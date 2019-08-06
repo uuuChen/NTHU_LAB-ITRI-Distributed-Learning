@@ -91,12 +91,12 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self._make_sure_data_and_labels_in_database()
 
-        image_nums = self.get_data_nums_from_database()
+        data_nums = self.get_data_nums_from_database()
 
         old_id_ptr = self.db_id_ptr
 
-        if old_id_ptr + batch_size >= image_nums:
-            new_id_ptr = batch_size - image_nums + old_id_ptr
+        if old_id_ptr + batch_size >= data_nums:
+            new_id_ptr = batch_size - data_nums + old_id_ptr
             id_list = self.db_id_list[old_id_ptr:] + self.db_id_list[:new_id_ptr]
 
         else:
