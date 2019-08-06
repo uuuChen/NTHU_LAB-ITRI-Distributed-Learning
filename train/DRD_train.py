@@ -43,19 +43,25 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 
 train_args = parser.parse_args(args=[])
 
+train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS,
+                            shuffle=True)
 
-def train_epoch(model, dataSet, epoch):
+test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS,
+                           shuffle=True)
+
+model = AlexNet()
+
+def train_epoch(epoch):
 
     model.train()
 
-    data_nums = dataSet.get_data_nums_from_database()
+    data_nums = train_dataSet.get_data_nums_from_database()
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   image_size=tuple(train_args.image_size))
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -78,7 +84,7 @@ def train_epoch(model, dataSet, epoch):
                        100. * batch_idx / batches, loss.item()))
 
 
-def test_epoch(model, dataSet):
+def test_epoch():
 
     model.eval()
 
@@ -86,14 +92,13 @@ def test_epoch(model, dataSet):
 
     correct = 0
 
-    data_nums = dataSet.get_data_nums_from_database()
+    data_nums = test_dataSet.get_data_nums_from_database()
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   image_size=tuple(train_args.image_size))
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -114,13 +119,7 @@ def test_epoch(model, dataSet):
         test_loss, correct, data_nums,
         100. * correct / data_nums))
 
-
 if __name__ == '__main__':
-
-    train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS)
-    test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS)
-
-    model = AlexNet()
 
     train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
 
@@ -137,13 +136,10 @@ if __name__ == '__main__':
 
     for epoch in range(1, train_args.epochs + 1):
 
-        train_epoch(model=model,
-                    dataSet=train_dataSet,
-                    epoch=epoch)
+        train_epoch(epoch=epoch)
 
-        test_epoch(model=model,
-                   dataSet=test_dataSet)
 
+        test_epoch()
 
 
 

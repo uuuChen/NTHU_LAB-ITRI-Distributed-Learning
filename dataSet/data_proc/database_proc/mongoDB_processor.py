@@ -13,7 +13,7 @@ from PIL import Image
 from logger import *
 
 
-DEBUG = True  # when Debug is True, logger will print debug messages.
+DEBUG = False  # when Debug is True, logger will print debug messages.
 
 
 class MongoDB_Processor(Logger):

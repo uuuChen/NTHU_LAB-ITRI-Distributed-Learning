@@ -20,17 +20,14 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--batch-size', type=int, default=5, metavar='N',
-                    help='input batch size for training (default: 5)')
+parser.add_argument('--batch-size', type=int, default=512, metavar='N',
+                    help='input batch size for training (default: 512)')
 
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 10)')
+parser.add_argument('--epochs', type=int, default=30, metavar='N',
+                    help='number of epochs to train (default: 30)')
 
-parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
-                    help='learning rate (default: 0.1)')
-
-parser.add_argument('--image-size', type=int, default=(100, 100), metavar='N',
-                    help='image size (width, height) for training and testing (default: (100, 100))', nargs='+')
+parser.add_argument('--lr', type=float, default=1e-1, metavar='LR',
+                    help='learning rate (default: 1e-1)')
 
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='SGD momentum (default: 0.5)')
@@ -46,18 +43,26 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 
 train_args = parser.parse_args(args=[])
 
+train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS,
+                            shuffle=True)
 
-def train_epoch(model, dataSet, epoch):
+test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS,
+                           shuffle=True)
+
+model = MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
+            label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
+
+def train_epoch(epoch):
 
     model.train()
 
-    data_nums = dataSet.get_data_nums_from_database()
+    data_nums = train_dataSet.get_data_nums_from_database()
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -80,7 +85,7 @@ def train_epoch(model, dataSet, epoch):
                        100. * batch_idx / batches, loss.item()))
 
 
-def test_epoch(model, dataSet):
+def test_epoch():
 
     model.eval()
 
@@ -88,13 +93,13 @@ def test_epoch(model, dataSet):
 
     correct = 0
 
-    data_nums = dataSet.get_data_nums_from_database()
+    data_nums = test_dataSet.get_data_nums_from_database()
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -115,14 +120,7 @@ def test_epoch(model, dataSet):
         test_loss, correct, data_nums,
         100. * correct / data_nums))
 
-
 if __name__ == '__main__':
-
-    train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS)
-    test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS)
-
-    model = MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
-                label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
 
     train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
 
@@ -139,12 +137,9 @@ if __name__ == '__main__':
 
     for epoch in range(1, train_args.epochs + 1):
 
-        train_epoch(model=model,
-                    dataSet=train_dataSet,
-                    epoch=epoch)
+        train_epoch(epoch=epoch)
 
-        test_epoch(model=model,
-                   dataSet=test_dataSet)
+        test_epoch()
 
 
 
