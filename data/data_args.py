@@ -12,10 +12,6 @@ GLOBAL_COMMON_ARGS = {
     'db_test_data_labels_coll_name': 'test_data_labels',
 
     'data_nums_dir_path': 'data/data_nums',
-
-    'train_coll_name': 'train_data_labels',
-
-    'test_coll_name': 'test_data_labels',
 }
 
 # --------------------------------
@@ -71,7 +67,7 @@ MNIST_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'coll_name': GLOBAL_COMMON_ARGS['train_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
 
     'db_id_ptr_file_path': os.path.join(MNIST_COMMON_ARGS['dir_path'], 'db_train_id_ptr.txt'),
 
@@ -83,7 +79,7 @@ MNIST_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'coll_name': GLOBAL_COMMON_ARGS['test_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
 DRD_TRAIN_ARGS = {
@@ -97,7 +93,7 @@ DRD_TRAIN_ARGS = {
 
     'labels_csv_file_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'trainLabels.csv'),
 
-    'coll_name': GLOBAL_COMMON_ARGS['train_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
 }
 
 DRD_TEST_ARGS = {
@@ -111,7 +107,7 @@ DRD_TEST_ARGS = {
 
     'labels_csv_file_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'trainLabels.csv'),
 
-    'coll_name': GLOBAL_COMMON_ARGS['test_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
 ECG_TRAIN_ARGS = {
@@ -121,7 +117,7 @@ ECG_TRAIN_ARGS = {
 
     'data_labels_csv_file_path': os.path.join(ECG_COMMON_ARGS['dir_path'], 'heartbeat/mitbih_train.csv'),
 
-    'coll_name': GLOBAL_COMMON_ARGS['train_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
 }
 
 ECG_TEST_ARGS = {
@@ -131,7 +127,7 @@ ECG_TEST_ARGS = {
 
     'data_labels_csv_file_path': os.path.join(ECG_COMMON_ARGS['dir_path'], 'heartbeat/mitbih_test.csv'),
 
-    'coll_name': GLOBAL_COMMON_ARGS['test_coll_name'],
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
 # --------------------------------

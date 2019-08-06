@@ -27,7 +27,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.data_type = data_args['data_type']
 
-        self.coll_name = data_args['coll_name']
+        self.coll_name = data_args['db_data_labels_coll_name']
 
         unique_name = data_args['data_type'] + '_' + self.data_name + '_' + __name__
         self.__logger = self.get_logger(unique_name=unique_name,
