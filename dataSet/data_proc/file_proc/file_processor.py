@@ -46,7 +46,7 @@ class File_Processor(Logger):
             new_dir_idx_ptr = old_dir_idx_ptr + batch_size
             batch_image_file_names = image_file_names[old_dir_idx_ptr: new_dir_idx_ptr]
 
-        # write new directory index pointer numbers to file path: "self.images_dir_idx_ptr_path"
+        # write new directory index pointer numbers to file path: "mages_dir_idx_ptr_path"
         self.write_nums_to_file(file_path=images_dir_idx_ptr_path,
                                 nums=new_dir_idx_ptr)
 
