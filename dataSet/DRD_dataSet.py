@@ -88,7 +88,7 @@ class DRD_DataSet(Data_Processor):
     def _get_data_and_labels_from_database(self, batch_size):
         return super()._get_data_and_labels_from_database(batch_size=batch_size)
 
-    def get_data_and_labels(self, batch_size, image_size, toTensor=True, data_preprocess=True, one_hot=True):
+    def get_data_and_labels(self, batch_size, image_size, data_preprocess=True, toTensor=True, one_hot=False):
 
         data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
 

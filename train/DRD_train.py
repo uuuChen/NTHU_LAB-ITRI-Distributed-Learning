@@ -3,18 +3,19 @@
 from __future__ import print_function
 import argparse
 import torch.optim as optim
-from model.AlexNet import *
 from torch.autograd import Variable
 
-from dataSet.MNIST_dataSet import *
+# Model Imports
+from model.AlexNet import *
+
+# DataSet Imports
 from dataSet.DRD_dataSet import *
-from data.data_args import *
+from data.data_args import * # import data arguments
+
+os.chdir('../')
 
 # training settings
 parser = argparse.ArgumentParser()
-
-parser.add_argument('--data-name', type=str, default='DRD', metavar='D',
-                    help='name of thed data used for training (default: DRD)')
 
 parser.add_argument('--batch-size', type=int, default=5, metavar='N',
                     help='input batch size for training (default: 5)')
@@ -54,8 +55,7 @@ def train_epoch(model, dataSet, epoch):
     for batch_idx in range(1, batches + 1):
 
         data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   image_size=tuple(train_args.image_size),
-                                                   one_hot=False)
+                                                   image_size=tuple(train_args.image_size))
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -93,8 +93,7 @@ def test_epoch(model, dataSet):
     for batch_idx in range(1, batches + 1):
 
         data, target = dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   image_size=tuple(train_args.image_size),
-                                                   one_hot=False)
+                                                   image_size=tuple(train_args.image_size))
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -118,18 +117,10 @@ def test_epoch(model, dataSet):
 
 if __name__ == '__main__':
 
-    if train_args.data_name == 'MNIST':
-        train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS)
-        test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS)
-        model = None
+    train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS)
+    test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS)
 
-    elif train_args.data_name == 'DRD':
-        train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS)
-        test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS)
-        model = AlexNet()
-
-    else:
-        raise Exception("data_name ( %s ) not exist !" % train_args.data_name)
+    model = AlexNet()
 
     train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
 

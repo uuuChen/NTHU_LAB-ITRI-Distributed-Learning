@@ -65,6 +65,9 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
                              data=data,
                              labels=labels)
 
+        print(os.path.join(self.data_nums_dir_path, '%s_%s.txt' %
+                           (self.data_name, self.data_type)))
+
         self.write_nums_to_file(file_path=os.path.join(self.data_nums_dir_path, '%s_%s.txt' %
                                                        (self.data_name, self.data_type)),
                                 nums=local_data_nums)
@@ -157,6 +160,9 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
     def _get_data_and_labels_from_local(self):
         raise NotImplementedError('Must override "_get_data_and_labels_from_local()" ')
 
+    @abstractmethod
+    def get_data_and_labels(self, batch_size, image_size, data_preprocess, toTensor, one_hot):
+        raise NotImplementedError('Must override "get_data_and_labels()" ')
 
 
 
