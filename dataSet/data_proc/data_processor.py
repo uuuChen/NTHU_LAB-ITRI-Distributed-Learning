@@ -65,9 +65,6 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
                              data=data,
                              labels=labels)
 
-        print(os.path.join(self.data_nums_dir_path, '%s_%s.txt' %
-                           (self.data_name, self.data_type)))
-
         self.write_nums_to_file(file_path=os.path.join(self.data_nums_dir_path, '%s_%s.txt' %
                                                        (self.data_name, self.data_type)),
                                 nums=local_data_nums)
