@@ -19,11 +19,11 @@
 --------------------------------------------
 ## 目前進度
 
-#####  "add readme.md" | uuuChen | 08/06
+####  "add readme.md" | uuuChen | 08/06
 1. 增加 readme.md <br>
 2. 更動 "train.py" argparse 初始方式 <br>
 
-#####  "add train directory" | uuuChen | 08/06
+####  "add train directory" | uuuChen | 08/06
 1. 在 “train/” 創建對應 MNIST、DRD、ECG 的 python 檔，方便參數管理<br>
 
 --------------------------------------------
