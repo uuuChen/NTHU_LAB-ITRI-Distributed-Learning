@@ -1,9 +1,7 @@
 # distributed_learning
-鎮豪測試
 --------------------------------------------
 ## 初始 origin 參數 (只需執行一次）
-1. git remote add origin https://github.com/uuuChen/distributed_learning
-2.  
+1. git remote add origin https://github.com/uuuChen/distributed_learning  
 --------------------------------------------
 ## 上傳
 1. git add . <br>
