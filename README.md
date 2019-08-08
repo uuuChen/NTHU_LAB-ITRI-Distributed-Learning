@@ -33,7 +33,10 @@
 3. loss function 改用 cross_entropy()
 4. 增加繪圖程式碼，但目前為註解狀態未啟用
 
-####"add readme.md" | uuuChen | 08/06
+####  "delet MNIST_data directory" , "add MNIST directory" | Edward1997 | 08/08
+1.更動本地存放之資料路徑與內容
+
+####  "add readme.md" | uuuChen | 08/06
 1. 增加 readme.md 
 2. 更動 "train.py" argparse 初始方式 
 
