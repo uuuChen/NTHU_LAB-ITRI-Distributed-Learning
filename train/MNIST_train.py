@@ -3,8 +3,8 @@
 from __future__ import print_function
 from torch.autograd import Variable
 import argparse
-import torch.optim as optim
-import os
+import torchvision
+import matplotlib.pyplot as plt
 
 # Model Imports
 from model.LeNet import *
@@ -27,7 +27,7 @@ parser.add_argument('--epochs', type=int, default=10, metavar='N',
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 
-parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
 
 parser.add_argument('--no-cuda', action='store_true', default=False,

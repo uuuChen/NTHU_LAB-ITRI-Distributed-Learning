@@ -1,4 +1,5 @@
-# distributed_learning
+﻿# distributed_learning
+--------------------------------------------
 --------------------------------------------
 ## 初始 origin 參數 (只需執行一次）
 1. git remote add origin https://github.com/uuuChen/distributed_learning  
@@ -19,9 +20,22 @@
 --------------------------------------------
 ## 目前進度
 
-####  "add readme.md" | uuuChen | 08/06
-1. 增加 readme.md <br>
-2. 更動 "train.py" argparse 初始方式 <br>
+####  "vim MNIST_dataSet.py" | Edward1997 | 08/08
+1. 改為從 torchvision 下載本地端資料
+2. 從資料庫讀資料改為一次全部讀取
+3. 增加資料前處理(mongodb --> model 之間時處理) 
+
+####  "add LeNet.py" | Edward1997 | 08/08
+
+####  "vim MNIST_train.py" | Edward1997 | 08/08
+1. 參數調整: lr = 0.01 , batch_size = 128 , momentum = 0.9
+2. 改用 LeNet模型
+3. loss function 改用 cross_entropy()
+4. 增加繪圖程式碼，但目前為註解狀態未啟用
+
+####"add readme.md" | uuuChen | 08/06
+1. 增加 readme.md 
+2. 更動 "train.py" argparse 初始方式 
 
 ####  "add train directory" | uuuChen | 08/06
 1. 在 “train/” 創建對應 MNIST、DRD、ECG 的 python 檔，方便參數管理<br>
