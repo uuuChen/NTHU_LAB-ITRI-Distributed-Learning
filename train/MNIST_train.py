@@ -7,7 +7,7 @@ import torch.optim as optim
 import os
 
 # Model Imports
-from model.MLP import *
+from model.LeNet import *
 
 # DataSet Imports
 from dataSet.MNIST_dataSet import *
@@ -18,10 +18,10 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--batch-size', type=int, default=512, metavar='N',
+parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                     help='input batch size for training (default: 512)')
 
-parser.add_argument('--epochs', type=int, default=30, metavar='N',
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 30)')
 
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
@@ -47,8 +47,7 @@ train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
 test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 
-model = MLP(input_node_nums=MNIST_COMMON_ARGS['data_length'],
-            label_class_nums=MNIST_COMMON_ARGS['label_class_nums'])
+model = LeNet()
 
 def train_epoch(epoch):
 
@@ -58,9 +57,11 @@ def train_epoch(epoch):
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
+    datas, targets = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
+                                                   one_hot=False)
     for batch_idx in range(1, batches + 1):
-
-        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+        target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -71,7 +72,18 @@ def train_epoch(epoch):
 
         output = model(data)
 
-        loss = F.nll_loss(output, target)
+        # #show img
+        # print(target)
+        # img = torchvision.utils.make_grid(data.cpu())
+        # img = img.numpy().transpose(1, 2, 0)
+        #
+        # std = [0.5, 0.5, 0.5]
+        # mean = [0.5, 0.5, 0.5]
+        # img = img * std + mean
+        # plt.imshow(img)
+        # plt.show()
+
+        loss = F.cross_entropy(output, target)
 
         loss.backward()
 
@@ -95,9 +107,13 @@ def test_epoch():
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
+    datas, targets = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
+                                                       one_hot=False)
+
     for batch_idx in range(1, batches + 1):
 
-        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+        target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -106,7 +122,7 @@ def test_epoch():
 
         output = model(data)
 
-        test_loss += F.nll_loss(output, target).item()
+        test_loss += F.cross_entropy(output, target).item()
 
         pred = output.data.max(1)[1]
 
