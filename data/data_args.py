@@ -21,7 +21,7 @@ GLOBAL_COMMON_ARGS = {
 MNIST_COMMON_ARGS = {
     'data_name': 'MNIST',
 
-    'dir_path': 'data/MNIST_data/',
+    'dir_path': 'data/MNIST/',
 
     'label_class_nums': 10,
 
@@ -52,11 +52,24 @@ ECG_COMMON_ARGS = {
     'use_gridFS': False,
 }
 
+
+Xray_COMMON_ARGS = {
+    'data_name': 'Xray',
+
+    'dir_path': 'data/Xray/',
+
+    'label_class_nums': 15,
+
+    'use_gridFS': True,
+}
+
 MNIST_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 DRD_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 ECG_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
+
+Xray_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 # --------------------------------
 #  PRIVATE dataSet PRIVATE arguments
@@ -130,6 +143,33 @@ ECG_TEST_ARGS = {
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
+Xray_TRAIN_ARGS = {
+    'train': True,
+
+    'data_type': 'train',
+
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'images'),
+
+    'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
+
+    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample_labels.csv'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
+}
+
+Xray_TEST_ARGS = {
+    'train': False,
+
+    'data_type': 'test',
+
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'images'),
+
+    'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
+
+    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample_labels.csv'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+}
 # --------------------------------
 #  merge dataSET COMMON and PRIVATE arguments
 # --------------------------------
@@ -142,6 +182,9 @@ DRD_TEST_ARGS.update(DRD_COMMON_ARGS)
 
 ECG_TRAIN_ARGS.update(ECG_COMMON_ARGS)
 ECG_TEST_ARGS.update(ECG_COMMON_ARGS)
+
+Xray_TRAIN_ARGS.update(Xray_COMMON_ARGS)
+Xray_TEST_ARGS.update(Xray_COMMON_ARGS)
 
 
 

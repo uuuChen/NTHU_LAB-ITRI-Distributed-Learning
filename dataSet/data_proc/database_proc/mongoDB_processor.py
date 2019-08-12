@@ -262,7 +262,7 @@ class MongoDB_Processor(Logger):
             self.__logger.debug('Insert %s Rows' % int(i + 1))
 
             data_file_path = data_file_paths[i]
-            label = int(labels[i])
+            label = labels[i]
 
             dic = {
                 "label": label,
@@ -359,6 +359,7 @@ class MongoDB_Processor(Logger):
             label = grid_out.label
 
             batch_images.append(image)
+            label  = np.array(label)
             batch_labels.append(label)
 
         self.__logger.debug('Done !')

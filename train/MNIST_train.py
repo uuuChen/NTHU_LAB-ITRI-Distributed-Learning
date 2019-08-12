@@ -59,9 +59,14 @@ def train_epoch(epoch):
 
     datas, targets = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
                                                    one_hot=False)
+    datas_tratned_num = 0
     for batch_idx in range(1, batches + 1):
-        data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-        target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+        if batch_idx * train_args.batch_size < len(datas):
+            data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+            target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+        else:
+            data = datas[(batch_idx-1) * train_args.batch_size:len(datas)]
+            target = targets[(batch_idx-1) * train_args.batch_size:len(datas)]
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -89,9 +94,10 @@ def train_epoch(epoch):
 
         optimizer.step()
 
+        datas_tratned_num += len(data)
         if batch_idx % train_args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * train_args.batch_size, data_nums,
+                epoch, datas_tratned_num, data_nums,
                        100. * batch_idx / batches, loss.item()))
 
 

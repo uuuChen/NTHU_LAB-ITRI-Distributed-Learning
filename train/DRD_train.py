@@ -61,7 +61,7 @@ def train_epoch(epoch):
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size, image_size= train_args.image_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -98,7 +98,7 @@ def test_epoch():
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size,image_size=train_args.image_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
