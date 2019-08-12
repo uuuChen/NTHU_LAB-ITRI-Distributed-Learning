@@ -266,24 +266,24 @@ class MongoDB_Processor(Logger):
 
             data_file_path = data_file_paths[i]
 
-            # check whether the data is complete
-            byte_data = open(data_file_path, 'rb').read()
-            data = np.array(Image.open(io.BytesIO(byte_data)))
-            if len(data.shape) == 0:  # the data is incomplete, so we have to ignore it
-                self.__logger.error('%s is incomplete' % data_file_path)
-                error_data_nums += 1
-                continue
+            # # check whether the data is complete
+            # byte_data = open(data_file_path, 'rb').read()
+            # data = np.array(Image.open(io.BytesIO(byte_data)))
+            # if len(data.shape) == 0:  # the data is incomplete, so we have to ignore it
+            #     self.__logger.error('%s is incomplete' % data_file_path)
+            #     error_data_nums += 1
+            #     continue
 
-            else:  # the data is complete, so we upload data file and corresponding label to database
-                label = labels[i]
+            # else:  # the data is complete, so we upload data file and corresponding label to database
+            label = labels[i]
 
-                dic = {
-                    "label": label,
-                    "file_name": re.split(r"[/\\]", data_file_path)[-1],
-                    "ID": i + 1
-                }
+            dic = {
+                "label": label,
+                "file_name": re.split(r"[/\\]", data_file_path)[-1],
+                "ID": i + 1
+            }
 
-                fs.put(open(data_file_path, 'rb'), **dic)
+            fs.put(open(data_file_path, 'rb'), **dic)
 
         self.__logger.debug('Done !')
 

@@ -9,6 +9,13 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/13"
+1. <除錯、新增> | "data_processor.py" 裡 
+"_make_sure_data_and_labels_in_database()" : 原本直接呼叫 
+"coll_delete_all()" 而導致錯誤，因為忘記考慮 gridFS 的情況。目前調整為在 
+"data_processor.py" 新增 "delete_coll_from_database()"，根據 use_gridFS
+來決定如何刪除 collection 
+
 #### "uuuChen 08/13 00:45"
 1. <新增、更動、除錯> | "mongoDB_processor.py" 裡 "gridFS_coll_insert()" : 
 新增「防止上傳不完整資料到資料庫」功能，否則在訓練時轉成 tensor 會出現 

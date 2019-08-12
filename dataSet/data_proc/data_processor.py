@@ -82,7 +82,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         if db_data_nums != local_data_nums or db_data_nums == 0:
             if not db_data_nums == 0:
-                self.coll_delete_all(coll_name=self.coll_name)
+                self.delete_coll_from_database()
 
             self._upload_data_and_labels_to_database()
 
@@ -153,6 +153,14 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
             db_data_nums = self.coll_find_all(coll_name=self.coll_name).count()
 
         return db_data_nums
+
+    def delete_coll_from_database(self):
+
+        if self.use_gridFS:
+            self.gridFS_coll_delete_all(coll_name=self.coll_name)
+
+        else:
+            self.coll_delete_all(coll_name=self.coll_name)
 
     @abstractmethod
     def _get_data_and_labels_from_local(self):
