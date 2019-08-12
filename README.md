@@ -47,6 +47,10 @@
 
 #### "add Xray_dataset.py"  | Edward1997 | 08/12
 
+#### "vim MNIST_train.py, DRD_train.py"  | Edward1997 | 08/12
+* def train_epoch
+	datas_tratned_num += len(data)
+
 #### "vim MNIST_dataSet.py" | Edward1997 | 08/08
 改為從 torchvision 下載本地端資料
 從資料庫讀資料改為一次全部讀取
@@ -69,9 +73,5 @@ loss function 改用 cross_entropy()
 ECG 以 MLP train 成功，test dataSet 在第三個 epoch 的正確率大概 93%
 將 MNIST_train.py、DRD_train.py 的 model 放到 global，讓 train 跟 test 時都使用同樣的 model。原先的做法在 test 時無法使用已被 train 更新的 model
 MNIST 以 MLP 訓練，在 test 時的正確率也可到達 90% ，可嘗試將 model 以 Lenet 替換
-
-#### "vim MNIST_train.py, DRD_train.py"  | Edward1997 | 08/12
-* def train_epoch
-	datas_tratned_num += len(data)
 	避免已訓練資料顯示超過總資料上限
 --------------------------------------------
