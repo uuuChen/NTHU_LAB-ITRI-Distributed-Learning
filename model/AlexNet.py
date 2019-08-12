@@ -59,7 +59,7 @@ class AlexNet(nn.Module):
 
         x = self.classifier(x)
 
-        return F.log_softmax(x, dim=0)
+        return F.log_softmax(x, dim=1)
 
 
 

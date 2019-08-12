@@ -120,7 +120,7 @@ class Xray_DataSet(Data_Processor):
 
             for data_ in data:
                 data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
-                data_ = data_.reshape(1,100,100)
+                data_ = data_.reshape(1, 100, 100)
                 data_ = data_.transpose((2, 0, 1))
                 preproc_data.append(data_)
 
@@ -128,7 +128,7 @@ class Xray_DataSet(Data_Processor):
 
         if one_hot:
             labels = self._trans_labels_to_one_hot(labels=labels,
-                                                    class_nums=self.label_class_nums)
+                                                   class_nums=self.label_class_nums)
 
         if toTensor:
             data = torch.from_numpy(data)

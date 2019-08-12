@@ -1,6 +1,7 @@
 test.py
 test.ipynb
 data/DRD_data/train
+data/DRD_data/test
 data/ECG_data/
 __pycache__/
 .idea

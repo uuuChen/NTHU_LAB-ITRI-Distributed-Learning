@@ -52,9 +52,10 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
             local_data_nums = len(data_file_paths)
 
-            self.gridFS_coll_insert(coll_name=self.coll_name,
-                                    data_file_paths=data_file_paths,
-                                    labels=labels)
+            error_data_nums = self.gridFS_coll_insert(coll_name=self.coll_name,
+                                                      data_file_paths=data_file_paths,
+                                                      labels=labels)
+            local_data_nums -= error_data_nums
 
         else:
             data, labels = self._get_data_and_labels_from_local()
@@ -81,7 +82,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         if db_data_nums != local_data_nums or db_data_nums == 0:
             if not db_data_nums == 0:
-                self.drop_database()
+                self.coll_delete_all(coll_name=self.coll_name)
 
             self._upload_data_and_labels_to_database()
 

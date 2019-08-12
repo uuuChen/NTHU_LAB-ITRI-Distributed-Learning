@@ -13,7 +13,7 @@ from PIL import Image
 from logger import *
 
 
-DEBUG = False  # when Debug is True, logger will print debug messages.
+DEBUG = True  # when Debug is True, logger will print debug messages.
 
 
 class MongoDB_Processor(Logger):
@@ -238,7 +238,7 @@ class MongoDB_Processor(Logger):
         """Insert data and labels into a collection using gridFS.
 
         The passed argument must be the the data file paths instead of the data, because gridFS can only upload data to
-        the database in the format of file or str.
+        the database in the format of file or str. If some data are incomplete, we won't upload them to database.
 
         In this function, data is opened and uploaded as a file.
 
@@ -255,24 +255,39 @@ class MongoDB_Processor(Logger):
         self.__logger.debug('Insert %s Rows From Local To Database ( %s ) Collection ( %s ) ...' %
                             (len(data_file_paths), self.db_name, coll_name))
 
+        error_data_nums = 0
+
         fs = GridFS(self.db, collection=coll_name)
 
         for i in range(len(data_file_paths)):
 
-            self.__logger.debug('Insert %s Rows' % int(i + 1))
+            if (i + 1) % 100 == 0:
+                self.__logger.debug('Insert %s Rows' % int(i + 1))
 
             data_file_path = data_file_paths[i]
-            label = labels[i]
 
-            dic = {
-                "label": label,
-                "file_name": re.split(r"[/\\]", data_file_path)[-1],
-                "ID": i + 1
-            }
+            # check whether the data is complete
+            byte_data = open(data_file_path, 'rb').read()
+            data = np.array(Image.open(io.BytesIO(byte_data)))
+            if len(data.shape) == 0:  # the data is incomplete, so we have to ignore it
+                self.__logger.error('%s is incomplete' % data_file_path)
+                error_data_nums += 1
+                continue
 
-            fs.put(open(data_file_path, 'rb'), **dic)
+            else:  # the data is complete, so we upload data file and corresponding label to database
+                label = labels[i]
+
+                dic = {
+                    "label": label,
+                    "file_name": re.split(r"[/\\]", data_file_path)[-1],
+                    "ID": i + 1
+                }
+
+                fs.put(open(data_file_path, 'rb'), **dic)
 
         self.__logger.debug('Done !')
+
+        return error_data_nums
 
     def gridFS_coll_download_all(self, coll_name, download_dir_path, category_name):
 
@@ -342,8 +357,6 @@ class MongoDB_Processor(Logger):
 
         batch_grid_outs_count = batch_grid_outs.count()
 
-        print(id_list)
-
         self.__logger.debug('Read %s Rows From Database ( %s ) ...' % (batch_grid_outs_count, self.db_name))
 
         batch_images = []
@@ -359,7 +372,7 @@ class MongoDB_Processor(Logger):
             label = grid_out.label
 
             batch_images.append(image)
-            label  = np.array(label)
+            label = np.array(label)
             batch_labels.append(label)
 
         self.__logger.debug('Done !')

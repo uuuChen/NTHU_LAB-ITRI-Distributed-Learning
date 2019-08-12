@@ -10,10 +10,8 @@ from model.AlexNet import *
 from model.MLP import *
 
 # DataSet Imports
-from dataSet.MNIST_dataSet import *
-from dataSet.DRD_dataSet import *
 from dataSet.ECG_dataSet import *
-from data.data_args import * # import data arguments
+from data.data_args import *  # import data arguments
 
 os.chdir('../')
 

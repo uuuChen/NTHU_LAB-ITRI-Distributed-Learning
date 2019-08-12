@@ -10,15 +10,18 @@ from model.AlexNet import *
 
 # DataSet Imports
 from dataSet.DRD_dataSet import *
-from data.data_args import * # import data arguments
+from data.data_args import *  # import data arguments
 
 os.chdir('../')
 
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--batch-size', type=int, default=5, metavar='N',
-                    help='input batch size for training (default: 5)')
+parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
+
+parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
@@ -57,11 +60,14 @@ def train_epoch(epoch):
 
     data_nums = train_dataSet.get_data_nums_from_database()
 
-    batches = (data_nums - 1) // train_args.batch_size + 1
+    train_batch_size = train_args.train_batch_size
+
+    batches = (data_nums - 1) // train_batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size, image_size= train_args.image_size)
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_batch_size,
+                                                         image_size=train_args.image_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -80,44 +86,34 @@ def train_epoch(epoch):
 
         if batch_idx % train_args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * train_args.batch_size, data_nums,
+                epoch, batch_idx * train_batch_size, data_nums,
                        100. * batch_idx / batches, loss.item()))
-
 
 def test_epoch():
 
     model.eval()
 
-    test_loss = 0
+    test_batch_size = train_args.test_batch_size
 
-    correct = 0
+    data, target = test_dataSet.get_data_and_labels(batch_size=test_batch_size,
+                                                    image_size=train_args.image_size)
 
-    data_nums = test_dataSet.get_data_nums_from_database()
+    if train_args.cuda:
+        data, target = data.cuda(), target.cuda()
 
-    batches = (data_nums - 1) // train_args.batch_size + 1
+    data, target = Variable(data).float(), Variable(target).long()
 
-    for batch_idx in range(1, batches + 1):
+    output = model(data)
 
-        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size,image_size=train_args.image_size)
+    test_loss = F.nll_loss(output, target).item()
 
-        if train_args.cuda:
-            data, target = data.cuda(), target.cuda()
+    pred = output.data.max(1)[1]
 
-        data, target = Variable(data).float(), Variable(target).long()
-
-        output = model(data)
-
-        test_loss += F.nll_loss(output, target).item()
-
-        pred = output.data.max(1)[1]
-
-        correct += pred.eq(target.data).cpu().sum()
-
-    test_loss /= batches
+    correct = pred.eq(target.data).cpu().sum()
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, data_nums,
-        100. * correct / data_nums))
+        test_loss, correct, test_batch_size,
+        100. * correct / test_batch_size))
 
 if __name__ == '__main__':
 
@@ -137,7 +133,6 @@ if __name__ == '__main__':
     for epoch in range(1, train_args.epochs + 1):
 
         train_epoch(epoch=epoch)
-
 
         test_epoch()
 

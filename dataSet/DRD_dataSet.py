@@ -98,7 +98,7 @@ class DRD_DataSet(Data_Processor):
 
         if one_hot:
             labels = self._trans_labels_to_one_hot(labels=labels,
-                                                    class_nums=self.label_class_nums)
+                                                   class_nums=self.label_class_nums)
 
         if toTensor:
             data, labels = self._trans_data_and_labels_to_tensor(data=data,
