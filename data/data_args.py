@@ -49,6 +49,8 @@ ECG_COMMON_ARGS = {
 
     'data_length': 187,
 
+    'MLP_conn_node_nums': 500,
+
     'use_gridFS': False,
 }
 

@@ -9,6 +9,14 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/13 12:20"
+1. <新增> | "MLP.py" 裡 "Agent_MLP"、 "Server_MLP" : 將四層的 MLP 從中間分割，
+在 Agent 與 Server 端各配置兩層
+2. <新增> | "dist_ECG_train.py" : 配合 "Agent_MLP" 、 "Server_MLP" 進行訓練
+，雖然可以動但做法待驗證，原因是訓練速度與效果不如集中式，第二個 epoch 時集中式的正
+確率可到 91 %、分割式才到 85% ，理論上兩者應該要一致  
+
+
 #### "uuuChen 08/13 01:16"
 1. <除錯、新增> | "data_processor.py" 裡 
 "_make_sure_data_and_labels_in_database()" : 原本直接呼叫 

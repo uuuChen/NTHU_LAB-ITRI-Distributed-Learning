@@ -1,16 +1,15 @@
 
 # System Imports
 from __future__ import print_function
-from torch.autograd import Variable
 import argparse
-import torchvision
-# import matplotlib.pyplot as plt
+import torch.optim as optim
+from torch.autograd import Variable
 
 # Model Imports
-from model.LeNet import *
+from model.MLP import *
 
 # DataSet Imports
-from dataSet.MNIST_dataSet import *
+from dataSet.ECG_dataSet import *
 from data.data_args import *  # import data arguments
 
 os.chdir('../')
@@ -18,16 +17,16 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--batch-size', type=int, default=128, metavar='N',
+parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
 
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
+parser.add_argument('--epochs', type=int, default=30, metavar='N',
                     help='number of epochs to train (default: 30)')
 
-parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                    help='learning rate (default: 0.01)')
+parser.add_argument('--lr', type=float, default=1e-1, metavar='LR',
+                    help='learning rate (default: 1e-1)')
 
-parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
+parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='SGD momentum (default: 0.5)')
 
 parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -41,69 +40,75 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 
 train_args = parser.parse_args(args=[])
 
-train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
-                              shuffle=True)
+train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS,
+                            shuffle=True)
 
-test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
-                             shuffle=True)
+test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS,
+                           shuffle=True)
 
-model = LeNet()
+agent_model = Agent_MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
+                        conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'])
+
+server_model = Server_MLP(conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'],
+                          label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
+
+agent_optim = optim.SGD(agent_model.parameters(),
+                        lr=train_args.lr,
+                        momentum=train_args.momentum)
+
+server_optim = optim.SGD(server_model.parameters(),
+                         lr=train_args.lr,
+                         momentum=train_args.momentum)
 
 def train_epoch(epoch):
 
-    model.train()
+    agent_model.train()
+    server_model.train()
 
     data_nums = train_dataSet.get_data_nums_from_database()
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
-    datas, targets = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   one_hot=False)
-    datas_tratned_num = 0
     for batch_idx in range(1, batches + 1):
-        if batch_idx * train_args.batch_size < len(datas):
-            data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-            target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-        else:
-            data = datas[(batch_idx-1) * train_args.batch_size:len(datas)]
-            target = targets[(batch_idx-1) * train_args.batch_size:len(datas)]
+
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
 
         data, target = Variable(data).float(), Variable(target).long()
 
-        optimizer.zero_grad()
+        # agent forward
+        agent_optim.zero_grad()
+        features = agent_model(data)
 
-        output = model(data)
+        # server forward
+        server_optim.zero_grad()
+        if train_args.cuda:
+            features = features.cuda()
+        features = Variable(features).float()
+        features.requires_grad_()
+        output = server_model(features)
+        loss = F.nll_loss(output, target)
 
-        # #show img
-        # print(target)
-        # img = torchvision.utils.make_grid(data.cpu())
-        # img = img.numpy().transpose(1, 2, 0)
-        #
-        # std = [0.5, 0.5, 0.5]
-        # mean = [0.5, 0.5, 0.5]
-        # img = img * std + mean
-        # plt.imshow(img)
-        # plt.show()
-
-        loss = F.cross_entropy(output, target)
-
+        # server backward
         loss.backward()
+        server_optim.step()
 
-        optimizer.step()
+        # agent backward
+        features.backward(gradient=features.grad.data)
+        agent_optim.step()
 
-        datas_tratned_num += len(data)
         if batch_idx % train_args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, datas_tratned_num, data_nums,
+                epoch, batch_idx * train_args.batch_size, data_nums,
                        100. * batch_idx / batches, loss.item()))
 
 
 def test_epoch():
 
-    model.eval()
+    agent_model.eval()
+    server_model.eval()
 
     test_loss = 0
 
@@ -113,22 +118,22 @@ def test_epoch():
 
     batches = (data_nums - 1) // train_args.batch_size + 1
 
-    datas, targets = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                       one_hot=False)
-
     for batch_idx in range(1, batches + 1):
 
-        data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-        target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
 
         data, target = Variable(data).float(), Variable(target).long()
 
-        output = model(data)
+        # agent forward
+        features = agent_model(data)
 
-        test_loss += F.cross_entropy(output, target).item()
+        # server forward
+        output = server_model(features)
+
+        test_loss += F.nll_loss(output, target).item()
 
         pred = output.data.max(1)[1]
 
@@ -149,16 +154,13 @@ if __name__ == '__main__':
 
     if train_args.cuda:
         torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model.cuda()  # move all model parameters to the GPU
+        server_model.cuda()  # move all model parameters to the GPU
+        agent_model.cuda()  # move all model parameters to the GPU
 
-    optimizer = optim.SGD(model.parameters(),
-                          lr=train_args.lr,
-                          momentum=train_args.momentum)
 
     for epoch in range(1, train_args.epochs + 1):
 
         train_epoch(epoch=epoch)
-
 
         test_epoch()
 

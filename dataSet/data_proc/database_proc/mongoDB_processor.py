@@ -13,7 +13,7 @@ from PIL import Image
 from logger import *
 
 
-DEBUG = True  # when Debug is True, logger will print debug messages.
+DEBUG = False  # when Debug is True, logger will print debug messages.
 
 
 class MongoDB_Processor(Logger):
@@ -31,7 +31,6 @@ class MongoDB_Processor(Logger):
         # get a unique logger for debug, so the get_logger() needs to pass in a unique name
         unique_name = data_args['data_type'] + '_' + self.db_name + '_' + __name__
         self.__logger = self.get_logger(unique_name=unique_name, debug=DEBUG)
-
 
     def coll_insert(self, coll_name, data, labels):
 
@@ -161,7 +160,7 @@ class MongoDB_Processor(Logger):
 
         for i, data_label in list(enumerate(data_labels, start=1)):
 
-            if i + 1 % 1000 == 0:
+            if i % 1000 == 0:
                 self.__logger.debug('Read %s Rows' % i)
 
             data_ = data_label['data']
@@ -202,7 +201,7 @@ class MongoDB_Processor(Logger):
 
         for i, data_label in list(enumerate(batch_data_labels, start=1)):
 
-            if i + 1 % 1000 == 0:
+            if i % 1000 == 0:
                 self.__logger.debug('Read %s Rows' % i)
 
             data = data_label['data']
