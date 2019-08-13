@@ -6,10 +6,10 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 # Model Imports
-from model.MLP import *
+from model.AlexNet import *
 
 # DataSet Imports
-from dataSet.ECG_dataSet import *
+from dataSet.DRD_dataSet import *
 from data.data_args import *  # import data arguments
 
 os.chdir('../')
@@ -17,14 +17,20 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--batch-size', type=int, default=512, metavar='N',
-                    help='input batch size for training (default: 512)')
+parser.add_argument('--train-batch-size', type=int, default=5, metavar='N',
+                    help='input batch size for training (default: 5)')
 
-parser.add_argument('--epochs', type=int, default=30, metavar='N',
-                    help='number of epochs to train (default: 30)')
+parser.add_argument('--test-batch-size', type=int, default=10, metavar='N',
+                    help='input batch size for training (default: 10)')
 
-parser.add_argument('--lr', type=float, default=1e-1, metavar='LR',
-                    help='learning rate (default: 1e-1)')
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                    help='number of epochs to train (default: 10)')
+
+parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+                    help='learning rate (default: 0.1)')
+
+parser.add_argument('--image-size', type=int, default=(100, 100), metavar='N',
+                    help='image size (width, height) for training and testing (default: (100, 100))', nargs='+')
 
 parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                     help='SGD momentum (default: 0.5)')
@@ -40,17 +46,16 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 
 train_args = parser.parse_args(args=[])
 
-train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS,
+train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS,
                             shuffle=True)
 
-test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS,
+test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS,
                            shuffle=True)
 
-agent_model = Agent_MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
-                        conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'])
+agent_model = Agent_AlexNet()
 
-server_model = Server_MLP(conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'],
-                          label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
+server_model = Server_AlexNet(flatten_nodes=1024,
+                              num_classes=DRD_COMMON_ARGS['label_class_nums'])
 
 agent_optim = optim.SGD(agent_model.parameters(),
                         lr=train_args.lr,
@@ -67,11 +72,12 @@ def train_epoch(epoch):
 
     data_nums = train_dataSet.get_data_nums_from_database()
 
-    batches = (data_nums - 1) // train_args.batch_size + 1
+    batches = (data_nums - 1) // train_args.train_batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.train_batch_size,
+                                                         image_size=train_args.image_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -101,12 +107,10 @@ def train_epoch(epoch):
 
         if batch_idx % train_args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * train_args.batch_size, data_nums,
+                epoch, batch_idx * train_args.train_batch_size, data_nums,
                        100. * batch_idx / batches, loss.item()))
 
-
 def test_epoch():
-
     agent_model.eval()
     server_model.eval()
 
@@ -116,11 +120,12 @@ def test_epoch():
 
     data_nums = test_dataSet.get_data_nums_from_database()
 
-    batches = (data_nums - 1) // train_args.batch_size + 1
+    batches = (data_nums - 1) // train_args.test_batch_size + 1
 
     for batch_idx in range(1, batches + 1):
 
-        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.test_batch_size,
+                                                        image_size=train_args.image_size)
 
         if train_args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -158,13 +163,11 @@ if __name__ == '__main__':
         server_model.cuda()  # move all model parameters to the GPU
         agent_model.cuda()  # move all model parameters to the GPU
 
-
     for epoch in range(1, train_args.epochs + 1):
 
         train_epoch(epoch=epoch)
 
         test_epoch()
-
 
 
 

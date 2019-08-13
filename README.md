@@ -9,11 +9,17 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/13 17:20"
+1. <新增> | "AlexNet.py" 裡 "Agent_AlexNet"、 "Server_AlexNet" : 將 AlexNet
+根據 "classifier" 劃分為兩半，前半段在 agent、後半段在 server
+2. <新增> | "dist_AlexNet_train.py" : 配合 "Agent_Alexnet" 、 
+"Server_AlexNet" 進行訓練，訓練時集中式與分割式正確率相當接近
+
 #### "uuuChen 08/13 16:35"
 1. <除錯> | "dist_ECG_train.py" 裡 "train_epoch" : 原本分割式與集中式訓練時
 正確率差異明顯，並不符合理論，後來發現是命名問題，因為 agent output 與
 server input 都命名為 "features"，兩者的計算圖重疊而導致錯誤，後分別命名
-為 "agent_output", "server_input"
+為 "agent_output", "server_input"，訓練時集中式與分割式正確率相當接近
 
 #### "Edward1997 08/13 14:00"
 1. <新增> | "dis_MNIST_train.py":

@@ -102,7 +102,8 @@ DRD_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train'),
+    # 'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train'),
+    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
@@ -116,7 +117,8 @@ DRD_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test/train/train'),
+    # 'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test/train/train'),
+    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 

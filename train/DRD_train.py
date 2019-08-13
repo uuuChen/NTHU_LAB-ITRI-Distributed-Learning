@@ -17,11 +17,11 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
-                    help='input batch size for training (default: 100)')
+parser.add_argument('--train-batch-size', type=int, default=5, metavar='N',
+                    help='input batch size for training (default: 5)')
 
-parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
-                    help='input batch size for training (default: 100)')
+parser.add_argument('--test-batch-size', type=int, default=10, metavar='N',
+                    help='input batch size for training (default: 10)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
