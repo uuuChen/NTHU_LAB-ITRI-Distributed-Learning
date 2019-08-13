@@ -80,15 +80,15 @@ def train_epoch(epoch):
 
         # agent forward
         agent_optim.zero_grad()
-        features = agent_model(data)
+        agent_output = agent_model(data)
 
         # server forward
         server_optim.zero_grad()
+        server_input = Variable(agent_output).float()
         if train_args.cuda:
-            features = features.cuda()
-        features = Variable(features).float()
-        features.requires_grad_()
-        output = server_model(features)
+            server_input = server_input.cuda()
+        server_input.requires_grad_()
+        output = server_model(server_input)
         loss = F.nll_loss(output, target)
 
         # server backward
@@ -96,7 +96,7 @@ def train_epoch(epoch):
         server_optim.step()
 
         # agent backward
-        features.backward(gradient=features.grad.data)
+        agent_output.backward(gradient=server_input.grad.data)
         agent_optim.step()
 
         if batch_idx % train_args.log_interval == 0:

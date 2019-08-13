@@ -9,13 +9,18 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/13 16:35"
+1. <除錯> | "dist_ECG_train.py" 裡 "train_epoch" : 原本分割式與集中式訓練時
+正確率差異明顯，並不符合理論，後來發現是命名問題，因為 agent output 與
+server input 都命名為 "features"，兩者的計算圖重疊而導致錯誤，後分別命名
+為 "agent_output", "server_input"
+
 #### "Edward1997 08/13 14:00"
 1. <新增> | "dis_MNIST_train.py":
 單一程式，模型切割式訓練，訓練效果與模型未分割時相同。
 接下來將繼續嘗試，若gradiant使用程式外傳來的是否依然可以成功。
 2. <新增> | "LeNet.py" 中 "class Agent_LaNet","class Server_LeNet":
 原先模型為五層(前2卷積層,後3全連接層)，分割為Server後3層，Agent前2層
-
 
 
 #### "uuuChen 08/13 12:20"

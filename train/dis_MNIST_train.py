@@ -4,7 +4,7 @@ from __future__ import print_function
 from torch.autograd import Variable
 import argparse
 import torchvision
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # Model Imports
 from model.LeNet import *
