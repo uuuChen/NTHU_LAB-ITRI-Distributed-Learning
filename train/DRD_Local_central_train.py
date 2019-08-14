@@ -17,11 +17,11 @@ os.chdir('../')
 # training settings
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--train-batch-size', type=int, default=5, metavar='N',
-                    help='input batch size for training (default: 5)')
+parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
 
-parser.add_argument('--test-batch-size', type=int, default=10, metavar='N',
-                    help='input batch size for training (default: 10)')
+parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
+                    help='input batch size for training (default: 100)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
@@ -46,11 +46,23 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 
 train_args = parser.parse_args(args=[])
 
-train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS,
-                            shuffle=True)
+# -------------------------------------
+# use all of the data to train
+# -------------------------------------
+# train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS,
+#                             shuffle=True)
+#
+# test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS,
+#                            shuffle=True)
 
-test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS,
-                           shuffle=True)
+# -------------------------------------
+# use a small amount of data to train
+# -------------------------------------
+train_dataSet = DRD_DataSet(data_args=DRD_TESTING_ARGS,
+                            shuffle=False)
+
+test_dataSet = DRD_DataSet(data_args=DRD_TESTING_ARGS,
+                           shuffle=False)
 
 model = AlexNet()
 
@@ -86,8 +98,8 @@ def train_epoch(epoch):
 
         if batch_idx % train_args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * train_batch_size, data_nums,
-                       100. * batch_idx / batches, loss.item()))
+                epoch, batch_idx * train_batch_size, batches * train_batch_size, 100. * batch_idx / batches,
+                loss.item()))
 
 def test_epoch():
 

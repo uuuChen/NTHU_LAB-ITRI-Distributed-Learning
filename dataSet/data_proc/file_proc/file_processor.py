@@ -30,7 +30,8 @@ class File_Processor(Logger):
         # if batch size is None, get full batch
         if batch_size is None:
             old_dir_idx_ptr = 0
-            batch_size = image_file_nums
+            batch_size = image_file_nums  # actual usage
+            # batch_size = 500  # testing usage
 
         else:
             old_dir_idx_ptr = self.read_nums_from_file(file_path=images_dir_idx_ptr_path)

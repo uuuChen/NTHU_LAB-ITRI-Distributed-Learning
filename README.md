@@ -9,6 +9,10 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/14 19:20"
+1. <更動> | "train/" 裡 python 檔名稱
+2. <新增> | "data_args" 裡加入 "DRD_TESTING_ARGS"，提供DRD部分資料測試
+
 #### "Edward1997 08/14 17:30"
 1. <新增> | "MNIST_Server_train.py", "MNIST_Agent_train.py"
 使用 socket, pickle 在本地端進行 TCP 溝通的模型訓練

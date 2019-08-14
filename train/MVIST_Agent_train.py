@@ -14,11 +14,11 @@ from data.data_args import *  # import data arguments
 
 os.chdir('../')
 # agent socket setting
-ip_port=('localhost',8080)
-back_log=5
-buffer_size=4096
+ip_port = ('localhost', 8080)
+back_log = 5
+buffer_size = 4096
 
-tcp_client=socket(AF_INET,SOCK_STREAM)
+tcp_client = socket(AF_INET, SOCK_STREAM)
 tcp_client.connect(ip_port)
 
 # training settings

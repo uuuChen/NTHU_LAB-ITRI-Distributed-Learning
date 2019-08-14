@@ -59,7 +59,7 @@ def train_epoch(epoch,conn):
         try:
             data = conn.recv(buffer_size)
             data_nums = pickle.loads(data)
-            print("get data_nums:",data_nums)
+            print("get data_nums:", data_nums)
             break
         except Exception:
             break
@@ -70,7 +70,7 @@ def train_epoch(epoch,conn):
         model_server.train()
         optimizer_server.zero_grad()
 
-        # get gent_output
+        # get agent_output
         while 1:
             try:
                 data = conn.recv(1000000)

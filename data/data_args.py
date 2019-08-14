@@ -102,8 +102,7 @@ DRD_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    # 'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train'),
-    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'sample'),
+    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train'),
 
     'images_dir_idx_ptr_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
@@ -117,14 +116,28 @@ DRD_TEST_ARGS = {
 
     'data_type': 'test',
 
-    # 'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test/train/train'),
-    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'sample'),
+    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test/train/train'),
 
     'images_dir_idx_ptr_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
     'labels_csv_file_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'trainLabels.csv'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+}
+
+DRD_TESTING_ARGS = {
+    'train': True,
+
+    'data_type': 'train',
+
+    'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train'),
+
+    'images_dir_idx_ptr_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
+
+    'labels_csv_file_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'trainLabels.csv'),
+
+    'db_data_labels_coll_name': 'testing_data_labels',
+
 }
 
 ECG_TRAIN_ARGS = {
@@ -174,6 +187,7 @@ Xray_TEST_ARGS = {
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
+
 # --------------------------------
 #  merge dataSET COMMON and PRIVATE arguments
 # --------------------------------
@@ -183,6 +197,7 @@ MNIST_TEST_ARGS.update(MNIST_COMMON_ARGS)
 
 DRD_TRAIN_ARGS.update(DRD_COMMON_ARGS)
 DRD_TEST_ARGS.update(DRD_COMMON_ARGS)
+DRD_TESTING_ARGS.update(DRD_COMMON_ARGS)
 
 ECG_TRAIN_ARGS.update(ECG_COMMON_ARGS)
 ECG_TEST_ARGS.update(ECG_COMMON_ARGS)
