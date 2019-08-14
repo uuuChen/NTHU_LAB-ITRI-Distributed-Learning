@@ -2,8 +2,6 @@
 from __future__ import print_function
 from torch.autograd import Variable
 import argparse
-from socket import *
-import pickle
 
 # Model Imports
 from model.LeNet import *
@@ -12,21 +10,47 @@ from model.LeNet import *
 from dataSet.MNIST_dataSet import *
 from data.data_args import *  # import data arguments
 
-os.chdir('../')
-# agent socket setting
-ip_port = ('localhost', 8080)
-back_log = 5
-buffer_size = 4096
+# Socket Imports
+from socket_.socket_ import *
+from socket_.socket_args import *
 
-tcp_client = socket(AF_INET, SOCK_STREAM)
-tcp_client.connect(ip_port)
+os.chdir('../')
+
+# agent socket_ setting
+agent_sock = Socket(AGENT_SOCKET_ARGS)
+
+# training settings
+train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
+                              shuffle=True)
 
 # training settings
 parser = argparse.ArgumentParser()
+
+parser.add_argument('--batch-size', type=int, default=512, metavar='N',
+                    help='input batch size for training (default: 512)')
+
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                    help='number of epochs to train (default: 30)')
+
+parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                    help='learning rate (default: 0.01)')
+
+parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
+                    help='SGD momentum (default: 0.5)')
+
+parser.add_argument('--no-cuda', action='store_true', default=False,
+                    help='disables CUDA training')
+
+parser.add_argument('--seed', type=int, default=1, metavar='S',
+                    help='random seed (default: 1)')
+
+parser.add_argument('--log-interval', type=int, default=1, metavar='N',
+                    help='how many batches to wait before logging training status')
+
 train_args = parser.parse_args(args=[])
 
-train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
-                              shuffle=True)
+test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
+                             shuffle=True)
 
 model_agent = Agent_LeNet()
 
@@ -34,29 +58,11 @@ def train_epoch(epoch):
 
     model_agent.train()
     data_nums = train_dataSet.get_data_nums_from_database()
-
-    # send data_nums to server
-    msg = pickle.dumps(data_nums)
-    while 1:
-        try:
-            tcp_client.send(msg)
-            print("send data_nums:",data_nums)
-            break
-        except Exception:
-            break
-
     batches = (data_nums - 1) // train_args.batch_size + 1
 
-    datas, targets = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size,
-                                                   one_hot=False)
-
     for batch_idx in range(1, batches + 1):
-        if batch_idx * train_args.batch_size < len(datas):
-            data = datas[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-            target = targets[(batch_idx-1) * train_args.batch_size:batch_idx * train_args.batch_size]
-        else:
-            data = datas[(batch_idx-1) * train_args.batch_size:len(datas)]
-            target = targets[(batch_idx-1) * train_args.batch_size:len(datas)]
+
+        data, target = train_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
 
         if train_args.cuda:
             data = data.cuda()
@@ -67,50 +73,27 @@ def train_epoch(epoch):
         optimizer_agent.zero_grad()
         agent_output = model_agent(data)
 
-        # send agent_output
-        msg = pickle.dumps(agent_output)
-        while 1:
-            try:
-                tcp_client.send(msg)
-                print("send agent_output")
-                break
-            except Exception:
-                break
+        # send things to server
+        agent_sock.send(agent_output, 'agent_output')  # send agent_output
+        agent_sock.send(target, 'target')  # send target
+        agent_output_grad = agent_sock.recv('agent_output_clone_grad')  # get agent_output_clone
 
-        # send target
-        msg = pickle.dumps(target)
-        while 1:
-            try:
-                tcp_client.send(msg)
-                print("send target")
-                break
-            except Exception:
-                break
-
-        # get agent_output_clone
-        while 1:
-            try:
-                data = tcp_client.recv(1000000)
-                agent_output_clone_gradient = pickle.loads(data)
-                print("get agent_output_clone_gradient:")
-                break
-            except Exception:
-                break
+        # receive loss value from server
+        loss = agent_sock.recv('loss')
 
         #agent backward
-        agent_output.backward(gradient=agent_output_clone_gradient)
+        agent_output.backward(gradient=agent_output_grad)
         optimizer_agent.step()
 
+        if batch_idx % train_args.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * train_args.batch_size, data_nums,
+                       100. * batch_idx / batches, loss.item()))
+
 if __name__ == '__main__':
-    # get train_args from server
-    while 1:
-        try:
-            data = tcp_client.recv(buffer_size)
-            train_args = pickle.loads(data)
-            print("get train_args")
-            break
-        except Exception:
-            break
+
+    # sent train_args to server
+    agent_sock.send(train_args, 'train_args')
 
     train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
 
@@ -127,15 +110,8 @@ if __name__ == '__main__':
 
     for epoch in range(1, train_args.epochs + 1):
         train_epoch(epoch=epoch)
-        # send model_agent
-        msg = pickle.dumps(model_agent)
-        while 1:
-            try:
-                tcp_client.send(msg)
-                print("send model_agent")
-                break
-            except Exception:
-                break
+
+        # test_epoch()
 
 
 

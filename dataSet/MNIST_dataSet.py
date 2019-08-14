@@ -44,7 +44,7 @@ class MNIST_DataSet(Data_Processor):
 
     def get_data_and_labels(self, batch_size, image_size=None, data_preprocess=True, toTensor=True, one_hot=False):
 
-        data, labels = self.coll_read_all(self.coll_name)
+        data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
 
         if data_preprocess:
             datas = []

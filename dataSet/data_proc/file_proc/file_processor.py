@@ -12,7 +12,7 @@ class File_Processor(Logger):
 
     def __init__(self):
 
-        self.__logger = self.get_logger(unique_name= __name__,
+        self.__logger = self.get_logger(unique_name=__name__,
                                         debug=DEBUG)
 
         Logger.__init__(self)
