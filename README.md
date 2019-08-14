@@ -9,6 +9,11 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 08/14 17:30"
+1. <新增> | "MNIST_Server_train.py", "MNIST_Agent_train.py"
+使用 socket, pickle 在本地端進行 TCP 溝通的模型訓練
+正確率與集中式相當
+
 #### "Edward1997 08/14 14:40"
 1. <新增> | "socket directory","socket_server.py","socket_client.py":
 範例程式，使用 socket 的 TCP 傳輸資料，並利用 pickle 包裝物件
