@@ -9,6 +9,11 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 08/14 14:40"
+1. <新增> | "socket directory","socket_server.py","socket_client.py":
+範例程式，使用 socket 的 TCP 傳輸資料，並利用 pickle 包裝物件
+實現用網路傳輸Variable物件之功能
+
 #### "uuuChen 08/13 17:20"
 1. <新增> | "AlexNet.py" 裡 "Agent_AlexNet"、 "Server_AlexNet" : 將 AlexNet
 根據 "classifier" 劃分為兩半，前半段在 agent、後半段在 server
