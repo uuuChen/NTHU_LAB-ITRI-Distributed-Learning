@@ -4,7 +4,7 @@ COMMON_SOCKET_ARGS = {
     'port': 8080,
     'buffer_size': 4096,
     'back_log': 5,
-    'max_buffer_size': int(1e10)
+    'max_buffer_size': float(1e8)
 }
 
 SERVER_SOCKET_ARGS = {

@@ -74,11 +74,12 @@ def train_epoch(epoch):
         agent_output = model_agent(data)
 
         # send things to server
+        agent_sock.send(True, 'is_training')  # tell server to call "train_once()"
         agent_sock.send(agent_output, 'agent_output')  # send agent_output
         agent_sock.send(target, 'target')  # send target
-        agent_output_grad = agent_sock.recv('agent_output_clone_grad')  # get agent_output_clone
 
         # receive loss value from server
+        agent_output_grad = agent_sock.recv('agent_output_clone_grad')  # get agent_output_clone
         loss = agent_sock.recv('loss')
 
         #agent backward
@@ -89,6 +90,50 @@ def train_epoch(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * train_args.batch_size, data_nums,
                        100. * batch_idx / batches, loss.item()))
+
+def test_epoch():
+
+    model_agent.eval()
+
+    test_loss = 0
+
+    correct = 0
+
+    data_nums = test_dataSet.get_data_nums_from_database()
+
+    batches = (data_nums - 1) // train_args.batch_size + 1
+
+    for batch_idx in range(1, batches + 1):
+
+        data, target = test_dataSet.get_data_and_labels(batch_size=train_args.batch_size)
+
+        if train_args.cuda:
+            data, target = data.cuda(), target.cuda()
+
+        data, target = Variable(data).float(), Variable(target).long()
+
+        agent_output = model_agent(data)
+
+        # send things to server
+        agent_sock.send(False, 'is_training')  # tell server to call "test_once()"
+        agent_sock.send(agent_output, 'agent_output')  # send agent_output
+        agent_sock.send(target, 'target')  # send target
+
+        # receive loss value from server
+        output = agent_sock.recv('server_output')
+        loss = agent_sock.recv('loss')
+
+        test_loss += loss
+
+        pred = output.data.max(1)[1]
+
+        correct += pred.eq(target.data).cpu().sum()
+
+    test_loss /= batches
+
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        test_loss, correct, data_nums,
+        100. * correct / data_nums))
 
 if __name__ == '__main__':
 
@@ -110,8 +155,7 @@ if __name__ == '__main__':
 
     for epoch in range(1, train_args.epochs + 1):
         train_epoch(epoch=epoch)
-
-        # test_epoch()
+        test_epoch()
 
 
 

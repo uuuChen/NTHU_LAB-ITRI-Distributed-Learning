@@ -9,6 +9,20 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/15 01:20"
+1. <更動> | "MNIST_dataSet.py" 裡 "get_data_and_labels": 原先並無支援
+從 database 讀取 batch_size，更動為支援 batch_size
+2. <新增> | "socket_/socket_.py": 參考 Version "Edward1997 08/14 17:30"，
+將在　"MNIST_Server_train.py", "MNIST_Agent_train.py" 裡　server、
+agent socket 的程式寫成獨立類別，讓使用時更為簡潔
+3. <新增> | "socket_/socket_args.py": 此檔存放 socket 的一些 arguments，
+與 "data_args" 的功能相近
+4. <更動> | "MNIST_Server_train.py", "MNIST_Agent_train.py": 將程式碼以新
+增的 "socket_.py" 改寫，另外將 "train_args"、"test_epoch()" 由 
+"MNIST_Server_train.py" 改寫到 "MNIST_Agent_train.py"。另外原先在
+"MNIST_Server_train.py" 以 "train_epoch()" 實作，改寫為 "iter_once()"，
+如此能讓 server 彈性更高
+
 #### "uuuChen 08/14 19:20"
 1. <更動> | "train/" 裡 python 檔名稱
 2. <新增> | "data_args" 裡加入 "DRD_TESTING_ARGS"，提供DRD部分資料測試

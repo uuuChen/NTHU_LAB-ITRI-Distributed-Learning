@@ -58,9 +58,9 @@ class Socket(Logger):
         while True:
             try:
                 if self.type == 'server':
-                    msg = self.conn.recv(self.max_buffer_size)
+                    msg = self.conn.recv(1000000)
                 else:
-                    msg = self.socket.recv(self.max_buffer_size)
+                    msg = self.socket.recv(1000000)
 
             except Exception:
                 self.__logger.error('"%s" Receive "%s" Error !' % (self.type, data_name))
