@@ -12,7 +12,7 @@ from model.AlexNet import *
 from dataSet.DRD_dataSet import *
 from data.data_args import *  # import data arguments
 
-os.chdir('../')
+os.chdir('../../')
 
 # training settings
 parser = argparse.ArgumentParser()
@@ -65,6 +65,10 @@ test_dataSet = DRD_DataSet(data_args=DRD_TESTING_ARGS,
                            shuffle=False)
 
 model = AlexNet()
+
+optimizer = optim.SGD(model.parameters(),
+                      lr=train_args.lr,
+                      momentum=train_args.momentum)
 
 def train_epoch(epoch):
 
@@ -137,10 +141,6 @@ if __name__ == '__main__':
     if train_args.cuda:
         torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
         model.cuda()  # move all model parameters to the GPU
-
-    optimizer = optim.SGD(model.parameters(),
-                          lr=train_args.lr,
-                          momentum=train_args.momentum)
 
     for epoch in range(1, train_args.epochs + 1):
 

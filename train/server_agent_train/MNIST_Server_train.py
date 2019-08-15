@@ -1,7 +1,6 @@
 # System Imports
 from __future__ import print_function
 from torch.autograd import Variable
-import argparse
 
 # Model Imports
 from model.LeNet import *
@@ -13,6 +12,8 @@ from data.data_args import *  # import data arguments
 # Socket Imports
 from socket_.socket_ import *
 from socket_.socket_args import *
+
+os.chdir('../../')
 
 model_server = Server_LeNet()
 

@@ -13,7 +13,7 @@ from model.LeNet import *
 from dataSet.MNIST_dataSet import *
 from data.data_args import *  # import data arguments
 
-os.chdir('../')
+os.chdir('../../')
 
 # training settings
 parser = argparse.ArgumentParser()
@@ -47,13 +47,11 @@ train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
 test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 
-model_server = Server_LeNet()
-model_agent = Agent_LeNet()
+model = LeNet()
 
 def train_epoch(epoch):
 
-    #agent
-    model_agent.train()
+    model.train()
 
     data_nums = train_dataSet.get_data_nums_from_database()
 
@@ -75,27 +73,26 @@ def train_epoch(epoch):
 
         data, target = Variable(data).float(), Variable(target).long()
 
-        #agent forward
-        optimizer_agent.zero_grad()
-        agent_output = model_agent(data)
+        optimizer.zero_grad()
 
-        #server
-        model_server.train()
-        optimizer_server.zero_grad()
-        agent_output_clone = agent_output.detach()
-        agent_output_clone.requires_grad_()
+        output = model(data)
 
-        #server forward
-        output = model_server(agent_output_clone)
+        # #show img
+        # print(target)
+        # img = torchvision.utils.make_grid(data.cpu())
+        # img = img.numpy().transpose(1, 2, 0)
+        #
+        # std = [0.5, 0.5, 0.5]
+        # mean = [0.5, 0.5, 0.5]
+        # img = img * std + mean
+        # plt.imshow(img)
+        # plt.show()
 
-        #server backward
         loss = F.cross_entropy(output, target)
-        loss.backward()
-        optimizer_server.step()
 
-        #agent backward
-        agent_output.backward(gradient=agent_output_clone.grad.data)
-        optimizer_agent.step()
+        loss.backward()
+
+        optimizer.step()
 
         datas_tratned_num += len(data)
         if batch_idx % train_args.log_interval == 0:
@@ -106,8 +103,7 @@ def train_epoch(epoch):
 
 def test_epoch():
 
-    model_server.eval()
-    model_agent.eval()
+    model.eval()
 
     test_loss = 0
 
@@ -130,8 +126,7 @@ def test_epoch():
 
         data, target = Variable(data).float(), Variable(target).long()
 
-        agent_output = model_agent(data)
-        output = model_server(agent_output)
+        output = model(data)
 
         test_loss += F.cross_entropy(output, target).item()
 
@@ -154,13 +149,9 @@ if __name__ == '__main__':
 
     if train_args.cuda:
         torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model_agent.cuda()  # move all model parameters to the GPU
-        model_server.cuda()  # move all model parameters to the GPU
+        model.cuda()  # move all model parameters to the GPU
 
-    optimizer_server = optim.SGD(model_server.parameters(),
-                          lr=train_args.lr,
-                          momentum=train_args.momentum)
-    optimizer_agent = optim.SGD(model_agent.parameters(),
+    optimizer = optim.SGD(model.parameters(),
                           lr=train_args.lr,
                           momentum=train_args.momentum)
 

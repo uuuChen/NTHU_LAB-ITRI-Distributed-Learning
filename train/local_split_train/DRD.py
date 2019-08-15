@@ -12,7 +12,7 @@ from model.AlexNet import *
 from dataSet.DRD_dataSet import *
 from data.data_args import *  # import data arguments
 
-os.chdir('../')
+os.chdir('../../')
 
 # training settings
 parser = argparse.ArgumentParser()

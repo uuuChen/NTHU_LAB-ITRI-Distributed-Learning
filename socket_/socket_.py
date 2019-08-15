@@ -4,7 +4,7 @@ import pickle
 
 from logger import *
 
-DEBUG = False
+DEBUG = True
 
 class Socket(Logger):
 
@@ -46,9 +46,9 @@ class Socket(Logger):
         msg = pickle.dumps(msg)
         try:
             if self.type == 'server':
-                self.conn.send(msg)
+                self.conn.sendall(msg)
             else:
-                self.socket.send(msg)
+                self.socket.sendall(msg)
         except Exception:
             self.__logger.error('"%s" Send "%s" Error !' % (self.type, data_name))
             raise
@@ -58,9 +58,9 @@ class Socket(Logger):
         while True:
             try:
                 if self.type == 'server':
-                    msg = self.conn.recv(1000000)
+                    msg = self.conn.recv(self.max_buffer_size)
                 else:
-                    msg = self.socket.recv(1000000)
+                    msg = self.socket.recv(self.max_buffer_size)
 
             except Exception:
                 self.__logger.error('"%s" Receive "%s" Error !' % (self.type, data_name))

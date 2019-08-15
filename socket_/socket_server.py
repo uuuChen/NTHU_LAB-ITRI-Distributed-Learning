@@ -3,17 +3,12 @@ from socket_args import *
 
 server = Socket(socket_args=SERVER_SOCKET_ARGS)
 
+server.accept()  # 服務端阻塞
+
 while True:
 
-    server.accept() #服務端阻塞
+    data = server.recv('msg')
 
-    data = server.send(1, 'train_args')
-
-    while True:
-
-        # server.send(data, 'server_msg')
-
-    conn.close()
+    print(data)
 
 
-tcp_server.close()
