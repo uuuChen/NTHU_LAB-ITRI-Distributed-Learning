@@ -13,8 +13,6 @@ from data.data_args import *  # import data arguments
 from socket_.socket_ import *
 from socket_.socket_args import *
 
-os.chdir('../../')
-
 model_server = Server_LeNet()
 
 # server socket setting
