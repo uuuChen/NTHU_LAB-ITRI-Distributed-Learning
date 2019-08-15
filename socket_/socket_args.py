@@ -2,7 +2,7 @@
 COMMON_SOCKET_ARGS = {
     'host': 'localhost',
     'port': 8080,
-    'buffer_size': 4096,
+    'buffer_size': 2048,
     'back_log': 5,
     # 'max_buffer_size': 1000000
 }

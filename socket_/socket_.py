@@ -70,10 +70,13 @@ class Socket(Logger):
                 self.socket.sendall(data)
 
         except Exception:
-            self.__logger.error('"%s" Send "%s" Error !' % (self.type, data_name))
+            print('"%s" Send "%s" Error !' % (self.type, data_name))
             raise
 
     def send(self, data, data_name):
+
+        # print('\n----------------------------------------------------------------------')
+        # print('SEND\n')
 
         # header setup and send
         header = {
@@ -82,47 +85,54 @@ class Socket(Logger):
         }
         self._send(header, data_name + '_header')
 
-        print('send data_len: %s' % header['data_len'])
+        # print('send data_len: %s' % header['data_len'])
 
         time.sleep(0.1)  # VERY IMPORTANT! otherwise it won’t pass because the interval is too close
 
         self._send(data, data_name)
 
-        self.__logger.debug('"%s" Send "%s" Successfully !' % (self.type, data_name))
+        # print('"%s" Send "%s" Successfully !' % (self.type, data_name))
+        # print('----------------------------------------------------------------------\n')
+
 
     def _recv(self, data_name, data_len=None):
 
         data = []
 
-        # print('total_data_len: %s' % data_len)
-
-        rcv_data_len_sum = 0
+        if data_len is None:
+            data_len_left = self.buffer_size
+        else:
+            data_len_left = data_len
 
         while True:
 
+            if data_len_left >= self.buffer_size:
+                buf_size = self.buffer_size
+            else:
+                buf_size = data_len_left
+
             try:
                 if self.type == 'server':
-                    buf_data = self.conn.recv(self.buffer_size)
+                    buf_data = self.conn.recv(buf_size)
                 else:
-                    buf_data = self.socket.recv(self.buffer_size)
+                    buf_data = self.socket.recv(buf_size)
 
                 if data_len is None:
                     data = [buf_data]
-                    # print('receive %s data' % len(data))
                     break
-
-                rcv_data_len_sum += len(buf_data)
-
-                print('receive data_len: %s' % rcv_data_len_sum)
 
                 data.append(buf_data)
 
-                if rcv_data_len_sum >= data_len:
+                data_len_left -= len(buf_data)
+
+                if data_len_left == 0:
                     break
 
             except Exception:
                 self.__logger.error('"%s" Receive "%s" Error !' % (self.type, data_name))
                 raise
+
+        # print('receive data len: ' + str(len(b"".join(data))))
 
         data = pickle.loads(b"".join(data))
 
@@ -130,26 +140,31 @@ class Socket(Logger):
 
     def recv(self, data_name):
 
+        # print('\n----------------------------------------------------------------------')
+        # print('RECV\n')
+
         while True:
 
             # receive data header
             header_name = data_name + '_header'
             header = self._recv(header_name)
-            print('\n----------------------------------------------------------------------')
-            print('header' + str(header))
+
+            # print('header: ' + str(header))
 
             # whether get the correct packet
             if data_name == header['data_name']:  # correct, break the while loop
+                # print('matching header name')
                 break
+
             else:  # incorrect, keep waiting
-                self.__logger.debug('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
-                                    % (self.type, data_name, header['data_name']))
+                 print('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
+                       % (self.type, data_name, header['data_name']))
 
         data = self._recv(data_name, data_len=header['data_len'])
 
-        print('receive complete data: ' + str(data))
-        self.__logger.debug('"%s" Receive "%s" Successfully !' % (self.type, data_name))
-        print('----------------------------------------------------------------------')
+        # print('"%s" Receive "%s" Successfully !' % (self.type, data_name))
+
+        # print('----------------------------------------------------------------------')
 
 
         return data
