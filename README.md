@@ -9,6 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/16"
+1. <新增、除錯> | 新增 "socket_/socket_.py" 裡 "send()", "_send()", 
+"recv()",  "_recv()" 等函式。在 window 上支援一次接收 "100000 bytes" 的
+大封包，但是在 MACBOOK 上測試會出現問題。而新增這些函式後便也能在 MACBOOK 支援 
+大封包傳送與接收，且測試結果正確。之後會在 LINUX 系統上進行測試。
+ 
 #### "uuuChen 08/15 01:20"
 1. <更動> | "MNIST_dataSet.py" 裡 "get_data_and_labels": 原先並無支援
 從 database 讀取 batch_size，更動為支援 batch_size

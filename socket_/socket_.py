@@ -64,7 +64,8 @@ class Socket(Logger):
 
         try:
             if self.type == 'server':
-                self.conn.sendall(data)
+                self.conn.sendall(data)  # sendall() is a package of send(). It can automatically call send() when the
+                                         # data has not been delivered completely.
 
             else:
                 self.socket.sendall(data)
@@ -75,17 +76,37 @@ class Socket(Logger):
 
     def send(self, data, data_name):
 
+        """ When the sender "send", the header is sent first, and then data is sent.
+
+        The contents of the header include:
+            (1) data_name  (str): The name of the data to be passed, used to compare at the time of reception.
+            (2) data_bytes (int): The total number of bytes of data to be sent.
+
+        "data_name" is used to let the "receiver" confirm whether it is the data it wants. In addition, because the
+        "receiver" can receive up to "self.buffer_size" bytes at a time, "data_bytes" is used to determine how much to
+        receive each time, especially when receiving the last packet, the amount received must be correct, otherwise it
+        is possible to receive packets of other data, which is very important.
+
+        Args:
+            data      (*)   : The information to be delivered. Not limited to the data type.
+            data_name (str) : The name of the data to be sent, used to compare at the time of reception.
+
+        Returns:
+            None.
+
+        """
+
         self.__logger.debug('----------------------------------------------------------------------')
         self.__logger.debug('SEND\n')
 
         # header setup and send
         header = {
             'data_name': data_name,
-            'data_len': len(pickle.dumps(data))
+            'data_bytes': len(pickle.dumps(data))
         }
         self._send(header, data_name + '_header')
 
-        self.__logger.debug('send data_len: %s' % header['data_len'])
+        self.__logger.debug('send data_bytes: %s' % header['data_bytes'])
 
         time.sleep(0.1)  # VERY IMPORTANT! otherwise it won’t pass because the interval is too close
 
@@ -93,19 +114,19 @@ class Socket(Logger):
 
         self.__logger.debug('"%s" Send "%s" Successfully !' % (self.type, data_name))
 
-    def _recv(self, data_name, data_len, is_header=False):
+    def _recv(self, data_name, data_bytes, is_header=False):
 
         data = []
 
-        left_data_len = data_len
+        left_data_bytes = data_bytes
 
         while True:
 
-            # VERY IMPORTANT. Adjust "buf_size" to get just the right size of the data
-            if left_data_len >= self.buffer_size:
+            # VERY IMPORTANT! Adjust "buf_size" to get just the right size of the data
+            if left_data_bytes >= self.buffer_size:
                 buf_size = self.buffer_size
             else:
-                buf_size = left_data_len
+                buf_size = left_data_bytes
 
             try:
                 if self.type == 'server':
@@ -119,9 +140,9 @@ class Socket(Logger):
 
                 data.append(buf_data)
 
-                left_data_len -= len(buf_data)
+                left_data_bytes -= len(buf_data)
 
-                if left_data_len == 0:
+                if left_data_bytes == 0:
                     break
 
             except Exception:
@@ -139,6 +160,26 @@ class Socket(Logger):
 
     def recv(self, data_name):
 
+        """ When the receiver "recv", the header is received first, and then data is received.
+
+        The contents of the header include:
+            (1) data_name  (str): The name of the data to be passed, used to compare at the time of reception.
+            (2) data_bytes (int): The total number of bytes of data to be sent.
+
+        "data_name" is used to let the "receiver" confirm whether it is the data it wants. In addition, because the
+        "receiver" can receive up to "self.buffer_size" bytes at a time, "data_bytes" is used to determine how much to
+        receive each time, especially when receiving the last packet, the amount received must be correct, otherwise it
+        is possible to receive packets of other data, which is very important.
+
+        Args:
+            data_name (str) : The name of the data to be received. If the data_name received by the header does not
+                              match the data_name of the argument, continue to wait.
+
+        Returns:
+            data (*): The data sent by the sender. Not limited to the data type.
+
+        """
+
         self.__logger.debug('----------------------------------------------------------------------')
         self.__logger.debug('RECV\n')
 
@@ -146,7 +187,7 @@ class Socket(Logger):
 
             # receive data header
             header_name = data_name + '_header'
-            header = self._recv(header_name, data_len=self.buffer_size, is_header=True)
+            header = self._recv(header_name, data_bytes=self.buffer_size, is_header=True)
 
             self.__logger.debug('header: ' + str(header))
 
@@ -159,7 +200,7 @@ class Socket(Logger):
                 self.__logger.error('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
                                     % (self.type, data_name, header['data_name']))
 
-        data = self._recv(data_name, data_len=header['data_len'])
+        data = self._recv(data_name, data_bytes=header['data_bytes'])
 
         self.__logger.debug('"%s" Receive "%s" Successfully !' % (self.type, data_name))
 

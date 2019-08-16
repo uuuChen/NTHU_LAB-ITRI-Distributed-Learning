@@ -7,7 +7,6 @@ from model.LeNet import *
 
 # DataSet Imports
 from dataSet.MNIST_dataSet import *
-from data.data_args import *  # import data arguments
 
 # Socket Imports
 from socket_.socket_ import *
