@@ -19,7 +19,6 @@ while True:
     server.accept()  # 服務端阻塞
 
     if not server.is_right_conn(client_name=recv_client_name):
-        server.close()
         continue
 
     data = server.recv('msg')

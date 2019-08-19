@@ -4,10 +4,6 @@ import numpy as np
 import time
 from socket_ import Socket
 
-# client = Socket(('localhost', 8080), False)
-#
-# client.connect()
-
 while True:
 
     client = Socket(('localhost', 8080), False)
@@ -16,7 +12,7 @@ while True:
         msg = 'client_2'
         client.send(msg, 'msg')
     client.close()
-    time.sleep(10)
+    time.sleep(2)
 
 
 

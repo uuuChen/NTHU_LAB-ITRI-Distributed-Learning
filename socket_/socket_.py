@@ -16,6 +16,9 @@ class Socket(Logger):
 
         Logger.__init__(self)
 
+        # logger = self.get_logger(unique_name=__name__,
+        #                          debug=DEBUG)
+
         self.__logger = logger
 
         if is_server:
@@ -153,8 +156,9 @@ class Socket(Logger):
                 if left_data_bytes == 0:
                     break
 
-            except Exception:
-                self.__logger.error('"%s" Receive "%s" Error !' % (self.type, data_name))
+            except timeout:
+
+                self.__logger.error('TIMEOUT !!! "%s" Receive "%s" Error !' % (self.type, data_name))
                 raise
 
         if is_header:
@@ -194,7 +198,10 @@ class Socket(Logger):
         while True:
             # receive data header
             header_name = data_name + '_header'
-            header = self._recv(header_name, data_bytes=self.buffer_size, is_header=True)
+            try:
+                header = self._recv(header_name, data_bytes=self.buffer_size, is_header=True)
+            except timeout:
+                raise
 
             self.__logger.debug('header: ' + str(header))
 
@@ -215,24 +222,31 @@ class Socket(Logger):
 
     def is_right_conn(self, client_name):
         if self.is_server:
+            self.send(True, 'awake')
             recv_client_name = self.recv('client_name')
             if recv_client_name == client_name:
                 self.send(True, 'is_conn_or_not')
-                self.__logger.debug('accept "%s" connection !' % recv_client_name)
+                self.__logger.debug('accept "%s" connection!' % recv_client_name)
                 return True
             else:
                 self.send(False, 'is_conn_or_not')
                 self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
                 return False
         else:
+            awake = self.recv('awake')
             self.send(client_name, 'client_name')
-            conn = self.recv('is_conn_or_not')
+
+            try:
+                conn = self.recv('is_conn_or_not')
+            except timeout:
+                conn = False
+
             if conn:
                 self.__logger.debug(
-                    '"%s" connect to "%s" Successfully !' % (client_name, self.server_host_port))
+                    '"%s" connect to "%s" Successfully!' % (client_name, self.server_host_port))
                 return True
             else:
-                self.__logger.debug('"%s" CANT''t connect to "%s" !' % (client_name, self.server_host_port))
+                self.__logger.debug('"%s" CANT''T connect to "%s" !' % (client_name, self.server_host_port))
 
                 self.socket.close()
                 return False
@@ -240,9 +254,12 @@ class Socket(Logger):
 
     def accept(self):
         self.conn, self.addr = self.socket.accept()
+        self.__logger.debug('accept %s connection !' % str(self.addr))
 
     def connect(self):
         self.socket.connect(self.server_host_port)
+        self.__logger.debug('connect to %s !' % str(self.server_host_port))
+        # self.socket.settimeout(30)
 
 
     def close(self):

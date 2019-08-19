@@ -190,6 +190,7 @@ if __name__ == '__main__':
     epoch = 1
     is_first_training = True
     while True:
+        print('reaccept')
         # wait for current training agent connect. Keep waiting if it's not connected by current training agent
         server_sock.accept()
         if not server_sock.is_right_conn(client_name=get_cur_agent_name()):
@@ -209,11 +210,14 @@ if __name__ == '__main__':
         # start training and testing
         train_epoch(epoch=epoch)
         test_epoch()
+        server_sock.close()
 
         # set some training attributes
         epoch += 1
         is_first_training = False
         trans_to_next_agent_idx()
+
+        print('trans to agent ' + str(get_cur_agent_name()))
 
 
 

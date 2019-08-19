@@ -14,9 +14,6 @@ from socket_.socket_ import *
 
 os.chdir('../../../')
 
-# agent and server socket setting
-agent_server_sock = Socket(('localhost', 8080), False)
-
 # training settings
 train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
                               shuffle=True)
@@ -85,44 +82,46 @@ if __name__ == '__main__':
 
     while True:
 
-        # connect to server
-        conn = agent_server_sock.connect()
-        # if not agent_server_sock.is_right_conn(client_name=1):
-        #     continue
+        # connect to server, agent and server socket setting
+        agent_server_sock = Socket(('localhost', 8080), False)
+        agent_server_sock.connect()
 
-        # receive previous, next agents  from server
-        prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
+        if agent_server_sock.is_right_conn(client_name='agent_1'):
+            # receive previous, next agents from server
+            prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
 
-        # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
-        if prev_agent_attrs is not None:
-            from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
-            from_agent_sock.connect()
-            model_agent = from_agent_sock.recv('model_agent')
-            from_agent_sock.close()
+            # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
+            if prev_agent_attrs is not None:
+                from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
+                from_agent_sock.connect()
+                model_agent = from_agent_sock.recv('model_agent')
+                from_agent_sock.close()
 
-        # receive train_args from server
-        train_args = agent_server_sock.recv('train_args')
-        train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
-        torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-                                            # deterministic
-        if train_args.cuda:
-            torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-            model_agent.cuda()  # move all model parameters to the GPU
-        optimizer_agent = optim.SGD(model_agent.parameters(),
-                                    lr=train_args.lr,
-                                    momentum=train_args.momentum)
+            # receive train_args from server
+            train_args = agent_server_sock.recv('train_args')
+            train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
+            torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
+                                                # deterministic
+            if train_args.cuda:
+                torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
+                model_agent.cuda()  # move all model parameters to the GPU
+            optimizer_agent = optim.SGD(model_agent.parameters(),
+                                        lr=train_args.lr,
+                                        momentum=train_args.momentum)
 
-        # train an epoch with server
-        train_epoch()
-        test_epoch()
-        agent_server_sock.close()
+            # train an epoch with server
+            train_epoch()
+            test_epoch()
 
-        print('ready to send')
-        # send model to next agent
-        to_agent_sock = Socket(next_agent_attrs['host_port'], True)
-        to_agent_sock.accept(client_name=next_agent_attrs['name'])
-        to_agent_sock.send(model_agent, 'model_agent')
-        to_agent_sock.close()
+            agent_server_sock.close()
+            time.sleep(10)
+
+            # send model to next agent
+            to_agent_sock = Socket(next_agent_attrs['host_port'], True)
+            to_agent_sock.accept()
+            to_agent_sock.send(model_agent, 'model_agent')
+            to_agent_sock.close()
+
 
 
 
