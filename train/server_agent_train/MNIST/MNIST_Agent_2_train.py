@@ -11,24 +11,22 @@ from data.data_args import *  # import data arguments
 
 # Socket Imports
 from socket_.socket_ import *
-from socket_.socket_args import *
 
 os.chdir('../../../')
 
-# agent socket_ setting
-from_agent_sock = Socket(('localhost', 80), False)
-agent_server_sock = Socket(('localhost', 8080), False)
+# agent and server socket setting
+agent_server_sock = Socket(('localhost', 8080), False, client_name='agent_2')
 
 # training settings
 train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
                               shuffle=True)
-
 test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
-
 model_agent = Agent_LeNet()
 
+
 def train_epoch():
+
     model_agent.train()
     data_nums = train_dataSet.get_data_nums_from_database()
     agent_server_sock.send(data_nums, 'data_nums')
@@ -60,6 +58,7 @@ def train_epoch():
 
 
 def test_epoch():
+
     model_agent.eval()
 
     data_nums = test_dataSet.get_data_nums_from_database()
@@ -84,38 +83,43 @@ def test_epoch():
 
 if __name__ == '__main__':
 
-    # connect to last training agent
-    from_agent_sock.connect()
+    while True:
 
-    model_agent = from_agent_sock.recv('model_agent')
+        # connect to server
+        conn = agent_server_sock.connect()
 
-    from_agent_sock.close()
+        # receive previous, next agents  from server
+        prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
+        print(prev_agent_attrs, next_agent_attrs)
+        # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
+        if prev_agent_attrs is not None:
+            from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
+            from_agent_sock.connect()
+            model_agent = from_agent_sock.recv('model_agent')
+            from_agent_sock.close()
 
-    # connect to server
-    agent_server_sock.connect()
+        # receive train_args from server
+        train_args = agent_server_sock.recv('train_args')
+        train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
+        torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
+                                            # deterministic
+        if train_args.cuda:
+            torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
+            model_agent.cuda()  # move all model parameters to the GPU
+        optimizer_agent = optim.SGD(model_agent.parameters(),
+                                    lr=train_args.lr,
+                                    momentum=train_args.momentum)
 
-    # receive train_args from server
-    train_args = agent_server_sock.recv('train_args')
+        # train an epoch with server
+        train_epoch()
+        test_epoch()
+        agent_server_sock.close()
 
-    train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
-
-    torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-    # deterministic
-
-    if train_args.cuda:
-        torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model_agent.cuda()  # move all model parameters to the GPU
-
-    optimizer_agent = optim.SGD(model_agent.parameters(),
-                                lr=train_args.lr,
-                                momentum=train_args.momentum)
-
-    # for epoch in range(1, train_args.epochs + 1):
-    train_epoch()
-    test_epoch()
-
-    agent_server_sock.close()
-
+        # send model to next agent
+        to_agent_sock = Socket(next_agent_attrs['host_port'], True)
+        to_agent_sock.accept(client_name=next_agent_attrs['name'])
+        to_agent_sock.send(model_agent, 'model_agent')
+        to_agent_sock.close()
 
 
 

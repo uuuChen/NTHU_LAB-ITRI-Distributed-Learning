@@ -14,18 +14,14 @@ from socket_.socket_ import *
 
 os.chdir('../../../')
 
-# agent socket_ setting
-from_agent_sock = None
-agent_server_sock = Socket(('localhost', 8080), False)
-to_agent_sock = Socket(('localhost', 80), True)
+# agent and server socket setting
+agent_server_sock = Socket(('localhost', 8080), False, client_name='agent_1')
 
 # training settings
 train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS,
                               shuffle=True)
-
 test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
-
 model_agent = Agent_LeNet()
 
 
@@ -45,7 +41,7 @@ def train_epoch():
 
         data, target = Variable(data).float(), Variable(target).long()
 
-        #agent forward
+        # agent forward
         optimizer_agent.zero_grad()
         agent_output = model_agent(data)
 
@@ -56,9 +52,10 @@ def train_epoch():
         # receive gradient from server
         agent_output_grad = agent_server_sock.recv('agent_output_clone_grad')  # get agent_output_clone
 
-        #agent backward
+        # agent backward
         agent_output.backward(gradient=agent_output_grad)
         optimizer_agent.step()
+
 
 def test_epoch():
 
@@ -83,32 +80,47 @@ def test_epoch():
         agent_server_sock.send(agent_output, 'agent_output')  # send agent_output
         agent_server_sock.send(target, 'target')  # send target
 
+
 if __name__ == '__main__':
 
-    # connect to server
-    agent_server_sock.connect()
+    while True:
 
-    # receive train_args from server
-    train_args = agent_server_sock.recv('train_args')
-    train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
-    torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-                                        # deterministic
-    if train_args.cuda:
-        torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model_agent.cuda()  # move all model parameters to the GPU
-    optimizer_agent = optim.SGD(model_agent.parameters(),
-                                lr=train_args.lr,
-                                momentum=train_args.momentum)
+        # connect to server
+        conn = agent_server_sock.connect()
 
-    # train an epoch with server
-    train_epoch()
-    test_epoch()
-    agent_server_sock.close()
+        # receive previous, next agents  from server
+        prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
 
-    # send model to next agent
-    to_agent_sock.accept()
-    to_agent_sock.send(model_agent, 'model_agent')
-    to_agent_sock.close()
+        # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
+        if prev_agent_attrs is not None:
+            from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
+            from_agent_sock.connect()
+            model_agent = from_agent_sock.recv('model_agent')
+            from_agent_sock.close()
+
+        # receive train_args from server
+        train_args = agent_server_sock.recv('train_args')
+        train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
+        torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
+                                            # deterministic
+        if train_args.cuda:
+            torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
+            model_agent.cuda()  # move all model parameters to the GPU
+        optimizer_agent = optim.SGD(model_agent.parameters(),
+                                    lr=train_args.lr,
+                                    momentum=train_args.momentum)
+
+        # train an epoch with server
+        train_epoch()
+        test_epoch()
+        agent_server_sock.close()
+
+        print('ready to send')
+        # send model to next agent
+        to_agent_sock = Socket(next_agent_attrs['host_port'], True)
+        to_agent_sock.accept(client_name=next_agent_attrs['name'])
+        to_agent_sock.send(model_agent, 'model_agent')
+        to_agent_sock.close()
 
 
 

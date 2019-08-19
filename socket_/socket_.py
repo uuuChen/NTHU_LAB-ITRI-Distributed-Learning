@@ -9,7 +9,7 @@ DEBUG = False
 
 class Socket(Logger):
 
-    def __init__(self, server_host_port, is_server, back_log=5, buffer_size=2048):
+    def __init__(self, server_host_port, is_server, client_name=None, back_log=5, buffer_size=2048):
 
         Logger.__init__(self)
 
@@ -25,6 +25,8 @@ class Socket(Logger):
         self.is_server = is_server
 
         self.server_host_port = server_host_port
+
+        self.client_name = client_name
 
         self.back_log = back_log
 
@@ -191,7 +193,6 @@ class Socket(Logger):
         self.__logger.debug('RECV\n')
 
         while True:
-
             # receive data header
             header_name = data_name + '_header'
             header = self._recv(header_name, data_bytes=self.buffer_size, is_header=True)
@@ -213,11 +214,35 @@ class Socket(Logger):
 
         return data
 
-    def accept(self):
+    def accept(self, client_name):
         self.conn, self.addr = self.socket.accept()
+        print(self.addr)
+        # recv_client_name = self.recv('client_name')
+        # print(recv_client_name)
+        # if recv_client_name == client_name:
+        #     self.send(True, 'is_conn_or_not')
+        #     self.__logger.debug('accept "%s" connection !' % recv_client_name)
+        #     return True
+        # else:
+        #     self.send(False, 'is_conn_or_not')
+        #     self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
+        #     return False
+        return True
 
     def connect(self):
+        # while True:
         self.socket.connect(self.server_host_port)
+        # print(self.client_name)
+        # self.send(self.client_name, 'client_name')
+        # conn = self.recv('is_conn_or_not')
+        # print(conn)
+        # if conn:
+        #     self.__logger.debug('"%s" connect to "%s" Successfully !' % (self.client_name, self.server_host_port))
+        #     break
+        # else:
+        #     self.__logger.debug('"%s" CANT''t connect to "%s" Successfully !' % (self.client_name,
+        #                                                                          self.server_host_port))
+        #     self.socket.close()
 
     def close(self):
         if self.is_server:
