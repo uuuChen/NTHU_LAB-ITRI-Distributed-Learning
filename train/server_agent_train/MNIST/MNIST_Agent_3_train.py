@@ -21,7 +21,7 @@ test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 model_agent = Agent_LeNet()
 
-cur_host_port = ('localhost', 2048)
+cur_host_port = ('localhost', 2049)
 
 def train_epoch():
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         agent_server_sock = Socket(('localhost', 8080), False)
         agent_server_sock.connect()
 
-        if agent_server_sock.is_right_conn(client_name='agent_1'):
+        if agent_server_sock.is_right_conn(client_name='agent_3'):
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             to_agent_sock.send(model_agent, 'model_agent')
             to_agent_sock.close()
 
-            print('agent_1 done')
+            print('agent_3 done')
 
 
 

@@ -63,11 +63,6 @@ class Socket(Logger):
 
         client = socket(AF_INET, SOCK_STREAM)
 
-        if self.server_host_port is None:
-            raise
-
-        # client.connect(self.server_host_port)
-
         return client
 
     def _send(self, data, data_name):
@@ -222,7 +217,7 @@ class Socket(Logger):
 
     def is_right_conn(self, client_name):
         if self.is_server:
-            self.send(True, 'awake')
+            self.awake()
             recv_client_name = self.recv('client_name')
             if recv_client_name == client_name:
                 self.send(True, 'is_conn_or_not')
@@ -233,7 +228,7 @@ class Socket(Logger):
                 self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
                 return False
         else:
-            awake = self.recv('awake')
+            self.sleep()
             self.send(client_name, 'client_name')
 
             try:
@@ -251,6 +246,11 @@ class Socket(Logger):
                 self.socket.close()
                 return False
 
+    def sleep(self):
+        _ = self.recv('awake')
+
+    def awake(self):
+        self.send(True, 'awake')
 
     def accept(self):
         self.conn, self.addr = self.socket.accept()

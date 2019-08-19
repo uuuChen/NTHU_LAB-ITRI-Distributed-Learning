@@ -45,19 +45,19 @@ agents_attrs = [
     },
     {
         'name': 'agent_1',
-        'host_port': ('localhost', 69503)
+        'host_port': ('localhost', 2048)
     },
     {
         'name': 'agent_2',
-        'host_port': ('localhost', 80)
+        'host_port': ('localhost', 2049)
     },
     {
         'name': 'agent_3',
-        'host_port': ('localhost', 81)
+        'host_port': ('localhost', 2050)
     },
     {
         'name': 'agent_4',
-        'host_port': ('localhost', 82)
+        'host_port': ('localhost', 2051)
     }
 ]
 agent_nums = len(agents_attrs) - 1
@@ -134,6 +134,8 @@ def train_epoch(epoch):
                 epoch, trained_data_num, data_nums,
                        100. * batch_idx / batches, loss.item()))
 
+        break
+
 
 def test_epoch():
 
@@ -190,7 +192,6 @@ if __name__ == '__main__':
     epoch = 1
     is_first_training = True
     while True:
-        print('reaccept')
         # wait for current training agent connect. Keep waiting if it's not connected by current training agent
         server_sock.accept()
         if not server_sock.is_right_conn(client_name=get_cur_agent_name()):
@@ -203,6 +204,9 @@ if __name__ == '__main__':
         if is_first_training:
             prev_agent_attrs = None
         server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+
+        # wait for previos agent send model snapshot to current agent
+        server_sock.sleep()
 
         # send train args to agent
         server_sock.send(train_args, 'train_args')

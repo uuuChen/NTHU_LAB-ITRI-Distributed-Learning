@@ -21,6 +21,7 @@ test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 model_agent = Agent_LeNet()
 
+cur_host_port = ('localhost', 2049)
 
 def train_epoch():
     model_agent.train()
@@ -51,6 +52,8 @@ def train_epoch():
         # agent backward
         agent_output.backward(gradient=agent_output_grad)
         optimizer_agent.step()
+
+        break
 
 
 def test_epoch():
@@ -87,13 +90,15 @@ if __name__ == '__main__':
         if agent_server_sock.is_right_conn(client_name='agent_2'):
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
-
             # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
             if prev_agent_attrs is not None:
                 from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
                 from_agent_sock.connect()
                 model_agent = from_agent_sock.recv('model_agent')
                 from_agent_sock.close()
+
+            # awake server
+            agent_server_sock.awake()
 
             # receive train_args from server
             train_args = agent_server_sock.recv('train_args')
@@ -117,6 +122,7 @@ if __name__ == '__main__':
             to_agent_sock.send(model_agent, 'model_agent')
             to_agent_sock.close()
 
+            print('agent_2 done')
 
 
 
