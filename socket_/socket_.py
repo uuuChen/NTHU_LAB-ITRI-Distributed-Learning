@@ -7,14 +7,16 @@ from logger import *
 
 DEBUG = True
 
+logger = Logger.get_logger(unique_name=__name__,
+                           debug=DEBUG)
+
 class Socket(Logger):
 
-    def __init__(self, server_host_port, is_server, client_name=None, back_log=5, buffer_size=2048):
+    def __init__(self, server_host_port, is_server, back_log=5, buffer_size=2048):
 
         Logger.__init__(self)
 
-        self.__logger = self.get_logger(unique_name=__name__,
-                                        debug=DEBUG)
+        self.__logger = logger
 
         if is_server:
             type_ = 'server'
@@ -25,8 +27,6 @@ class Socket(Logger):
         self.is_server = is_server
 
         self.server_host_port = server_host_port
-
-        self.client_name = client_name
 
         self.back_log = back_log
 
@@ -229,11 +229,11 @@ class Socket(Logger):
             conn = self.recv('is_conn_or_not')
             if conn:
                 self.__logger.debug(
-                    '"%s" connect to "%s" Successfully !' % (self.client_name, self.server_host_port))
+                    '"%s" connect to "%s" Successfully !' % (client_name, self.server_host_port))
                 return True
             else:
-                self.__logger.debug('"%s" CANT''t connect to "%s" Successfully !' % (self.client_name,
-                                                                                     self.server_host_port))
+                self.__logger.debug('"%s" CANT''t connect to "%s" !' % (client_name, self.server_host_port))
+
                 self.socket.close()
                 return False
 
