@@ -21,7 +21,7 @@ test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 model_agent = Agent_LeNet()
 
-cur_host_port = ('localhost', 2050)
+cur_host_port = ('localhost', 2051)
 
 def train_epoch():
     model_agent.train()
@@ -90,21 +90,23 @@ if __name__ == '__main__':
         if agent_server_sock.is_right_conn(client_name='agent_4'):
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
+
             # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
             if prev_agent_attrs is not None:
+                agent_server_sock.sleep()
                 from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
                 from_agent_sock.connect()
                 model_agent = from_agent_sock.recv('model_agent')
                 from_agent_sock.close()
 
-            # awake server
+            # awake server after previous agent sending model snapshot to current agent
             agent_server_sock.awake()
 
             # receive train_args from server
             train_args = agent_server_sock.recv('train_args')
             train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
             torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-            # deterministic
+                                                # deterministic
             if train_args.cuda:
                 torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
                 model_agent.cuda()  # move all model parameters to the GPU
@@ -116,14 +118,17 @@ if __name__ == '__main__':
             train_epoch()
             test_epoch()
 
+            # initial server socket
+            to_agent_sock = Socket(cur_host_port, True)
+            agent_server_sock.awake()
+            agent_server_sock.close()
+
             # send model to next agent
-            to_agent_sock = Socket(next_agent_attrs['host_port'], True)
             to_agent_sock.accept()
             to_agent_sock.send(model_agent, 'model_agent')
             to_agent_sock.close()
 
             print('agent_4 done')
-
 
 
 
