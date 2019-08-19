@@ -1,22 +1,22 @@
 
 COMMON_SOCKET_ARGS = {
-    'host': 'localhost',
-    'port': 8080,
     'buffer_size': 2048,
     'back_log': 5,
-    # 'max_buffer_size': 1000000
 }
 
 SERVER_SOCKET_ARGS = {
-    'type': 'server'
+    'type': 'server',
+    # 'host': 'localhost',
+    # 'port': 8080,
+    'ip': 'localhost/8080',
 }
 
-AGENT_SOCKET_ARGS = {
+AGENT_1_SOCKET_ARGS = {
     'type': 'client'
 }
 
 SERVER_SOCKET_ARGS.update(COMMON_SOCKET_ARGS)
-AGENT_SOCKET_ARGS.update(COMMON_SOCKET_ARGS)
+AGENT_1_SOCKET_ARGS.update(COMMON_SOCKET_ARGS)
 
 
 

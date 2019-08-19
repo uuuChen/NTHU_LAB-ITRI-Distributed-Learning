@@ -42,7 +42,19 @@ train_args = parser.parse_args(args=[])
 model_server = Server_LeNet()
 
 # server socket setting
-server_sock = Socket(SERVER_SOCKET_ARGS)
+server_sock = Socket(('localhost', 8080), True)
+
+# train setup
+train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
+torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
+# deterministic
+if train_args.cuda:
+    torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
+    model_server.cuda()  # move all model parameters to the GPU
+
+optimizer_server = optim.SGD(model_server.parameters(),
+                             lr=train_args.lr,
+                             momentum=train_args.momentum)
 
 def train_epoch(epoch):
 
@@ -124,25 +136,18 @@ def test_epoch():
 
 if __name__ == '__main__':
 
-    # wait for agent connect
-    server_sock.accept()
+    while True:
 
-    # get train args from agent
-    server_sock.send(train_args, 'train_args')
+        # wait for agent connect
+        server_sock.accept()
 
-    # train setup
-    train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
-    torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-    # deterministic
-    if train_args.cuda:
-        torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model_server.cuda()  # move all model parameters to the GPU
+        # get train args from agent
+        server_sock.send(train_args, 'train_args')
 
-    optimizer_server = optim.SGD(model_server.parameters(),
-                                 lr=train_args.lr,
-                                 momentum=train_args.momentum)
+        # for epoch in range(1, train_args.epochs + 1):
+        #     train_epoch(epoch=epoch)
+        #     test_epoch()
 
-    for epoch in range(1, train_args.epochs + 1):
-        train_epoch(epoch=epoch)
+        train_epoch(epoch=1)
         test_epoch()
 

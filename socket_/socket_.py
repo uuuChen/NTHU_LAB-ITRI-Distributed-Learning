@@ -9,28 +9,32 @@ DEBUG = False
 
 class Socket(Logger):
 
-    def __init__(self, socket_args):
+    def __init__(self, server_host_port, is_server, back_log=5, buffer_size=2048):
 
         Logger.__init__(self)
 
         self.__logger = self.get_logger(unique_name=__name__,
                                         debug=DEBUG)
 
-        self.type = socket_args['type']
+        if is_server:
+            type_ = 'server'
+        else:
+            type_ = 'agent'
+        self.type = type_
 
-        self.host = socket_args['host']
+        self.is_server = is_server
 
-        self.port = socket_args['port']
+        self.server_host_port = server_host_port
 
-        self.back_log = socket_args['back_log']
+        self.back_log = back_log
 
-        self.buffer_size = socket_args['buffer_size']
+        self.buffer_size = buffer_size
 
         self.socket = self._get_socket()
 
     def _get_socket(self):
 
-        if self.type == 'server':
+        if self.is_server:
             socket = self._get_server_socket()
 
         else:
@@ -42,7 +46,7 @@ class Socket(Logger):
 
         server = socket(AF_INET, SOCK_STREAM)
 
-        server.bind((self.host, self.port))
+        server.bind(self.server_host_port)
 
         server.listen(self.back_log)
 
@@ -54,7 +58,10 @@ class Socket(Logger):
 
         client = socket(AF_INET, SOCK_STREAM)
 
-        client.connect((self.host, self.port))
+        if self.server_host_port is None:
+            raise
+
+        # client.connect(self.server_host_port)
 
         return client
 
@@ -63,7 +70,7 @@ class Socket(Logger):
         data = pickle.dumps(data)
 
         try:
-            if self.type == 'server':
+            if self.is_server:
                 self.conn.sendall(data)  # sendall() is a package of send(). It can automatically call send() when the
                                          # data has not been delivered completely.
 
@@ -209,9 +216,14 @@ class Socket(Logger):
     def accept(self):
         self.conn, self.addr = self.socket.accept()
 
+    def connect(self):
+        self.socket.connect(self.server_host_port)
+
     def close(self):
-        self.conn.close()
-        self.socket.close()
+        if self.is_server:
+            self.conn.close()
+        else:
+            self.socket.close()
 
 
 
