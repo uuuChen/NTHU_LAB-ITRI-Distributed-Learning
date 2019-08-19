@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = False
+DEBUG = True
 
 class Socket(Logger):
 
@@ -128,7 +128,6 @@ class Socket(Logger):
         data = []
 
         left_data_bytes = data_bytes
-
         while True:
 
             # VERY IMPORTANT! Adjust "buf_size" to get just the right size of the data
@@ -138,7 +137,7 @@ class Socket(Logger):
                 buf_size = left_data_bytes
 
             try:
-                if self.type == 'server':
+                if self.is_server:
                     buf_data = self.conn.recv(buf_size)
                 else:
                     buf_data = self.socket.recv(buf_size)
@@ -159,9 +158,9 @@ class Socket(Logger):
                 raise
 
         if is_header:
-            self.__logger.debug('receive header len: ' + str(len(b"".join(data))))
+            self.__logger.debug('receive header bytes: ' + str(len(b"".join(data))))
         else:
-            self.__logger.debug('receive data len: ' + str(len(b"".join(data))))
+            self.__logger.debug('receive data bytes: ' + str(len(b"".join(data))))
 
         data = pickle.loads(b"".join(data))
 
@@ -214,35 +213,37 @@ class Socket(Logger):
 
         return data
 
-    def accept(self, client_name):
+    def is_right_conn(self, client_name):
+        if self.is_server:
+            recv_client_name = self.recv('client_name')
+            if recv_client_name == client_name:
+                self.send(True, 'is_conn_or_not')
+                self.__logger.debug('accept "%s" connection !' % recv_client_name)
+                return True
+            else:
+                self.send(False, 'is_conn_or_not')
+                self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
+                return False
+        else:
+            self.send(client_name, 'client_name')
+            conn = self.recv('is_conn_or_not')
+            if conn:
+                self.__logger.debug(
+                    '"%s" connect to "%s" Successfully !' % (self.client_name, self.server_host_port))
+                return True
+            else:
+                self.__logger.debug('"%s" CANT''t connect to "%s" Successfully !' % (self.client_name,
+                                                                                     self.server_host_port))
+                self.socket.close()
+                return False
+
+
+    def accept(self):
         self.conn, self.addr = self.socket.accept()
-        print(self.addr)
-        # recv_client_name = self.recv('client_name')
-        # print(recv_client_name)
-        # if recv_client_name == client_name:
-        #     self.send(True, 'is_conn_or_not')
-        #     self.__logger.debug('accept "%s" connection !' % recv_client_name)
-        #     return True
-        # else:
-        #     self.send(False, 'is_conn_or_not')
-        #     self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
-        #     return False
-        return True
 
     def connect(self):
-        # while True:
         self.socket.connect(self.server_host_port)
-        # print(self.client_name)
-        # self.send(self.client_name, 'client_name')
-        # conn = self.recv('is_conn_or_not')
-        # print(conn)
-        # if conn:
-        #     self.__logger.debug('"%s" connect to "%s" Successfully !' % (self.client_name, self.server_host_port))
-        #     break
-        # else:
-        #     self.__logger.debug('"%s" CANT''t connect to "%s" Successfully !' % (self.client_name,
-        #                                                                          self.server_host_port))
-        #     self.socket.close()
+
 
     def close(self):
         if self.is_server:

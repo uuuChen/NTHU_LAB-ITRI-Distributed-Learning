@@ -191,27 +191,29 @@ if __name__ == '__main__':
     is_first_training = True
     while True:
         # wait for current training agent connect. Keep waiting if it's not connected by current training agent
-        conn = server_sock.accept(client_name=get_cur_agent_name())
-        if conn:
-            # get previous and next agent attributes
-            prev_agent_attrs, next_agent_attrs = get_prev_next_agent()
+        server_sock.accept()
+        if not server_sock.is_right_conn(client_name=get_cur_agent_name()):
+            continue
 
-            # send prev_agent_attrs, next_agent_attrs to agent
-            if is_first_training:
-                prev_agent_attrs = None
-            server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+        # get previous and next agent attributes
+        prev_agent_attrs, next_agent_attrs = get_prev_next_agent()
 
-            # send train args to agent
-            server_sock.send(train_args, 'train_args')
+        # send prev_agent_attrs, next_agent_attrs to agent
+        if is_first_training:
+            prev_agent_attrs = None
+        server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
-            # start training and testing
-            train_epoch(epoch=epoch)
-            test_epoch()
+        # send train args to agent
+        server_sock.send(train_args, 'train_args')
 
-            # set some training attributes
-            epoch += 1
-            is_first_training = False
-            trans_to_next_agent_idx()
+        # start training and testing
+        train_epoch(epoch=epoch)
+        test_epoch()
+
+        # set some training attributes
+        epoch += 1
+        is_first_training = False
+        trans_to_next_agent_idx()
 
 
 

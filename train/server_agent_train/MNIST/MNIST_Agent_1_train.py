@@ -87,6 +87,8 @@ if __name__ == '__main__':
 
         # connect to server
         conn = agent_server_sock.connect()
+        if not agent_server_sock.is_right_conn(client_name=1):
+            continue
 
         # receive previous, next agents  from server
         prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
