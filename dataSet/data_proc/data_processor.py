@@ -97,8 +97,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         old_id_ptr = self.db_id_ptr
 
         if old_id_ptr + batch_size >= data_nums:
-            new_id_ptr = batch_size - data_nums + old_id_ptr
-            id_list = self.db_id_list[old_id_ptr:] + self.db_id_list[:new_id_ptr]
+            new_id_ptr = 0
+            id_list = self.db_id_list[old_id_ptr:]
 
         else:
             new_id_ptr = old_id_ptr + batch_size

@@ -9,6 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 08/19 11:20"
+1. <除錯> | "data_processor.py" 裡 "_get_data_and_labels_from_database" :
+若剩餘資料量 < batch，則只取到資料尾端，不再使用資料集開頭資料補上，避免開頭資料二次利用使訓練或測試不公平
+2. <更動> | "MNIST_Server_train.py", "MNIST_Agent_train.py" :
+將主導權交還 Server_train，train_arge 發配以及 loss 呈現等功能改為 Server_train 處理
+
 #### "uuuChen 08/16 12:25"
 1. <新增、除錯> | 新增 "socket_/socket_.py" 裡 "send()", "_send()", 
 "recv()",  "_recv()" 等函式。在 window 上支援一次接收 "100000 bytes" 的
