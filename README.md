@@ -9,6 +9,17 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/20 16:30"
+1. <更動> | "MNIST_Server_train.py": 詳見 HackMD "8/22 Weekly Meeting"
+1. <更動> | "MNIST_Agent_1_train.py": 詳見 HackMD "8/22 Weekly Meeting"
+1. <新增> | "MNIST_Agent_2_train.py": 詳見 HackMD "8/22 Weekly Meeting"
+1. <新增> | "MNIST_Agent_3_train.py": 詳見 HackMD "8/22 Weekly Meeting"
+2. <新增> | "MNIST_Agent_4_train.py": 詳見 HackMD "8/22 Weekly Meeting"
+3. <新增> | "socket_.py" 中 "is_right_conn": 詳見 HackMD "8/22 Weekly Meeting"
+4. <新增> | "socket_.py" 中 "awake": 詳見 HackMD "8/22 Weekly Meeting"
+5. <新增> | "socket_.py" 中 "sleep": 詳見 HackMD "8/22 Weekly Meeting"
+
+
 #### "Edward1997 08/19 11:20"
 1. <除錯> | "data_processor.py" 裡 "_get_data_and_labels_from_database" :
 若剩餘資料量 < batch，則只取到資料尾端，不再使用資料集開頭資料補上，避免開頭資料二次利用使訓練或測試不公平

@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = True
+DEBUG = False
 
 logger = Logger.get_logger(unique_name=__name__,
                            debug=DEBUG)
@@ -15,9 +15,6 @@ class Socket(Logger):
     def __init__(self, server_host_port, is_server, back_log=5, buffer_size=2048):
 
         Logger.__init__(self)
-
-        # logger = self.get_logger(unique_name=__name__,
-        #                          debug=DEBUG)
 
         self.__logger = logger
 
@@ -259,8 +256,6 @@ class Socket(Logger):
     def connect(self):
         self.socket.connect(self.server_host_port)
         self.__logger.debug('connect to %s !' % str(self.server_host_port))
-        # self.socket.settimeout(30)
-
 
     def close(self):
         if self.is_server:

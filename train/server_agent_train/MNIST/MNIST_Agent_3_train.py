@@ -57,7 +57,7 @@ def train_epoch():
         agent_output.backward(gradient=agent_output_grad)
         optimizer_agent.step()
 
-        break
+        # break
 
 
 def test_epoch():
@@ -94,6 +94,11 @@ if __name__ == '__main__':
 
         if agent_server_sock.is_right_conn(client_name='agent_3'):
 
+            # get whether training is done from server
+            if agent_server_sock.recv('is_training_done'):
+                agent_server_sock.close()
+                break
+
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
 
@@ -122,7 +127,11 @@ if __name__ == '__main__':
             # train an epoch with server
             train_epoch()
             test_epoch()
-            agent_server_sock.close()
+
+            # get whether training is done from server
+            if agent_server_sock.recv('is_training_done'):
+                agent_server_sock.close()
+                break
 
             # send model to next agent
             to_agent_sock.accept()

@@ -11,14 +11,13 @@ from dataSet.MNIST_dataSet import *
 
 # Socket Imports
 from socket_.socket_ import *
-from socket_.socket_args import *
 
 # training settings
 parser = argparse.ArgumentParser()
 parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                    help='number of epochs to train (default: 30)')
+                    help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
@@ -134,7 +133,7 @@ def train_epoch(epoch):
                 epoch, trained_data_num, data_nums,
                        100. * batch_idx / batches, loss.item()))
 
-        break
+        # break
 
 
 def test_epoch():
@@ -191,36 +190,59 @@ if __name__ == '__main__':
 
     epoch = 1
     is_first_training = True
+    is_training_done = False
+    socket_closed_agents_nums = 0
+
     while True:
+
         # wait for current training agent connect. Keep waiting if it's not connected by current training agent
         server_sock.accept()
         if not server_sock.is_right_conn(client_name=get_cur_agent_name()):
             continue
 
-        # get previous and next agent attributes
-        prev_agent_attrs, next_agent_attrs = get_prev_next_agent()
+        if not is_training_done:
+            # tell agents training is not done
+            server_sock.send(False, 'is_training_done')
 
-        # send prev_agent_attrs, next_agent_attrs to agent
-        if is_first_training:
-            prev_agent_attrs = None
-        server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+            # get previous and next agent attributes
+            prev_agent_attrs, next_agent_attrs = get_prev_next_agent()
 
-        # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
-        if not is_first_training:
-            server_sock.sleep()
+            # send prev_agent_attrs, next_agent_attrs to agent
+            if is_first_training:
+                prev_agent_attrs = None
+            server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
-        # send train args to agent
-        server_sock.send(train_args, 'train_args')
+            # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
+            if not is_first_training:
+                server_sock.sleep()
 
-        # start training and testing
-        train_epoch(epoch=epoch)
-        test_epoch()
-        server_sock.close()
+            # send train args to agent
+            server_sock.send(train_args, 'train_args')
 
-        # set some training attributes
-        epoch += 1
-        is_first_training = False
+            # start training and testing
+            train_epoch(epoch=epoch)
+            test_epoch()
+
+            # set some training attributes and send current epoch
+            epoch += 1
+            is_first_training = False
+
+            # determine whether training is done
+            if epoch == (train_args.epochs + 1):
+                is_training_done = True  # it will close current agent's socket and tell it not to send model snapshot
+                socket_closed_agents_nums += 1
+
+        else:
+            socket_closed_agents_nums += 1
+            if socket_closed_agents_nums == agent_nums:
+                server_sock.close()
+                break
+
+        # transfer to next training agent index
         trans_to_next_agent_idx()
+
+        # tell current agent whether training is done, and does it need to send model snapshot to next agent or not
+        server_sock.send(is_training_done, 'is_training_done')
 
         print('trans to agent ' + str(get_cur_agent_name()))
 
