@@ -51,14 +51,14 @@ agents_attrs = [
         'name': 'agent_2',
         'host_port': ('localhost', 2049)
     },
-    # {
-    #     'name': 'agent_3',
-    #     'host_port': ('localhost', 2050)
-    # },
-    # {
-    #     'name': 'agent_4',
-    #     'host_port': ('localhost', 2051)
-    # }
+    {
+        'name': 'agent_3',
+        'host_port': ('localhost', 2050)
+    },
+    {
+        'name': 'agent_4',
+        'host_port': ('localhost', 2051)
+    }
 ]
 agent_nums = len(agents_attrs) - 1
 
@@ -205,12 +205,9 @@ if __name__ == '__main__':
             prev_agent_attrs = None
         server_sock.send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
-        # awake current agent who is waiting for previous agent to build server socket
+        # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
         if not is_first_training:
-            server_sock.awake()
-
-        # server is waiting for previos agent sending model snapshot to current agent
-        server_sock.sleep()
+            server_sock.sleep()
 
         # send train args to agent
         server_sock.send(train_args, 'train_args')
@@ -218,9 +215,6 @@ if __name__ == '__main__':
         # start training and testing
         train_epoch(epoch=epoch)
         test_epoch()
-
-        # wait for previos agent building server
-        # server_sock.sleep()
         server_sock.close()
 
         # set some training attributes

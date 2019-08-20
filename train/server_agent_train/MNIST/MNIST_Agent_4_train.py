@@ -23,7 +23,11 @@ model_agent = Agent_LeNet()
 
 cur_host_port = ('localhost', 2051)
 
+# build current agent server. it's used to send model snapshot
+to_agent_sock = Socket(cur_host_port, True)
+
 def train_epoch():
+
     model_agent.train()
     data_nums = train_dataSet.get_data_nums_from_database()
     agent_server_sock.send(data_nums, 'data_nums')
@@ -57,6 +61,7 @@ def train_epoch():
 
 
 def test_epoch():
+
     model_agent.eval()
 
     data_nums = test_dataSet.get_data_nums_from_database()
@@ -88,19 +93,19 @@ if __name__ == '__main__':
         agent_server_sock.connect()
 
         if agent_server_sock.is_right_conn(client_name='agent_4'):
+
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
 
             # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
             if prev_agent_attrs is not None:
-                agent_server_sock.sleep()
                 from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
                 from_agent_sock.connect()
                 model_agent = from_agent_sock.recv('model_agent')
                 from_agent_sock.close()
 
-            # awake server after previous agent sending model snapshot to current agent
-            agent_server_sock.awake()
+                # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent
+                agent_server_sock.awake()
 
             # receive train_args from server
             train_args = agent_server_sock.recv('train_args')
@@ -117,10 +122,6 @@ if __name__ == '__main__':
             # train an epoch with server
             train_epoch()
             test_epoch()
-
-            # initial server socket
-            to_agent_sock = Socket(cur_host_port, True)
-            agent_server_sock.awake()
             agent_server_sock.close()
 
             # send model to next agent
@@ -129,6 +130,8 @@ if __name__ == '__main__':
             to_agent_sock.close()
 
             print('agent_4 done')
+
+
 
 
 
