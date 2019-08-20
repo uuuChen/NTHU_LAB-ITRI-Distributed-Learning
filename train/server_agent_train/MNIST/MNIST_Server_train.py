@@ -51,14 +51,14 @@ agents_attrs = [
         'name': 'agent_2',
         'host_port': ('localhost', 2049)
     },
-    {
-        'name': 'agent_3',
-        'host_port': ('localhost', 2050)
-    },
-    {
-        'name': 'agent_4',
-        'host_port': ('localhost', 2051)
-    }
+    # {
+    #     'name': 'agent_3',
+    #     'host_port': ('localhost', 2050)
+    # },
+    # {
+    #     'name': 'agent_4',
+    #     'host_port': ('localhost', 2051)
+    # }
 ]
 agent_nums = len(agents_attrs) - 1
 
@@ -220,7 +220,7 @@ if __name__ == '__main__':
         test_epoch()
 
         # wait for previos agent building server
-        server_sock.sleep()
+        # server_sock.sleep()
         server_sock.close()
 
         # set some training attributes

@@ -23,7 +23,11 @@ model_agent = Agent_LeNet()
 
 cur_host_port = ('localhost', 2049)
 
+# build current agent server. it's used to send model snapshot
+to_agent_sock = Socket(cur_host_port, True)
+
 def train_epoch():
+
     model_agent.train()
     data_nums = train_dataSet.get_data_nums_from_database()
     agent_server_sock.send(data_nums, 'data_nums')
@@ -57,6 +61,7 @@ def train_epoch():
 
 
 def test_epoch():
+
     model_agent.eval()
 
     data_nums = test_dataSet.get_data_nums_from_database()
@@ -99,14 +104,14 @@ if __name__ == '__main__':
                 model_agent = from_agent_sock.recv('model_agent')
                 from_agent_sock.close()
 
-            # awake server after previous agent sending model snapshot to current agent
+            # awake server after current agent receiving model snapshot from previous agent
             agent_server_sock.awake()
 
             # receive train_args from server
             train_args = agent_server_sock.recv('train_args')
             train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
             torch.manual_seed(train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-            # deterministic
+                                                # deterministic
             if train_args.cuda:
                 torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
                 model_agent.cuda()  # move all model parameters to the GPU
@@ -117,10 +122,6 @@ if __name__ == '__main__':
             # train an epoch with server
             train_epoch()
             test_epoch()
-
-            # initial server socket
-            to_agent_sock = Socket(cur_host_port, True)
-            agent_server_sock.awake()
             agent_server_sock.close()
 
             # send model to next agent
@@ -129,6 +130,8 @@ if __name__ == '__main__':
             to_agent_sock.close()
 
             print('agent_2 done')
+
+
 
 
 

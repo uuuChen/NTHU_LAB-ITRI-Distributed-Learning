@@ -23,6 +23,9 @@ model_agent = Agent_LeNet()
 
 cur_host_port = ('localhost', 2048)
 
+# build current agent server. it's used to send model snapshot
+to_agent_sock = Socket(cur_host_port, True)
+
 def train_epoch():
 
     model_agent.train()
@@ -101,7 +104,7 @@ if __name__ == '__main__':
                 model_agent = from_agent_sock.recv('model_agent')
                 from_agent_sock.close()
 
-            # awake server after previous agent sending model snapshot to current agent
+            # awake server after current agent receiving model snapshot from previous agent
             agent_server_sock.awake()
 
             # receive train_args from server
@@ -119,10 +122,6 @@ if __name__ == '__main__':
             # train an epoch with server
             train_epoch()
             test_epoch()
-
-            # initial server socket
-            to_agent_sock = Socket(cur_host_port, True)
-            agent_server_sock.awake()
             agent_server_sock.close()
 
             # send model to next agent

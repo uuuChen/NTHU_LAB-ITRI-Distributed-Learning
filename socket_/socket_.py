@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = True
+DEBUG = False
 
 logger = Logger.get_logger(unique_name=__name__,
                            debug=DEBUG)
