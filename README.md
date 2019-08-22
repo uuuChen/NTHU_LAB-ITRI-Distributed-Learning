@@ -9,6 +9,11 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+
+#### "Edward1997 08/22 13:40"
+1. <新增> | "VGGNet.py":
+嘗試使用 VGGNet 於 MNIST 但效果不彰，先更新上來以作備用
+
 #### "uuuChen 08/20 16:30"
 1. <更動> | "MNIST_Server_train.py": 詳見 HackMD "8/22 Weekly Meeting"
 1. <更動> | "MNIST_Agent_1_train.py": 詳見 HackMD "8/22 Weekly Meeting"
