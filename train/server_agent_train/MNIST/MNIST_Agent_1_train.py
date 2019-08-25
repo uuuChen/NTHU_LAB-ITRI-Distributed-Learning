@@ -21,7 +21,17 @@ test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 model_agent = Agent_LeNet()
 
+# ==================================
+# LocalHost testing
+# ==================================
+server_host_port = ('localhost', 8080)
 cur_host_port = ('localhost', 2048)
+
+# ==================================
+# LAN testing
+# ==================================
+# server_host_port = ('10.1.1.13', 8080)
+# cur_host_port = ('10.1.1.11', 2048)
 
 cur_agent_name = 'agent_1'
 
@@ -91,7 +101,7 @@ if __name__ == '__main__':
     while True:
 
         # connect to server, agent and server socket setting
-        agent_server_sock = Socket(('localhost', 8080), False)
+        agent_server_sock = Socket(server_host_port, False)
         agent_server_sock.connect()
 
         if agent_server_sock.is_right_conn(client_name=cur_agent_name):
@@ -133,11 +143,9 @@ if __name__ == '__main__':
             test_epoch()
 
             # get whether training is done from server
-            is_training_done = agent_server_sock.recv('is_training_done')
-            if is_training_done:
+            if agent_server_sock.recv('is_training_done'):
                 agent_server_sock.close()
                 break
-
 
             # send model to next agent
             to_agent_sock.accept()

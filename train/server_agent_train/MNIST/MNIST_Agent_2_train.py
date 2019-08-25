@@ -21,7 +21,19 @@ test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS,
                              shuffle=True)
 model_agent = Agent_LeNet()
 
+# ==================================
+# LocalHost testing
+# ==================================
+server_host_port = ('localhost', 8080)
 cur_host_port = ('localhost', 2049)
+
+# ==================================
+# LAN testing
+# ==================================
+# server_host_port = ('10.1.1.13', 8080)
+# cur_host_port = ('10.1.1.11', 2049)
+
+cur_agent_name = 'agent_2'
 
 # build current agent server. it's used to send model snapshot
 to_agent_sock = Socket(cur_host_port, True)
@@ -89,10 +101,10 @@ if __name__ == '__main__':
     while True:
 
         # connect to server, agent and server socket setting
-        agent_server_sock = Socket(('localhost', 8080), False)
+        agent_server_sock = Socket(server_host_port, False)
         agent_server_sock.connect()
 
-        if agent_server_sock.is_right_conn(client_name='agent_2'):
+        if agent_server_sock.is_right_conn(client_name=cur_agent_name):
 
             # get whether training is done from server
             if agent_server_sock.recv('is_training_done'):
@@ -101,7 +113,7 @@ if __name__ == '__main__':
 
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
-            print(prev_agent_attrs, next_agent_attrs)
+
             # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
             if prev_agent_attrs is not None:
                 from_agent_sock = Socket(prev_agent_attrs['host_port'], False)
@@ -138,7 +150,7 @@ if __name__ == '__main__':
             to_agent_sock.send(model_agent, 'model_agent')
             to_agent_sock.close()
 
-            print('agent_2 done')
+            print('%s done' % cur_agent_name)
 
 
 

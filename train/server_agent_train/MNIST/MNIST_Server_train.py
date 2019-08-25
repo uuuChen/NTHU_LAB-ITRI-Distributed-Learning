@@ -35,6 +35,9 @@ train_args = parser.parse_args(args=[])
 # initial the model
 server_model = Server_LeNet()
 
+# ==================================
+# LocalHost testing
+# ==================================
 # server socket setting
 server_sock = Socket(('localhost', 8080), True)
 
@@ -63,10 +66,13 @@ agents_attrs = [
 ]
 agent_nums = len(agents_attrs) - 1
 
+# ==================================
+# LAN testing
+# ==================================
 # localIP = socket.gethostbyname(socket.gethostname())
 # server_sock = Socket((localIP, 8080), True)
-
-# agent host port list for testing
+#
+# # agent host port list for testing
 # cur_agent_idx = 1  # in this case, cur_agent_idx's range is 1 ~ 4
 # agents_attrs = [
 #     {

@@ -11,6 +11,9 @@
 
 <<<<<<< Updated upstream
 
+#### "uuuChen 08/25 21:20"
+1. 待補!!
+
 #### "Edward1997 08/22 13:40"
 1. <新增> | "VGGNet.py":
 嘗試使用 VGGNet 於 MNIST 但效果不彰，先更新上來以作備用
