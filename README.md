@@ -9,6 +9,7 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+<<<<<<< Updated upstream
 
 #### "Edward1997 08/22 13:40"
 1. <新增> | "VGGNet.py":
@@ -24,6 +25,10 @@
 4. <新增> | "socket_.py" 中 "awake": 詳見 HackMD "8/22 Weekly Meeting"
 5. <新增> | "socket_.py" 中 "sleep": 詳見 HackMD "8/22 Weekly Meeting"
 
+=======
+#### "uuuChen 0820 02:25"
+1. 尚補
+>>>>>>> Stashed changes
 
 #### "Edward1997 08/19 11:20"
 1. <除錯> | "data_processor.py" 裡 "_get_data_and_labels_from_database" :

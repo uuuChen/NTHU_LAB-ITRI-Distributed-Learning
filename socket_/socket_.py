@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = False
+DEBUG = True
 
 logger = Logger.get_logger(unique_name=__name__,
                            debug=DEBUG)
@@ -112,7 +112,7 @@ class Socket(Logger):
 
         self.__logger.debug('send data_bytes: %s' % header['data_bytes'])
 
-        time.sleep(0.1)  # VERY IMPORTANT! otherwise it won’t pass because the interval is too close
+        self.sleep()
 
         self._send(data, data_name)
 
@@ -206,6 +206,8 @@ class Socket(Logger):
                 self.__logger.error('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
                                     % (self.type, data_name, header['data_name']))
 
+        self.awake()
+
         data = self._recv(data_name, data_bytes=header['data_bytes'])
 
         self.__logger.debug('"%s" Receive "%s" Successfully !' % (self.type, data_name))
@@ -218,11 +220,19 @@ class Socket(Logger):
             recv_client_name = self.recv('client_name')
             if recv_client_name == client_name:
                 self.send(True, 'is_conn_or_not')
+                self.__logger.debug('')
+                self.__logger.debug('######################################################################')
                 self.__logger.debug('accept "%s" connection!' % recv_client_name)
+                self.__logger.debug('######################################################################')
+                self.__logger.debug('')
                 return True
             else:
                 self.send(False, 'is_conn_or_not')
+                self.__logger.debug('')
+                self.__logger.debug('######################################################################')
                 self.__logger.debug('NOT accept "%s" connection !' % recv_client_name)
+                self.__logger.debug('######################################################################')
+                self.__logger.debug('')
                 return False
         else:
             self.sleep()
@@ -244,10 +254,10 @@ class Socket(Logger):
                 return False
 
     def sleep(self):
-        _ = self.recv('awake')
+        _ = self._recv('_awake', data_bytes=self.buffer_size, is_header=True)
 
     def awake(self):
-        self.send(True, 'awake')
+        self._send(True, '_awake')
 
     def accept(self):
         self.conn, self.addr = self.socket.accept()

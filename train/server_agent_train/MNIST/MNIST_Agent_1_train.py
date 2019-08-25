@@ -133,9 +133,11 @@ if __name__ == '__main__':
             test_epoch()
 
             # get whether training is done from server
-            if agent_server_sock.recv('is_training_done'):
+            is_training_done = agent_server_sock.recv('is_training_done')
+            if is_training_done:
                 agent_server_sock.close()
                 break
+
 
             # send model to next agent
             to_agent_sock.accept()

@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
             # receive previous, next agents from server
             prev_agent_attrs, next_agent_attrs = agent_server_sock.recv('prev_next_agent_attrs')
-
+            print(prev_agent_attrs, next_agent_attrs)
             # connect to last training agent and get model snapshot. prev_agent_attrs is None when the first training
             if prev_agent_attrs is not None:
                 from_agent_sock = Socket(prev_agent_attrs['host_port'], False)

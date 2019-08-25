@@ -2,6 +2,7 @@
 from __future__ import print_function
 from torch.autograd import Variable
 import argparse
+import torch
 
 # Model Imports
 from model.LeNet import *
@@ -11,6 +12,7 @@ from dataSet.MNIST_dataSet import *
 
 # Socket Imports
 from socket_.socket_ import *
+import socket
 
 # training settings
 parser = argparse.ArgumentParser()
@@ -31,7 +33,7 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 train_args = parser.parse_args(args=[])
 
 # initial the model
-model_server = Server_LeNet()
+server_model = Server_LeNet()
 
 # server socket setting
 server_sock = Socket(('localhost', 8080), True)
@@ -60,6 +62,34 @@ agents_attrs = [
     }
 ]
 agent_nums = len(agents_attrs) - 1
+
+# localIP = socket.gethostbyname(socket.gethostname())
+# server_sock = Socket((localIP, 8080), True)
+
+# agent host port list for testing
+# cur_agent_idx = 1  # in this case, cur_agent_idx's range is 1 ~ 4
+# agents_attrs = [
+#     {
+#
+#     },
+#     {
+#         'name': 'agent_1',
+#         'host_port': ('10.1.1.11', 2048)
+#     },
+#     {
+#         'name': 'agent_2',
+#         'host_port': ('10.1.1.11', 2049)
+#     },
+#     {
+#         'name': 'agent_3',
+#         'host_port': ('10.1.1.11', 2050)
+#     },
+#     {
+#         'name': 'agent_4',
+#         'host_port': ('10.1.1.11', 2051)
+#     }
+# ]
+# agent_nums = len(agents_attrs) - 1
 
 
 def trans_to_next_agent_idx():
@@ -95,7 +125,7 @@ def get_cur_agent_name():
 
 def train_epoch(epoch):
 
-    model_server.train()
+    server_model.train()
     data_nums = server_sock.recv('data_nums')
     batches = (data_nums - 1) // train_args.batch_size + 1
 
@@ -110,14 +140,13 @@ def train_epoch(epoch):
 
         # store gradient in agent_output_clone
         agent_output_clone = Variable(agent_output).float()
-        agent_output_clone.requires_grad_()
-
         if train_args.cuda:
             agent_output_clone = agent_output_clone.cuda()
             target = target.cuda()
+        agent_output_clone.requires_grad_()
 
         # server forward
-        server_output = model_server(agent_output_clone)
+        server_output = server_model(agent_output_clone)
         loss = F.cross_entropy(server_output, target)
 
         # server backward
@@ -138,7 +167,7 @@ def train_epoch(epoch):
 
 def test_epoch():
 
-    model_server.eval()
+    server_model.eval()
 
     test_loss = 0
     correct = 0
@@ -159,7 +188,7 @@ def test_epoch():
             target = target.cuda()
 
         # server forward
-        server_output = model_server(agent_output_clone)
+        server_output = server_model(agent_output_clone)
         loss = F.cross_entropy(server_output, target)
 
         test_loss += loss
@@ -183,8 +212,8 @@ if __name__ == '__main__':
                                         # deterministic
     if train_args.cuda:
         torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
-        model_server.cuda()  # move all model parameters to the GPU
-    optimizer_server = optim.SGD(model_server.parameters(),
+        server_model.cuda()  # move all model parameters to the GPU
+    optimizer_server = optim.SGD(server_model.parameters(),
                                  lr=train_args.lr,
                                  momentum=train_args.momentum)
 
