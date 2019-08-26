@@ -40,7 +40,6 @@ server_model = Server_LeNet()
 # ==================================
 # server socket setting
 server_sock = Socket(('localhost', 8080), True)
-
 # agent host port list for testing
 cur_agent_idx = 1  # in this case, cur_agent_idx's range is 1 ~ 4
 agents_attrs = [
@@ -71,7 +70,6 @@ agent_nums = len(agents_attrs) - 1
 # ==================================
 # localIP = socket.gethostbyname(socket.gethostname())
 # server_sock = Socket((localIP, 8080), True)
-#
 # # agent host port list for testing
 # cur_agent_idx = 1  # in this case, cur_agent_idx's range is 1 ~ 4
 # agents_attrs = [
@@ -80,19 +78,19 @@ agent_nums = len(agents_attrs) - 1
 #     },
 #     {
 #         'name': 'agent_1',
-#         'host_port': ('10.1.1.11', 2048)
+#         'host_port': ('172.20.10.3', 2048)
 #     },
 #     {
 #         'name': 'agent_2',
-#         'host_port': ('10.1.1.11', 2049)
+#         'host_port': ('172.20.10.3', 2049)
 #     },
 #     {
 #         'name': 'agent_3',
-#         'host_port': ('10.1.1.11', 2050)
+#         'host_port': ('172.20.10.3', 2050)
 #     },
 #     {
 #         'name': 'agent_4',
-#         'host_port': ('10.1.1.11', 2051)
+#         'host_port': ('172.20.10.3', 2051)
 #     }
 # ]
 # agent_nums = len(agents_attrs) - 1

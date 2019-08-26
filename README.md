@@ -11,8 +11,21 @@
 
 <<<<<<< Updated upstream
 
-#### "uuuChen 08/25 21:20"
-1. 待補!!
+#### 目前存在錯誤
+1. 當使用網路以兩台電腦實際進行測試時，agent 與 agent 間無法建立連線，也就無法
+傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
+
+#### "uuuChen 08/26 12:00"
+1. <新增> | "server_agent_train/agent.py": 因為各個 agent 的程式碼重複率很
+高，所以把它獨立寫成一個 class ，大幅減少程式碼
+2. <更動> | "socket_/socket_.py" 裡 "send()", "recv()": 在 "send()"
+的時候會先傳送 header 再傳送 data ，中間間隔 time.sleep(0.1)，更動為 sleep()，
+而在 "reve()" 到 header 後 "awake"
+3. <更動> | "MNIST_Agent_1_train.py": 使用 class "Agent" 改寫
+4. <更動> | "MNIST_Agent_2_train.py": 使用 class "Agent" 改寫
+5. <更動> | "MNIST_Agent_3_train.py": 使用 class "Agent" 改寫
+6. <更動> | "MNIST_Agent_4_train.py": 使用 class "Agent" 改寫
+
 
 #### "Edward1997 08/22 13:40"
 1. <新增> | "VGGNet.py":
