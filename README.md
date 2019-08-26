@@ -9,8 +9,6 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
-<<<<<<< Updated upstream
-
 #### 目前存在錯誤
 1. 當使用網路以兩台電腦實際進行測試時，agent 與 agent 間無法建立連線，也就無法
 傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
@@ -26,7 +24,6 @@
 5. <更動> | "MNIST_Agent_3_train.py": 使用 class "Agent" 改寫
 6. <更動> | "MNIST_Agent_4_train.py": 使用 class "Agent" 改寫
 
-
 #### "Edward1997 08/22 13:40"
 1. <新增> | "VGGNet.py":
 嘗試使用 VGGNet 於 MNIST 但效果不彰，先更新上來以作備用
@@ -40,11 +37,6 @@
 3. <新增> | "socket_.py" 中 "is_right_conn": 詳見 HackMD "8/22 Weekly Meeting"
 4. <新增> | "socket_.py" 中 "awake": 詳見 HackMD "8/22 Weekly Meeting"
 5. <新增> | "socket_.py" 中 "sleep": 詳見 HackMD "8/22 Weekly Meeting"
-
-=======
-#### "uuuChen 0820 02:25"
-1. 尚補
->>>>>>> Stashed changes
 
 #### "Edward1997 08/19 11:20"
 1. <除錯> | "data_processor.py" 裡 "_get_data_and_labels_from_database" :
