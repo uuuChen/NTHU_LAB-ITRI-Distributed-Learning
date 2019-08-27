@@ -121,10 +121,10 @@ def get_data_nums():
 
     for i in range(train_args.agent_nums):
 
-        train_data_nums[i] += server_socks[i].recv('data_nums')
+        train_data_nums[i] = server_socks[i].recv('data_nums')
         all_train_data_nums += train_data_nums[i]
 
-        test_data_nums[i] += server_socks[i].recv('data_nums')
+        test_data_nums[i] = server_socks[i].recv('data_nums')
         all_test_data_nums += test_data_nums[i]
 
 def send_train_args():
@@ -132,11 +132,6 @@ def send_train_args():
     for i in range(train_args.agent_nums):
         # send train args to agent
         server_socks[i].send(train_args, 'train_args')
-
-def is_training_done(flag):
-
-    for i in range(train_args.agent_nums):
-        server_socks[i].send(flag, 'is_training_done')
 
 def train_with_cur_agent(agent_idx, epoch, trained_data_num):
 
