@@ -22,7 +22,7 @@ cur_agent_name = 'agent_2'
 # ==================================
 # LocalHost testing
 # ==================================
-server_host_port = ('localhost', 8080)
+server_host_port = ('localhost', 8081)
 cur_host_port = ('localhost', 2049)
 
 # ==================================

@@ -13,6 +13,21 @@
 1. 當使用網路以兩台電腦實際進行測試時，agent 與 agent 間無法建立連線，也就無法
 傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
 
+#### "Edward1997 08/27 15:40"
+1.<更動> | "MNIST_Server_train.py", "server_agent_train/agent.py"
+server 一次建立多組與 agent 的連線，
+並在建立連線後收到 agents 的 data 個數，接著傳 train_args 給所有 agents
+
+agent.py 中 _train_epoch 與 _test_epoch 合併為 _iter
+MNIST_Server_train.py 可調整訓練 agent 個數、
+server port 起數數值、agent host port 起始數值(用於 snapshot)
+
+然正確率有所下滑目前最好為89%(一對二,epoch 5)，不如集中式的97%，尋找問題中
+帶補充的功能有；server 儲存 agents 的 label
+
+2.<新增> | "server_agent_train/agent.py" 中 send_model()、get_prev_model()
+snapshop 所用之功能
+
 #### "uuuChen 08/26 12:00"
 1. <新增> | "server_agent_train/agent.py": 因為各個 agent 的程式碼重複率很
 高，所以把它獨立寫成一個 class ，大幅減少程式碼

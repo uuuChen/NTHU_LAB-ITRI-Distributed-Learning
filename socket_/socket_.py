@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = True
+DEBUG = False
 
 logger = Logger.get_logger(unique_name=__name__,
                            debug=DEBUG)
@@ -63,7 +63,8 @@ class Socket(Logger):
         return client
 
     def _send(self, data, data_name):
-
+        #print('send: %s' %data_name)
+        #print(data)
         data = pickle.dumps(data)
 
         try:
@@ -119,7 +120,7 @@ class Socket(Logger):
         self.__logger.debug('"%s" Send "%s" Successfully !' % (self.type, data_name))
 
     def _recv(self, data_name, data_bytes, is_header=False):
-
+        #print('recv %s' %data_name)
         data = []
 
         left_data_bytes = data_bytes
@@ -159,7 +160,7 @@ class Socket(Logger):
             self.__logger.debug('receive data bytes: ' + str(len(b"".join(data))))
 
         data = pickle.loads(b"".join(data))
-
+        #print(data)
         return data
 
     def recv(self, data_name):
@@ -205,7 +206,6 @@ class Socket(Logger):
             else:  # incorrect, keep waiting
                 self.__logger.error('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
                                     % (self.type, data_name, header['data_name']))
-
         self.awake()
 
         data = self._recv(data_name, data_bytes=header['data_bytes'])
@@ -254,7 +254,7 @@ class Socket(Logger):
                 return False
 
     def sleep(self):
-        _ = self._recv('_awake', data_bytes=self.buffer_size, is_header=True)
+        x = self._recv('_awake', data_bytes=self.buffer_size, is_header=True)
 
     def awake(self):
         self._send(True, '_awake')
