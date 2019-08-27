@@ -18,9 +18,9 @@ import socket
 parser = argparse.ArgumentParser()
 parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
-parser.add_argument('--agent-nums', type=int, default=3, metavar='N',
+parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
                     help='input agents number (default: 2)')
-parser.add_argument('--epochs', type=int, default=3, metavar='N',
+parser.add_argument('--epochs', type=int, default=5, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
@@ -177,6 +177,7 @@ def train_with_cur_agent(agent_idx, epoch, trained_data_num):
     return trained_data_num
 
 def train_epoch(epoch):
+
     global is_first_training
 
     server_model.train()
@@ -203,8 +204,6 @@ def train_epoch(epoch):
 
 
 def test_with_cur_agent(agent_idx, test_loss, correct):
-
-    server_model.eval()
 
     data_nums = test_data_nums[agent_idx]
     batches = (data_nums - 1) // train_args.batch_size + 1
@@ -234,6 +233,8 @@ def test_with_cur_agent(agent_idx, test_loss, correct):
 
 
 def test_epoch():
+
+    server_model.eval()
 
     test_loss = 0
     correct = 0

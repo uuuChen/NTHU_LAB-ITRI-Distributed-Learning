@@ -48,7 +48,6 @@ class Agent(Logger):
             self.model.train()
             data_nums = self.train_dataSet.get_data_nums_from_database()
 
-            self.optim.zero_grad()
         else:
             print('%s starts testing....' % self.cur_name)
             self.model.eval()
@@ -56,8 +55,12 @@ class Agent(Logger):
 
         batches = (data_nums - 1) // self.train_args.batch_size + 1
         for batch_idx in range(1, batches + 1):
+            if is_train:
 
-            data, target = self.train_dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
+                self.optim.zero_grad()
+                data, target = self.train_dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
+            else:
+                data, target = self.test_dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
 
             if self.train_args.cuda:
                     data = data.cuda()
@@ -121,6 +124,7 @@ class Agent(Logger):
                 # if it is the last agent to test
                 if self.cur_name is 'agent_' + str(self.train_args.agent_nums):
                     # no need to send model
+                    print(str(self.train_args.agent_nums))
                     self.agent_server_sock.close()
                     break
                 else:
