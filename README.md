@@ -20,7 +20,8 @@ train_with_cur_agent 中 optimizer_server.zero_grad() 放於正確位置
 2. <更動> | "agent.py"
 調整終止條件判定的寫法，解決最後一個agent不會自動關閉的情況
 3. <更動、新增> | "MNIST_Server_train.py" 中 send_train_args()
-增加傳送內容，傳送 agent 本身的IP(原為手動確認輸入)、port(原為手動分配輸入) 
+增加傳送內容，傳送 agent 本身的IP(原為手動確認輸入)、port(原為手動分配輸入)
+並調整 agent.py、MNIST_Agent_(1~4)_train.py 相關參數
 4. <新增> | "MNIST_Server_train.py" 中 send_prev_next_agent_attrs()
 server 寄送當前 agent 的前後 agents 給它，讓她知道該跟誰進行 snapshop
 
