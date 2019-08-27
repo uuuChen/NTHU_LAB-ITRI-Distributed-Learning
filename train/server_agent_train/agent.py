@@ -8,14 +8,14 @@ import time
 
 class Agent(Logger):
 
-    def __init__(self, model, train_dataSet, test_dataSet, server_host_port, cur_host_port, cur_name):
+    def __init__(self, model, train_dataSet, test_dataSet, server_host_port, cur_name):
         Logger.__init__(self)
         self.model = model
         self.train_dataSet = train_dataSet
         self.test_dataSet = test_dataSet
         self.server_host_port = server_host_port
-        self.cur_host_port = cur_host_port
-        self.to_agent_sock = Socket(cur_host_port, True)
+        self.cur_host_port = None
+        self.to_agent_sock = None
         self.cur_name = cur_name
         self.train_args = None
         self.agent_server_sock = None
@@ -98,6 +98,10 @@ class Agent(Logger):
         self.train_args = self.agent_server_sock.recv('train_args')
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
 
+        # receive own IP and distributed port
+        self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
+        self.to_agent_sock = Socket(self.cur_host_port, True)
+
         # seeding the CPU for generating random numbers so that the
         torch.manual_seed(self.train_args.seed)
 
@@ -122,9 +126,8 @@ class Agent(Logger):
             # if it is the last epoch
             if self.agent_server_sock.recv('is_training_done'):
                 # if it is the last agent to test
-                if self.cur_name is 'agent_' + str(self.train_args.agent_nums):
+                if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:
                     # no need to send model
-                    print(str(self.train_args.agent_nums))
                     self.agent_server_sock.close()
                     break
                 else:

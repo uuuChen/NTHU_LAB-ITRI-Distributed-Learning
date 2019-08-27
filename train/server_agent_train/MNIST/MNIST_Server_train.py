@@ -18,9 +18,9 @@ import socket
 parser = argparse.ArgumentParser()
 parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
-parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
+parser.add_argument('--agent-nums', type=int, default=4, metavar='N',
                     help='input agents number (default: 2)')
-parser.add_argument('--epochs', type=int, default=5, metavar='N',
+parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
@@ -133,6 +133,27 @@ def send_train_args():
         # send train args to agent
         server_socks[i].send(train_args, 'train_args')
 
+        # send agent IP and distributed port
+        server_socks[i].send(agents_attrs[i]['host_port'], 'cur_host_port')
+
+def send_prev_next_agent_attrs(agent_idx):
+
+    global  is_first_training
+
+    # get previous and next agent attributes
+    prev_agent_attrs, next_agent_attrs = get_prev_next_agent(agent_idx)
+
+    # send prev_agent_attrs, next_agent_attrs to agent
+    if is_first_training:
+        prev_agent_attrs = None
+    server_socks[agent_idx].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+
+    # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
+    if not is_first_training:
+        server_socks[agent_idx].sleep()
+
+    is_first_training = False
+
 def train_with_cur_agent(agent_idx, epoch, trained_data_num):
 
     data_nums = train_data_nums[agent_idx]
@@ -180,19 +201,7 @@ def train_epoch(epoch):
     trained_data_num = 0
     for i in range(train_args.agent_nums):
 
-        # get previous and next agent attributes
-        prev_agent_attrs, next_agent_attrs = get_prev_next_agent(i)
-
-        # send prev_agent_attrs, next_agent_attrs to agent
-        if is_first_training:
-            prev_agent_attrs = None
-        server_socks[i].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
-
-        # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
-        if not is_first_training:
-            server_socks[i].sleep()
-
-        is_first_training = False
+        send_prev_next_agent_attrs(i)
 
         print('starting training with' + str(agents_attrs[i]))
         trained_data_num = train_with_cur_agent(i, epoch, trained_data_num)
@@ -237,12 +246,7 @@ def test_epoch():
 
     for i in range(train_args.agent_nums):
 
-        # get previous and next agent attributes
-        prev_agent_attrs, next_agent_attrs = get_prev_next_agent(i)
-
-        # send prev_agent_attrs, next_agent_attrs to agent
-        server_socks[i].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
-        server_socks[i].sleep()
+        send_prev_next_agent_attrs(i)
 
         test_loss, correct = test_with_cur_agent(i, test_loss, correct)
         batches += (test_data_nums[i] - 1) // train_args.batch_size + 1

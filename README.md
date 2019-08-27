@@ -13,10 +13,16 @@
 1. 當使用網路以兩台電腦實際進行測試時，agent 與 agent 間無法建立連線，也就無法
 傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
 
-#### "Edward1997 08/27 17:10"
+#### "Edward1997 08/27 18:30"
 1. <更動> | "MNIST_Server_train.py"
 train_with_cur_agent 中 optimizer_server.zero_grad() 放於正確位置
 解決上一版正確率下降問題
+2. <更動> | "agent.py"
+調整終止條件判定的寫法，解決最後一個agent不會自動關閉的情況
+3. <更動、新增> | "MNIST_Server_train.py" 中 send_train_args()
+增加傳送內容，傳送 agent 本身的IP(原為手動確認輸入)、port(原為手動分配輸入) 
+4. <新增> | "MNIST_Server_train.py" 中 send_prev_next_agent_attrs()
+server 寄送當前 agent 的前後 agents 給它，讓她知道該跟誰進行 snapshop
 
 #### "Edward1997 08/27 15:40"
 1. <更動> | "MNIST_Server_train.py", "server_agent_train/agent.py"
@@ -24,19 +30,14 @@ server 一次建立多組與 agent 的連線，
 並在建立連線後收到 agents 的 data 個數，接著傳 train_args 給所有 agents
 
 agent.py 中 _train_epoch 與 _test_epoch 合併為 _iter
-MNIST_Server_train.py 可調整訓練 agent 個數、
-server port 起數數值、agent host port 起始數值(用於 snapshot)
+MNIST_Server_train.py 可調整訓練 agent 個數、server port 起數數值、agent host port 起始數值(用於 snapshot)
 
 然正確率有所下滑目前最好為89%(一對二,epoch 5)，不如集中式的97%，尋找問題中
 帶補充的功能有；server 儲存 agents 的 label
-
 2. <新增> | "server_agent_train/agent.py" 中 send_model()、get_prev_model()
 snapshop 所用之功能
-
 3. <新增> |  "MNIST_Server_train.py" 中 send_train_args()、get_data_nums()
 server 傳送 train_args，並接收 agent 中資料各自了數量(train、test 分開)
-
-
 4. <新增> |  "MNIST_Server_train.py" 中 conn_to_agents()、train_with_cur_agent()、test_with_cur_agent()
 conn_to_agents() : server 與設定好個數的 agents 連線
 train_with_cur_agent() : 與某一個 agent 進行訓練

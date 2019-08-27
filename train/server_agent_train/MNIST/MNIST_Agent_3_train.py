@@ -23,7 +23,6 @@ cur_agent_name = 'agent_3'
 # LocalHost testing
 # ==================================
 server_host_port = ('localhost', 8082)
-cur_host_port = ('localhost', 2050)
 
 # ==================================
 # LAN testing
@@ -34,7 +33,7 @@ cur_host_port = ('localhost', 2050)
 
 if __name__ == '__main__':
 
-    agent = Agent(model_agent, train_dataSet, test_dataSet, server_host_port, cur_host_port, cur_agent_name)
+    agent = Agent(model_agent, train_dataSet, test_dataSet, server_host_port, cur_agent_name)
     agent.start_training()
 
 
