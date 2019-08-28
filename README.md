@@ -13,6 +13,20 @@
 1. 當使用網路以兩台電腦實際進行測試時，agent 與 agent 間無法建立連線，也就無法
 傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
 
+
+#### "Edward1997 08/28 11:00"
+1.<新增> | "server.py"
+將所有 server 會使用到的共用功能打包
+可藉由 train_args 傳入要訓練的 model 與 dataSet
+2.<更動> | "agent.py"
+藉由 server 傳來之 train_args 中的 dataSet 參數去取用對應資料集
+並更動相關參數讀取與傳送順序
+3.<新增> | "agent.py" 中 get_dataSet()、send_data_nums()、training_setting()
+為了整理版面，將部分程式打包成函數
+get_dataSet() : 根據train_args 中的 dataSet 參數去取用對應資料集
+send_data_nums() : 將該資料集中資料個數寄給 server(train、test分開)
+training_setting() : 設定 cuda 、 optimizer
+
 #### "Edward1997 08/27 18:30"
 1. <更動> | "MNIST_Server_train.py"
 train_with_cur_agent 中 optimizer_server.zero_grad() 放於正確位置
@@ -43,6 +57,8 @@ server 傳送 train_args，並接收 agent 中資料各自了數量(train、test
 conn_to_agents() : server 與設定好個數的 agents 連線
 train_with_cur_agent() : 與某一個 agent 進行訓練
 test_with_cur_agent() : 與某一個 agent 進行測試
+5.<更動> | "central_dataset_import.py"
+更正名稱拼字錯誤
 
 #### "uuuChen 08/26 12:00"
 1. <新增> | "server_agent_train/agent.py": 因為各個 agent 的程式碼重複率很

@@ -6,13 +6,20 @@ from socket_.socket_ import *
 from logger import *
 import time
 
+# DataSet Imports
+from dataSet.MNIST_dataSet import *
+from  dataSet.DRD_dataSet import *
+from  dataSet.Xray_dataSet import *
+from dataSet.ECG_dataSet import *
+from data.data_args import *  # import data arguments
+
 class Agent(Logger):
 
     def __init__(self, model, train_dataSet, test_dataSet, server_host_port, cur_name):
         Logger.__init__(self)
         self.model = model
-        self.train_dataSet = train_dataSet
-        self.test_dataSet = test_dataSet
+        self.train_dataSet = None
+        self.test_dataSet = None
         self.server_host_port = server_host_port
         self.cur_host_port = None
         self.to_agent_sock = None
@@ -20,6 +27,40 @@ class Agent(Logger):
         self.train_args = None
         self.agent_server_sock = None
         self.optim = None
+
+    def get_dataSet(self):
+
+        if self.train_args.dataSet == 'MNIST':
+            self.train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS, shuffle=True)
+            self.test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS, shuffle=True)
+        elif self.train_args.dataSet is 'DRD':
+            self.train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS, shuffle=False)
+            self.test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS, shuffle=False)
+        elif self.train_args.dataSet is 'ECG':
+            self.train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS, shuffle=True)
+            self.test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS, shuffle=True)
+        elif self.train_args.dataSet is 'Xray':
+            self.train_dataSet = Xray_DataSet(data_args=Xray_TRAIN_ARGS, shuffle=False)
+            self.test_dataSet = Xray_DataSet(data_args=Xray_TEST_ARGS, shuffle=False)
+
+    def send_data_nums(self):
+
+        train_data_nums = self.train_dataSet.get_data_nums_from_database()
+        self.agent_server_sock.send(train_data_nums, 'data_nums')
+        test_data_nums = self.test_dataSet.get_data_nums_from_database()
+        self.agent_server_sock.send(test_data_nums, 'data_nums')
+
+    def training_setting(self):
+        # seeding the CPU for generating random numbers so that the
+        torch.manual_seed(self.train_args.seed)
+
+        # results are deterministic
+        if self.train_args.cuda:
+            torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
+            self.model.cuda()  # move all model parameters to the GPU
+        self.optim = torch.optim.SGD(self.model.parameters(),
+                                     lr=self.train_args.lr,
+                                     momentum=self.train_args.momentum)
 
     def get_prev_model(self):
 
@@ -88,12 +129,6 @@ class Agent(Logger):
         self.agent_server_sock = Socket(self.server_host_port, False)
         self.agent_server_sock.connect()
 
-        # send data to store in server
-        train_data_nums = self.train_dataSet.get_data_nums_from_database()
-        self.agent_server_sock.send(train_data_nums, 'data_nums')
-        test_data_nums = self.test_dataSet.get_data_nums_from_database()
-        self.agent_server_sock.send(test_data_nums, 'data_nums')
-
         # receive train_args from server
         self.train_args = self.agent_server_sock.recv('train_args')
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
@@ -102,16 +137,14 @@ class Agent(Logger):
         self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
         self.to_agent_sock = Socket(self.cur_host_port, True)
 
-        # seeding the CPU for generating random numbers so that the
-        torch.manual_seed(self.train_args.seed)
+        # get dataSet that train_args choosed
+        self.get_dataSet()
 
-        # results are deterministic
-        if self.train_args.cuda:
-            torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
-            self.model.cuda()  # move all model parameters to the GPU
-        self.optim = torch.optim.SGD(self.model.parameters(),
-                                     lr=self.train_args.lr,
-                                     momentum=self.train_args.momentum)
+        # send data nums to store in server
+        self.send_data_nums()
+
+        # set cuda、optimizer、torch seed
+        self.training_setting()
 
         while True:
             # train an epoch with server
