@@ -14,7 +14,7 @@
 傳遞 model snapshot。然而使用 localhost 測試並不會出現異常
 
 
-#### "Edward1997 08/28 11:00"
+#### "Edward1997 08/28 11:30"
 1.<新增> | "server.py"
 將所有 server 會使用到的共用功能打包
 可藉由 train_args 傳入要訓練的 model 與 dataSet
