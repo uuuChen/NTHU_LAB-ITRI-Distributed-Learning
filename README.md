@@ -15,13 +15,13 @@
 
 
 #### "Edward1997 08/28 11:30"
-1.<新增> | "server.py"
+1. <新增> | "server.py"
 將所有 server 會使用到的共用功能打包
 可藉由 train_args 傳入要訓練的 model 與 dataSet
-2.<更動> | "agent.py"
+2. <更動> | "agent.py"
 藉由 server 傳來之 train_args 中的 dataSet 參數去取用對應資料集
 並更動相關參數讀取與傳送順序
-3.<新增> | "agent.py" 中 get_dataSet()、send_data_nums()、training_setting()
+3. <新增> | "agent.py" 中 get_dataSet()、send_data_nums()、training_setting()
 為了整理版面，將部分程式打包成函數
 get_dataSet() : 根據train_args 中的 dataSet 參數去取用對應資料集
 send_data_nums() : 將該資料集中資料個數寄給 server(train、test分開)
