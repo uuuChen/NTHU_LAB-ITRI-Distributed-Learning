@@ -192,62 +192,7 @@ class Agent(Logger):
             else:
                 self.send_model()
 
-            # # connect to server, agent and server socket setting
-            # self.agent_server_sock = Socket(self.server_host_port, False)
-            # self.agent_server_sock.connect()
-            #
-            # # receive train_args from server
-            # self.train_args = self.agent_server_sock.recv('train_args')
-            # self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
-            #
-            # # receive own IP and distributed port
-            # self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
-            # self.to_agent_sock = Socket(self.cur_host_port, True)
-            #
-            # # get dataSet that train_args choosed
-            # self.get_dataSet(shuffle=False)
-            #
-            # # send total data nums to server if its' the first agent
-            # if self.agent_server_sock.recv('is_first_agent'):
-            #     self.send_data_nums_to_server()
-            #
-            # # get shuffled train, test id list from server
-            # train_id_list, test_id_list = self.agent_server_sock.recv('train_test_id_list')
-            #
-            # # set these id lists to dataSet
-            # self.train_dataSet.set_db_id_list(train_id_list)
-            # self.test_dataSet.set_db_id_list(test_id_list)
-            #
-            # self.train_data_nums = len(train_id_list)
-            # self.test_data_nums = len(test_id_list)
-            #
-            # # set cuda、optimizer、torch seed
-            # self.training_setting()
-            #
-            # while True:
-            #     # train an epoch with server
-            #     self.get_prev_model()
-            #     self._iter(True)
-            #     print('%s done training' % self.cur_name)
-            #     self.send_model()
-            #
-            #     self.get_prev_model()
-            #     self._iter(False)
-            #     print('%s done testing' % self.cur_name)
-            #     # if it is the last epoch
-            #     if self.agent_server_sock.recv('is_training_done'):
-            #         # if it is the last agent to test
-            #         if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:
-            #             # no need to send model
-            #             self.agent_server_sock.close()
-            #             break
-            #         else:
-            #             self.send_model()
-            #             self.agent_server_sock.close()
-            #             break
-            #     else:
-            #         self.send_model()
-
+           
 
 
 
