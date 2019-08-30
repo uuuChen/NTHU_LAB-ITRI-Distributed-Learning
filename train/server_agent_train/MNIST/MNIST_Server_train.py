@@ -12,6 +12,8 @@ import socket
 
 # training settings
 parser = argparse.ArgumentParser()
+parser.add_argument('--is-simulate', type=bool, default=True, metavar='N',
+                    help='does the project use for accuracy simulation or not (actual hospitals usage) (default: True)')
 parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
 parser.add_argument('--agent-nums', type=int, default=2, metavar='N',

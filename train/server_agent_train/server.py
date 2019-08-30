@@ -1,6 +1,5 @@
-import torch
+import random
 from torch.autograd import Variable
-import argparse
 
 # Model Imports
 from model.LeNet import *
@@ -15,6 +14,9 @@ from logger import *
 
 class Server(Logger):
     def __init__(self, train_args):
+
+        Logger.__init__(self)
+
         # server socket setting
         self.server_port_begin = 8080
         self.server_socks = []
@@ -30,6 +32,7 @@ class Server(Logger):
         self.all_test_data_nums = 0
 
         # training setting
+        self.is_simulate = train_args.is_simulate
         self.is_first_training = True
         self.train_args = train_args
 
@@ -82,9 +85,49 @@ class Server(Logger):
 
         return prev_agent, next_agent
 
-    def get_data_nums(self):
-        global all_train_data_nums
-        global all_test_data_nums
+    def get_total_data_nums_from_first_agent(self):
+
+        for i in range(self.train_args.agent_nums):
+            if i == 0:
+                self.server_socks[i].send(True, 'is_first_agent')
+                self.all_train_data_nums = self.server_socks[i].recv('train_data_nums')
+                self.all_test_data_nums = self.server_socks[i].recv('test_data_nums')
+            else:
+                self.server_socks[i].send(False, 'is_first_agent')
+
+    def send_id_lists_to_agents(self):
+
+        all_train_id_list = list(range(1, self.all_train_data_nums + 1))
+        all_test_id_list = list(range(1, self.all_test_data_nums + 1))
+
+        random.shuffle(all_train_id_list)
+        random.shuffle(all_test_id_list)
+
+        left_train_data_nums = self.all_train_data_nums
+        left_test_data_nums = self.all_test_data_nums
+        left_agents_nums = self.train_args.agent_nums
+
+        train_start_idx = 0
+        test_start_idx = 0
+
+        for i in range(self.train_args.agent_nums):
+            agent_train_data_nums = (left_train_data_nums - 1) // left_agents_nums + 1
+            agent_test_data_nums = (left_test_data_nums - 1) // left_agents_nums + 1
+
+            agent_train_id_list = all_train_id_list[train_start_idx: train_start_idx + agent_train_data_nums]
+            agent_test_id_list = all_train_id_list[test_start_idx: test_start_idx + agent_test_data_nums]
+
+            self.server_socks[i].send([agent_train_id_list, agent_test_id_list], 'train_test_id_list')
+
+            train_start_idx += agent_train_data_nums
+            test_start_idx += agent_test_data_nums
+
+            left_train_data_nums -= agent_train_data_nums
+            left_test_data_nums -= agent_test_data_nums
+
+            left_agents_nums -= 1
+
+    def get_data_nums_from_agents(self):
 
         for i in range(self.train_args.agent_nums):
             self.train_data_nums[i] = self.server_socks[i].recv('data_nums')
@@ -93,7 +136,7 @@ class Server(Logger):
             self.test_data_nums[i] = self.server_socks[i].recv('data_nums')
             self.all_test_data_nums += self.test_data_nums[i]
 
-    def send_train_args(self):
+    def send_train_args_to_agents(self):
 
         for i in range(self.train_args.agent_nums):
             # send train args to agent
@@ -221,11 +264,26 @@ class Server(Logger):
             100. * correct / self.all_test_data_nums))
 
     def start_training(self):
-        self.conn_to_agents()
-        self.send_train_args()
-        self.get_data_nums()
 
-        for epoch in range(self.train_args.epochs):
-            # start training and testing
-            self.train_epoch(epoch=epoch)
-            self.test_epoch(epoch=epoch)
+        if not self.is_simulate:  # for real hospitals
+
+            self.conn_to_agents()
+
+            self.send_train_args_to_agents()
+
+            self.get_data_nums_from_agents()
+
+            for epoch in range(self.train_args.epochs):
+                # start training and testing
+                self.train_epoch(epoch=epoch)
+                self.test_epoch(epoch=epoch)
+
+        else:  # for distributed accuracy test
+
+            self.conn_to_agents()
+
+            self.send_train_args_to_agents()
+
+            self.get_total_data_nums_from_first_agent()
+
+            self.send_id_lists_to_agents()

@@ -162,6 +162,18 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         else:
             self.coll_delete_all(coll_name=self.coll_name)
 
+    def set_db_id_list(self, id_list):
+
+        """ When Class "agent"'s attribute "is_simulate" is True, use this function to set "db_id_list" with "id_list",
+            and "id_list" is obtained from server.
+
+            "db_id_list" is used in function "_get_data_and_labels_from_database". It can decide to read the data and
+            labels that match these ids from the database.
+
+        """
+
+        self.db_id_list = id_list
+
     @abstractmethod
     def _get_data_and_labels_from_local(self):
         raise NotImplementedError('Must override "_get_data_and_labels_from_local()" ')

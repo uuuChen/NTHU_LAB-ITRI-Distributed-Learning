@@ -28,20 +28,27 @@ class Agent(Logger):
         self.agent_server_sock = None
         self.optim = None
 
-    def get_dataSet(self):
+    def get_dataSet(self, shuffle):
 
         if self.train_args.dataSet == 'MNIST':
-            self.train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS, shuffle=True)
-            self.test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS, shuffle=True)
+            self.train_dataSet = MNIST_DataSet(data_args=MNIST_TRAIN_ARGS, shuffle=shuffle)
+            self.test_dataSet = MNIST_DataSet(data_args=MNIST_TEST_ARGS, shuffle=shuffle)
         elif self.train_args.dataSet is 'DRD':
-            self.train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS, shuffle=False)
-            self.test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS, shuffle=False)
+            self.train_dataSet = DRD_DataSet(data_args=DRD_TRAIN_ARGS, shuffle=shuffle)
+            self.test_dataSet = DRD_DataSet(data_args=DRD_TEST_ARGS, shuffle=shuffle)
         elif self.train_args.dataSet is 'ECG':
-            self.train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS, shuffle=True)
-            self.test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS, shuffle=True)
+            self.train_dataSet = ECG_DataSet(data_args=ECG_TRAIN_ARGS, shuffle=shuffle)
+            self.test_dataSet = ECG_DataSet(data_args=ECG_TEST_ARGS, shuffle=shuffle)
         elif self.train_args.dataSet is 'Xray':
-            self.train_dataSet = Xray_DataSet(data_args=Xray_TRAIN_ARGS, shuffle=False)
-            self.test_dataSet = Xray_DataSet(data_args=Xray_TEST_ARGS, shuffle=False)
+            self.train_dataSet = Xray_DataSet(data_args=Xray_TRAIN_ARGS, shuffle=shuffle)
+            self.test_dataSet = Xray_DataSet(data_args=Xray_TEST_ARGS, shuffle=shuffle)
+
+    def send_data_nums_to_server(self):
+        train_data_nums = self.train_dataSet.get_data_nums_from_database()
+        test_data_nums = self.test_dataSet.get_data_nums_from_database()
+        print(train_data_nums, test_data_nums)
+        self.agent_server_sock.send(train_data_nums, 'train_data_nums')
+        self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 
     def send_data_nums(self):
 
@@ -125,50 +132,81 @@ class Agent(Logger):
                 self.optim.step()
 
     def start_training(self):
-        # connect to server, agent and server socket setting
-        self.agent_server_sock = Socket(self.server_host_port, False)
-        self.agent_server_sock.connect()
+        self.is_simulate = True
+        if not self.is_simulate:
+            # connect to server, agent and server socket setting
+            self.agent_server_sock = Socket(self.server_host_port, False)
+            self.agent_server_sock.connect()
 
-        # receive train_args from server
-        self.train_args = self.agent_server_sock.recv('train_args')
-        self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
+            # receive train_args from server
+            self.train_args = self.agent_server_sock.recv('train_args')
+            self.is_simulate = self.train_args.is_simulate
+            self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
 
-        # receive own IP and distributed port
-        self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
-        self.to_agent_sock = Socket(self.cur_host_port, True)
+            # receive own IP and distributed port
+            self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
+            self.to_agent_sock = Socket(self.cur_host_port, True)
 
-        # get dataSet that train_args choosed
-        self.get_dataSet()
+            # get dataSet that train_args choosed
+            self.get_dataSet(shuffle=True)
 
-        # send data nums to store in server
-        self.send_data_nums()
+            # send data nums to store in server
+            self.send_data_nums_to_server()
 
-        # set cuda、optimizer、torch seed
-        self.training_setting()
+            # set cuda、optimizer、torch seed
+            self.training_setting()
 
-        while True:
-            # train an epoch with server
-            self.get_prev_model()
-            self._iter(True)
-            print('%s done training' % self.cur_name)
-            self.send_model()
+            while True:
+                # train an epoch with server
+                self.get_prev_model()
+                self._iter(True)
+                print('%s done training' % self.cur_name)
+                self.send_model()
 
-            self.get_prev_model()
-            self._iter(False)
-            print('%s done testing' % self.cur_name)
-            # if it is the last epoch
-            if self.agent_server_sock.recv('is_training_done'):
-                # if it is the last agent to test
-                if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:
-                    # no need to send model
-                    self.agent_server_sock.close()
-                    break
+                self.get_prev_model()
+                self._iter(False)
+                print('%s done testing' % self.cur_name)
+                # if it is the last epoch
+                if self.agent_server_sock.recv('is_training_done'):
+                    # if it is the last agent to test
+                    if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:
+                        # no need to send model
+                        self.agent_server_sock.close()
+                        break
+                    else:
+                        self.send_model()
+                        self.agent_server_sock.close()
+                        break
                 else:
                     self.send_model()
-                    self.agent_server_sock.close()
-                    break
-            else:
-                self.send_model()
+
+        else:
+
+            # connect to server, agent and server socket setting
+            self.agent_server_sock = Socket(self.server_host_port, False)
+            self.agent_server_sock.connect()
+
+            # receive train_args from server
+            self.train_args = self.agent_server_sock.recv('train_args')
+            self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
+
+            # receive own IP and distributed port
+            self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
+            self.to_agent_sock = Socket(self.cur_host_port, True)
+
+            # get dataSet that train_args choosed
+            self.get_dataSet(shuffle=False)
+
+            # send total data nums to server if its' the first agent
+            if self.agent_server_sock.recv('is_first_agent'):
+                self.send_data_nums_to_server()
+
+            # get shuffled train, test id list from server
+            train_id_list, test_id_list = self.agent_server_sock.recv('train_test_id_list')
+
+            # set these id lists to dataSet
+            self.train_dataSet.set_db_id_list(train_id_list)
+            self.test_dataSet.set_db_id_list(test_id_list)
 
 
 
