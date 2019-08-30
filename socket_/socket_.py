@@ -5,7 +5,7 @@ import time
 
 from logger import *
 
-DEBUG = True
+DEBUG = False
 
 logger = Logger.get_logger(unique_name=__name__,
                            debug=DEBUG)
@@ -160,7 +160,9 @@ class Socket(Logger):
             self.__logger.debug('receive data bytes: ' + str(len(b"".join(data))))
 
         data = pickle.loads(b"".join(data))
-        #print(data)
+
+        self.__logger.debug('| receive data: %s |' % str(data))
+
         return data
 
     def recv(self, data_name):

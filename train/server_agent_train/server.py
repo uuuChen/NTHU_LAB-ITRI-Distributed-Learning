@@ -26,8 +26,10 @@ class Server(Logger):
         self.agents_attrs = []
 
         # stored data from agent
-        self.train_data_nums = self.test_data_nums = [0] * train_args.agent_nums
-        self.all_train_data_nums = self.all_test_data_nums = 0
+        self.train_data_nums = [0] * train_args.agent_nums
+        self.test_data_nums = [0] * train_args.agent_nums
+        self.all_train_data_nums = 0
+        self.all_test_data_nums = 0
 
         # training setting
         self.is_simulate = train_args.is_simulate
@@ -113,7 +115,7 @@ class Server(Logger):
             agent_test_data_nums = (left_test_data_nums - 1) // left_agents_nums + 1
 
             agent_train_id_list = all_train_id_list[train_start_idx: train_start_idx + agent_train_data_nums]
-            agent_test_id_list = all_train_id_list[test_start_idx: test_start_idx + agent_test_data_nums]
+            agent_test_id_list = all_test_id_list[test_start_idx: test_start_idx + agent_test_data_nums]
 
             self.train_data_nums[i] = agent_train_data_nums
             self.test_data_nums[i] = agent_test_data_nums
@@ -131,10 +133,10 @@ class Server(Logger):
     def get_data_nums_from_agents(self):
 
         for i in range(self.train_args.agent_nums):
-            self.train_data_nums[i] = self.server_socks[i].recv('data_nums')
+            self.train_data_nums[i] = self.server_socks[i].recv('train_data_nums')
             self.all_train_data_nums += self.train_data_nums[i]
 
-            self.test_data_nums[i] = self.server_socks[i].recv('data_nums')
+            self.test_data_nums[i] = self.server_socks[i].recv('test_data_nums')
             self.all_test_data_nums += self.test_data_nums[i]
 
     def send_train_args_to_agents(self):
@@ -149,7 +151,7 @@ class Server(Logger):
     def send_prev_next_agent_attrs(self, agent_idx):
 
         # get previous and next agent attributes
-        prev_agent_attrs, next_agent_attrs = self.get_prev_next_agent(agent_idx)
+        prev_agent_attrs, next_agent_attrs = self.get_prev_next_agents_attrs(agent_idx)
 
         # send prev_agent_attrs, next_agent_attrs to agent
         if self.is_first_training:
@@ -201,6 +203,7 @@ class Server(Logger):
         return trained_data_num
 
     def train_epoch(self, epoch):
+
         self.model.train()
 
         trained_data_num = 0
@@ -266,30 +269,20 @@ class Server(Logger):
 
     def start_training(self):
 
+        self.conn_to_agents()
+
+        self.send_train_args_to_agents()
+
         if not self.is_simulate:  # for real hospitals
-
-            self.conn_to_agents()
-
-            self.send_train_args_to_agents()
-
             self.get_data_nums_from_agents()
 
-            for epoch in range(self.train_args.epochs):
-                # start training and testing
-                self.train_epoch(epoch=epoch)
-                self.test_epoch(epoch=epoch)
-
-        else:  # for distributed accuracy test
-
-            self.conn_to_agents()
-
-            self.send_train_args_to_agents()
-
+        else:  # for simulated accuracy test
             self.get_total_data_nums_from_first_agent()
-
             self.send_id_lists_to_agents()
 
             for epoch in range(self.train_args.epochs):
                 # start training and testing
                 self.train_epoch(epoch=epoch)
                 self.test_epoch(epoch=epoch)
+
+

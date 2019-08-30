@@ -8,8 +8,8 @@ import time
 
 # DataSet Imports
 from dataSet.MNIST_dataSet import *
-from  dataSet.DRD_dataSet import *
-from  dataSet.Xray_dataSet import *
+from dataSet.DRD_dataSet import *
+from dataSet.Xray_dataSet import *
 from dataSet.ECG_dataSet import *
 from data.data_args import *  # import data arguments
 
@@ -45,7 +45,6 @@ class Agent(Logger):
         elif self.train_args.dataSet is 'Xray':
             self.train_dataSet = Xray_DataSet(data_args=Xray_TRAIN_ARGS, shuffle=shuffle)
             self.test_dataSet = Xray_DataSet(data_args=Xray_TEST_ARGS, shuffle=shuffle)
-
 
     def send_data_nums_to_server(self):
         train_data_nums = self.train_dataSet.get_data_nums_from_database()
@@ -100,14 +99,13 @@ class Agent(Logger):
         batches = (data_nums - 1) // self.train_args.batch_size + 1
         for batch_idx in range(1, batches + 1):
             if is_train:
-
                 self.optim.zero_grad()
                 data, target = self.train_dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
             else:
                 data, target = self.test_dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
 
             if self.train_args.cuda:
-                    data = data.cuda()
+                data = data.cuda()
 
             data, target = Variable(data).float(), Variable(target).long()
 
