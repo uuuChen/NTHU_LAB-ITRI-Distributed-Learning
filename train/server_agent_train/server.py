@@ -26,10 +26,8 @@ class Server(Logger):
         self.agents_attrs = []
 
         # stored data from agent
-        self.train_data_nums = [0, 0, 0, 0]
-        self.all_train_data_nums = 0
-        self.test_data_nums = [0, 0, 0, 0]
-        self.all_test_data_nums = 0
+        self.train_data_nums = self.test_data_nums = [0] * train_args.agent_nums
+        self.all_train_data_nums = self.all_test_data_nums = 0
 
         # training setting
         self.is_simulate = train_args.is_simulate
@@ -70,7 +68,7 @@ class Server(Logger):
             }
             self.agents_attrs.append(agents_attr)
 
-    def get_prev_next_agent(self, agent_idx):
+    def get_prev_next_agents_attrs(self, agent_idx):
 
         prev_agent_idx = agent_idx - 1
         next_agent_idx = agent_idx + 1
@@ -80,10 +78,10 @@ class Server(Logger):
         if next_agent_idx == self.train_args.agent_nums:
             next_agent_idx = 0
 
-        prev_agent = self.agents_attrs[prev_agent_idx]
-        next_agent = self.agents_attrs[next_agent_idx]
+        prev_agent_attrs = self.agents_attrs[prev_agent_idx]
+        next_agent_attrs = self.agents_attrs[next_agent_idx]
 
-        return prev_agent, next_agent
+        return prev_agent_attrs, next_agent_attrs
 
     def get_total_data_nums_from_first_agent(self):
 
@@ -116,6 +114,9 @@ class Server(Logger):
 
             agent_train_id_list = all_train_id_list[train_start_idx: train_start_idx + agent_train_data_nums]
             agent_test_id_list = all_train_id_list[test_start_idx: test_start_idx + agent_test_data_nums]
+
+            self.train_data_nums[i] = agent_train_data_nums
+            self.test_data_nums[i] = agent_test_data_nums
 
             self.server_socks[i].send([agent_train_id_list, agent_test_id_list], 'train_test_id_list')
 
@@ -287,3 +288,8 @@ class Server(Logger):
             self.get_total_data_nums_from_first_agent()
 
             self.send_id_lists_to_agents()
+
+            for epoch in range(self.train_args.epochs):
+                # start training and testing
+                self.train_epoch(epoch=epoch)
+                self.test_epoch(epoch=epoch)

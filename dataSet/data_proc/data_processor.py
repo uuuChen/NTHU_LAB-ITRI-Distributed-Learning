@@ -21,6 +21,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.use_gridFS = data_args['use_gridFS']
 
+        self.is_simulate = data_args['is_simulate']
+
         self.data_nums_dir_path = data_args['data_nums_dir_path']
 
         self.label_class_nums = data_args['label_class_nums']
@@ -145,7 +147,6 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         return data, labels
 
     def get_data_nums_from_database(self):
-
         if self.use_gridFS:
             db_data_nums = self.gridFS_coll_find_all(coll_name=self.coll_name).count()
 
