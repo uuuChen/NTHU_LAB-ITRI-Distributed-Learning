@@ -108,8 +108,6 @@ class Agent(Logger):
 
             data, target = Variable(data).float(), Variable(target).long()
 
-            print(data.shape)
-
             # agent forward
             agent_output = self.model(data)
 
