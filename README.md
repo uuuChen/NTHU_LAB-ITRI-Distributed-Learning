@@ -14,11 +14,12 @@
 在 "MNIST_Server_train.py" 裡增加 "is_simulate" 變數，此值為 True 的話
 表示進行正確率模擬，假設每一個 agent 都擁有所有的 data, labels 進行訓練；
 此值為 False 表示真實使用醫院資料，假設每一個醫院擁有各自的 data, labels
-進行訓練。 <br><br>
+進行訓練。
+
 1. <新增> | "server.py" 中 "get_total_data_nums_from_first_agent()": 在
 每一個 agent 都有所有的 data 的前提下，使用此 function 拿到所有資料數
 
-1. <新增> | "server.py" 中 "send_id_lists_to_agents()": 由 server 分配
+2. <新增> | "server.py" 中 "send_id_lists_to_agents()": 由 server 分配
 每一個 agent 分到的 id_list。假設總共有 7 筆資料、 4 個玩家，分配的方式為
 前三個玩家分到 2 筆資料，第四個玩家分到1筆資料
 
