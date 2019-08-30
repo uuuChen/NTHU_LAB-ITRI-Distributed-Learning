@@ -1,14 +1,8 @@
 # System Imports
-from torch.autograd import Variable
 import argparse
-import torch
 
 # Server Imports
 from train.server_agent_train.server import *
-
-# Socket Imports
-from socket_.socket_ import *
-import socket
 
 # training settings
 parser = argparse.ArgumentParser()
@@ -18,7 +12,7 @@ parser.add_argument('--batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
 parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
                     help='input agents number (default: 2)')
-parser.add_argument('--epochs', type=int, default=1, metavar='N',
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')

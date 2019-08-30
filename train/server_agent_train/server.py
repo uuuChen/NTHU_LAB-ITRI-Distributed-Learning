@@ -280,9 +280,9 @@ class Server(Logger):
             self.get_total_data_nums_from_first_agent()
             self.send_id_lists_to_agents()
 
-            for epoch in range(self.train_args.epochs):
-                # start training and testing
-                self.train_epoch(epoch=epoch)
-                self.test_epoch(epoch=epoch)
+        for epoch in range(self.train_args.epochs):
+            # start training and testing
+            self.train_epoch(epoch=epoch)
+            self.test_epoch(epoch=epoch)
 
 

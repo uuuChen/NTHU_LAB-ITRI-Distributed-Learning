@@ -94,7 +94,10 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self._make_sure_data_and_labels_in_database()
 
-        data_nums = self.get_data_nums_from_database()
+        if self.is_simulate:
+            data_nums = len(self.db_id_list)
+        else:
+            data_nums = self.get_data_nums_from_database()
 
         old_id_ptr = self.db_id_ptr
 

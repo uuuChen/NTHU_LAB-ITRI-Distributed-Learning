@@ -7,7 +7,7 @@ DEBUG = False
 
 class DRD_DataSet(Data_Processor):
 
-    def __init__(self, data_args, shuffle=False):
+    def __init__(self, data_args, shuffle=False, is_simulate=True):
 
         data_args['shuffle'] = shuffle
 

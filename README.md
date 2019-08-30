@@ -9,6 +9,27 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/31 12:30"
+1. <新增> | "server.py" 中 "get_total_data_nums_from_first_agent()": 在
+每一個 agent 都有所有的 data 的前提下，使用此 function 拿到所有資料數
+
+1. <新增> | "server.py" 中 "send_id_lists_to_agents()": 由 server 分配
+每一個 agent 分到的 id_list。假設總共有 7 筆資料、 4 個玩家，分配的方式為
+前三個玩家分到 2 筆資料，第四個玩家分到一筆資料
+
+3. <更動> | "agent.py" 中 "start_training()": 配合 server 的更動進行調整
+
+4. <新增> | "MNIST_SERVER_train.py", "agent.py": 新增 is_simulate 
+bool 變數，此值為 True 的話表示進行正確率模擬，假設每一個 agent 都擁有所有
+的 data, labels 進行訓練；值為 False 表示真實使用醫院資料，假設每一個醫院
+擁有各自的 data, labels 進行訓練
+
+5. <更動> | "data_processor.py" 中 "_get_data_and_labels_from_database()"
+: 更動 data_nums 的獲得方式，將不再直接取得整個 database 的資料數，考慮
+到模擬時真實的訓練數量是由 server 分配，因此以 "db_id_list" 為判斷訓練資料
+數量的依據
+
+
 #### "Edward1997 08/28 11:30"
 1. <新增> | "server.py"
 將所有 server 會使用到的共用功能打包
