@@ -130,16 +130,18 @@ class Agent(Logger):
             self.model.train()
             data_nums = self.train_data_nums
             dataSet = self.train_dataSet
+            batch_size = self.train_args.train_batch_size
         else:
             self.model.eval()
             data_nums = self.test_data_nums
             dataSet = self.test_dataSet
+            batch_size = self.train_args.test_batch_size
 
-        batches = (data_nums - 1) // self.train_args.batch_size + 1
+        batches = (data_nums - 1) // batch_size + 1
 
         for batch_idx in range(1, batches + 1):
 
-            data, target = dataSet.get_data_and_labels(batch_size=self.train_args.batch_size)
+            data, target = dataSet.get_data_and_labels(batch_size=batch_size)
 
             if self.train_args.cuda:
                 data = data.cuda()
@@ -148,7 +150,6 @@ class Agent(Logger):
 
             # agent forward
             agent_output = self.model(data)
-            print(agent_output)
 
             # send agent_output and target to server
             self.agent_server_sock.send(agent_output, 'agent_output')  # send agent_output
@@ -184,17 +185,17 @@ class Agent(Logger):
         self.get_prev_model_from_prev_agent()
         self.iter_through_db_once(is_training=False)
         print('%s done testing' % self.cur_name)
+
         # if it is the last epoch
         if self.agent_server_sock.recv('is_training_done'):
+
             # if it is the last agent to test
-            if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:
-                # no need to send model
+            if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:  # no need to send model
                 self.agent_server_sock.close()
-                return True
-            else:
+            else:   # need to send model
                 self.send_model_to_next_agent()
                 self.agent_server_sock.close()
-                return True
+            return True
         else:
             self.send_model_to_next_agent()
             return False

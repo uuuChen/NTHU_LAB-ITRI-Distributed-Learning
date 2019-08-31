@@ -160,7 +160,7 @@ class Socket(Logger):
 
         data = pickle.loads(b"".join(data))
 
-        self.__logger.debug('| receive data: %s |' % str(data))
+        # self.__logger.debug('| receive data: %s |' % str(data))
 
         return data
 
