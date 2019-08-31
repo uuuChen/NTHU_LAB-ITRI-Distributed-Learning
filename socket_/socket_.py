@@ -260,6 +260,9 @@ class Socket(Logger):
     def awake(self):
         self._send(True, '_awake')
 
+    def getpeername(self):
+        return self.socket.getpeername()
+
     def accept(self):
         self.conn, self.addr = self.socket.accept()
         self.__logger.debug('accept %s connection !' % str(self.addr))

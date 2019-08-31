@@ -46,7 +46,7 @@ class Agent(Logger):
             test_data_args = Xray_TEST_ARGS
 
         else:
-            raise Exception('DataSet ( %s ) Not Exist !!!' % data_name)
+            raise Exception('DataSet ( %s ) Not Exist !' % data_name)
 
         training_args = {}
         training_args['shuffle'] = shuffle
@@ -68,10 +68,9 @@ class Agent(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
         if self.is_simulate:
-            # self.get_dataSet(shuffle=False)
-            self.get_dataSet(shuffle=True)
+            self.get_dataSet(shuffle=False)  # shuffle or not won't influence the results
         else:
-            self.get_dataSet(shuffle=True)
+            self.get_dataSet(shuffle=True)  # must shuffle
 
     def _recv_agents_attrs_from_server(self):
         # receive own IP and distributed port
@@ -128,7 +127,9 @@ class Agent(Logger):
 
     def _iter_through_db_once(self, is_training):
 
-        print('%s starts training....' % self.cur_name)
+        train_str = 'Training' if is_training else 'Testing'
+
+        print('{} starts {}....'.format(self.cur_name, train_str))
 
         if is_training:
             self.model.train()
@@ -141,8 +142,8 @@ class Agent(Logger):
             dataSet = self.test_dataSet
             batch_size = self.train_args.test_batch_size
 
+        trained_data_num = 0
         batches = (data_nums - 1) // batch_size + 1
-
         for batch_idx in range(1, batches + 1):
 
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
@@ -153,6 +154,8 @@ class Agent(Logger):
             data, target = Variable(data).float(), Variable(target).long()
 
             # agent forward
+            if is_training:
+                self.optim.zero_grad()
             agent_output = self.model(data)
 
             # send agent_output and target to server
@@ -161,7 +164,6 @@ class Agent(Logger):
 
             # receive gradient from server if training
             if is_training:
-                self.optim.zero_grad()
                 # get agent_output_clone
                 agent_output_grad = self.agent_server_sock.recv('agent_output_clone_grad')
 
@@ -169,7 +171,13 @@ class Agent(Logger):
                 agent_output.backward(gradient=agent_output_grad)
                 self.optim.step()
 
-    def _get_prev_model_from_prev_agent(self):
+            trained_data_num += data.shape[0]
+            server_host_port = self.agent_server_sock.getpeername()
+            print('{} at {}: [{}/{} ({:.0f}%)]'.format(train_str, server_host_port, trained_data_num, data_nums,
+                                                       100.0 * batch_idx / batches))
+
+    def _get_model_from_prev_agent(self):
+        print('\nwait for previous agent {} model snapshot...'.format(self.prev_agent_attrs['host_port']))
         if not self.agent_server_sock.recv('is_first_training'):
             from_agent_sock = Socket(self.prev_agent_attrs['host_port'], False)
             from_agent_sock.connect()
@@ -178,15 +186,16 @@ class Agent(Logger):
 
             # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent
             self.agent_server_sock.awake()
+        print('done !\n')
 
     def _iter(self, is_training):
 
-        self._get_prev_model_from_prev_agent()
+        self._get_model_from_prev_agent()
 
         self._iter_through_db_once(is_training=is_training)
 
         train_str = 'training' if is_training else 'testing'
-        print('%s done %s' % (self.cur_name, train_str))
+        print('{} done {} \n'.format(self.cur_name, train_str))
 
         if is_training:
             self._send_model_to_next_agent()

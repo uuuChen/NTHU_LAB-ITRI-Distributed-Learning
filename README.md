@@ -9,6 +9,14 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 08/31 18:00"
+
+簡化 "server.py", "agent.py" 程式
+
+1. <更動> | "server.py": 將 "train", "test" 程式碼合併
+2. <更動> | "agent.py": 將 "train", "test" 程式碼合併，並且 
+"get_prev_next_agent_attrs" 改成只運行一次，之後就不再從 server 獲得 
+
 #### "uuuChen 08/31 12:30"
 <br>
 在 "MNIST_Server_train.py" 裡增加 "is_simulate" 變數，此值為 True 的話
