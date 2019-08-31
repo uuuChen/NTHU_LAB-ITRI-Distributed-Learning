@@ -17,22 +17,9 @@ class Agent(Logger):
     def __init__(self, model, server_host_port, cur_name):
         Logger.__init__(self)
         self.model = model
-        self.is_simulate = None
-        self.train_dataSet = None
-        self.test_dataSet = None
-        self.train_data_nums = None
-        self.test_data_nums = None
-        self.train_id_list = None
-        self.test_id_list = None
         self.server_host_port = server_host_port
-        self.cur_host_port = None
-        self.prev_agent_attrs = None
-        self.next_agent_attrs = None
-        self.to_agent_sock = None
         self.cur_name = cur_name
-        self.train_args = None
-        self.agent_server_sock = None
-        self.optim = None
+
 
     def get_dataSet(self, shuffle):
 
@@ -81,7 +68,8 @@ class Agent(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
         if self.is_simulate:
-            self.get_dataSet(shuffle=False)
+            # self.get_dataSet(shuffle=False)
+            self.get_dataSet(shuffle=True)
         else:
             self.get_dataSet(shuffle=True)
 
@@ -194,6 +182,7 @@ class Agent(Logger):
     def _iter(self, is_training):
 
         self._get_prev_model_from_prev_agent()
+
         self._iter_through_db_once(is_training=is_training)
 
         train_str = 'training' if is_training else 'testing'
@@ -204,13 +193,12 @@ class Agent(Logger):
 
         else:
             if self.agent_server_sock.recv('is_training_done'):
-
                 # if it is the last agent to test
                 if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:  # no need to send model
-                    self.agent_server_sock.close()
+                    pass
                 else:  # need to send model
                     self._send_model_to_next_agent()
-                    self.agent_server_sock.close()
+                self.agent_server_sock.close()
                 return True
             else:
                 self._send_model_to_next_agent()

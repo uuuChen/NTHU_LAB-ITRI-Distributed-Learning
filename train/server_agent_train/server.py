@@ -59,6 +59,7 @@ class Server(Logger):
         self.optimizer = optim.SGD(self.model.parameters(),
                                    lr=self.train_args.lr,
                                    momentum=self.train_args.momentum)
+
     def _conn_to_agents(self):
 
         for i in range(self.train_args.agent_nums):
@@ -190,6 +191,7 @@ class Server(Logger):
             loss = F.cross_entropy(server_output, target)
 
             if is_training:
+
                 # server backward
                 loss.backward()
                 self.optimizer.step()
@@ -224,6 +226,8 @@ class Server(Logger):
             self.batches = 0
 
         for i in range(self.train_args.agent_nums):
+
+            # wait for cur agent receiving model from prev agent if cur agent isn't the first training
             self.server_socks[i].send(self.is_first_training, 'is_first_training')
             if not self.is_first_training:
                 self.server_socks[i].sleep()
@@ -259,7 +263,7 @@ class Server(Logger):
             self._recv_total_data_nums_from_first_agent()
             self._send_id_lists_to_agents()
 
-        else:  # for real hospitals
+        else:  # for real hospitals usage
             self._recv_data_nums_from_agents()
 
         # start training and testing
