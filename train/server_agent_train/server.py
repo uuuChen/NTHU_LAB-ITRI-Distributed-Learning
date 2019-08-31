@@ -37,8 +37,6 @@ class Server(Logger):
         self.is_simulate = train_args.is_simulate
         self.is_first_training = True
         self.train_args = train_args
-        self.epoch = None
-        self.cur_agent_idx = None
 
         if self.train_args.model is 'LeNet':
             self.model = Server_LeNet()
@@ -49,17 +47,18 @@ class Server(Logger):
         elif self.train_args.model is 'VGGNet':
             self.model = VGGNet()
 
-        # training setup
+        self._training_setting()
+
+    def _training_setting(self):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
-        torch.manual_seed(self.train_args.seed)  # seeding the CPU for generating random numbers so that the results are
-        # deterministic
-        if train_args.cuda:
+        # seeding the CPU for generating random numbers so that the results are deterministic
+        torch.manual_seed(self.train_args.seed)
+        if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
         self.optimizer = optim.SGD(self.model.parameters(),
-                                     lr=self.train_args.lr,
-                                     momentum=self.train_args.momentum)
-
+                                   lr=self.train_args.lr,
+                                   momentum=self.train_args.momentum)
     def _conn_to_agents(self):
 
         for i in range(self.train_args.agent_nums):
@@ -159,13 +158,13 @@ class Server(Logger):
             prev_agent_attrs, next_agent_attrs = self._get_prev_next_agents_attrs(i)
             self.server_socks[i].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
-    def _iter_with_cur_agent(self, is_training):
+    def _iter_with_cur_agent(self, is_training, cur_agent_idx):
 
         if is_training:
-            data_nums = self.train_data_nums[self.cur_agent_idx]
+            data_nums = self.train_data_nums[cur_agent_idx]
             batch_size = self.train_args.train_batch_size
         else:
-            data_nums = self.test_data_nums[self.cur_agent_idx]
+            data_nums = self.test_data_nums[cur_agent_idx]
             batch_size = self.train_args.test_batch_size
 
         batches = (data_nums - 1) // batch_size + 1
@@ -173,8 +172,8 @@ class Server(Logger):
         for batch_idx in range(1, batches + 1):
 
             # get agent_output and target from agent
-            agent_output = self.server_socks[self.cur_agent_idx].recv('agent_output')
-            target = self.server_socks[self.cur_agent_idx].recv('target')
+            agent_output = self.server_socks[cur_agent_idx].recv('agent_output')
+            target = self.server_socks[cur_agent_idx].recv('target')
 
             # store gradient in agent_output_clone
             agent_output_clone = Variable(agent_output).float()
@@ -196,12 +195,12 @@ class Server(Logger):
                 self.optimizer.step()
 
                 # send gradient to agent
-                self.server_socks[self.cur_agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
+                self.server_socks[cur_agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
 
                 self.trained_data_num += len(target)
                 if batch_idx % self.train_args.log_interval == 0:
                     print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        self.epoch, self.agents_attrs[self.cur_agent_idx], self.trained_data_num,
+                        self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
                         self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
 
             else:
@@ -225,16 +224,16 @@ class Server(Logger):
             self.batches = 0
 
         for i in range(self.train_args.agent_nums):
-            self.cur_agent_idx = i
             self.server_socks[i].send(self.is_first_training, 'is_first_training')
             if not self.is_first_training:
-                self.server_socks[self.cur_agent_idx].sleep()
+                self.server_socks[i].sleep()
             self.is_first_training = False
 
             train_str = 'training' if is_training else 'testing'
             print('start %s with %s' % (train_str, str(self.agents_attrs[i])))
 
-            self._iter_with_cur_agent(is_training=is_training)
+            self._iter_with_cur_agent(is_training=is_training,
+                                      cur_agent_idx=i)
 
             if not is_training:
                 if self.epoch == self.train_args.epochs - 1:
