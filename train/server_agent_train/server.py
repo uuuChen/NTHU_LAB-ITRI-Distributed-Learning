@@ -175,7 +175,6 @@ class Server(Logger):
 
         for batch_idx in range(1, batches + 1):
 
-            print(batch_idx)
             # get agent_output and target from agent
             agent_output = self.server_socks[self.cur_agent_idx].recv('agent_output')
             target = self.server_socks[self.cur_agent_idx].recv('target')

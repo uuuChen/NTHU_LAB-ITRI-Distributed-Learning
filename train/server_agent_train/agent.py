@@ -15,7 +15,7 @@ from data.data_args import *  # import data arguments
 
 class Agent(Logger):
 
-    def __init__(self, model, train_dataSet, test_dataSet, server_host_port, cur_name):
+    def __init__(self, model, server_host_port, cur_name):
         Logger.__init__(self)
         self.model = model
         self.is_simulate = None
@@ -36,24 +36,41 @@ class Agent(Logger):
         self.optim = None
 
     def get_dataSet(self, shuffle):
-        train_dataSet = None
-        test_dataSet = None
-        data_name = self.train_args.dataSet
-        if data_name == 'MNIST':
-            train_dataSet = MNIST_DataSet(MNIST_TRAIN_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-            test_dataSet = MNIST_DataSet(MNIST_TEST_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-        elif data_name == 'DRD':
-            train_dataSet = DRD_DataSet(DRD_TRAIN_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-            test_dataSet = DRD_DataSet(DRD_TEST_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-        elif data_name == 'ECG':
-            train_dataSet = ECG_DataSet(ECG_TRAIN_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-            test_dataSet = ECG_DataSet(ECG_TEST_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-        elif data_name == 'Xray':
-            train_dataSet = Xray_DataSet(Xray_TRAIN_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
-            test_dataSet = Xray_DataSet(Xray_TEST_ARGS, shuffle=shuffle, is_simulate=self.is_simulate)
 
-        self.train_dataSet = train_dataSet
-        self.test_dataSet = test_dataSet
+        data_name = self.train_args.dataSet
+
+        if data_name == 'MNIST':
+            dataSet = MNIST_DataSet
+            train_data_args = MNIST_TRAIN_ARGS
+            test_data_args = MNIST_TEST_ARGS
+
+        elif data_name == 'DRD':
+            dataSet = DRD_DataSet
+            train_data_args = DRD_TRAIN_ARGS
+            test_data_args = DRD_TEST_ARGS
+
+        elif data_name == 'ECG':
+            dataSet = ECG_DataSet
+            train_data_args = ECG_TRAIN_ARGS
+            test_data_args = ECG_TEST_ARGS
+
+        elif data_name == 'Xray':
+            dataSet = Xray_DataSet
+            train_data_args = Xray_TRAIN_ARGS
+            test_data_args = Xray_TEST_ARGS
+
+        else:
+            raise Exception('DataSet ( %s ) Not Exist !!!' % data_name)
+
+        training_args = {}
+        training_args['shuffle'] = shuffle
+        training_args['is_simulate'] = self.is_simulate
+
+        train_data_args.update(training_args)
+        test_data_args.update(training_args)
+
+        self.train_dataSet = dataSet(train_data_args)
+        self.test_dataSet = dataSet(test_data_args)
 
     def conn_to_server(self):
         # connect to server, agent and server socket setting
