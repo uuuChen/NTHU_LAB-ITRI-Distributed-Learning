@@ -12,7 +12,9 @@ from socket_.socket_ import *
 
 from logger import *
 
+
 class Server(Logger):
+
     def __init__(self, train_args):
 
         Logger.__init__(self)
@@ -35,6 +37,8 @@ class Server(Logger):
         self.is_simulate = train_args.is_simulate
         self.is_first_training = True
         self.train_args = train_args
+        self.epoch = None
+        self.cur_agent_idx = None
 
         if self.train_args.model is 'LeNet':
             self.model = Server_LeNet()
@@ -85,7 +89,7 @@ class Server(Logger):
 
         return prev_agent_attrs, next_agent_attrs
 
-    def get_total_data_nums_from_first_agent(self):
+    def recv_total_data_nums_from_first_agent(self):
 
         for i in range(self.train_args.agent_nums):
             if i == 0:
@@ -130,7 +134,7 @@ class Server(Logger):
 
             left_agents_nums -= 1
 
-    def get_data_nums_from_agents(self):
+    def recv_data_nums_from_agents(self):
 
         for i in range(self.train_args.agent_nums):
             self.train_data_nums[i] = self.server_socks[i].recv('train_data_nums')
@@ -145,127 +149,233 @@ class Server(Logger):
             # send train args to agent
             self.server_socks[i].send(self.train_args, 'train_args')
 
+            # # send agent IP and distributed port
+            # self.server_socks[i].send(self.agents_attrs[i]['host_port'], 'cur_host_port')
+
+    def send_agents_attrs_to_agents(self):
+
+        for i in range(self.train_args.agent_nums):
             # send agent IP and distributed port
             self.server_socks[i].send(self.agents_attrs[i]['host_port'], 'cur_host_port')
 
-    def send_prev_next_agent_attrs(self, agent_idx):
+            # send previous and next agent attributes
+            prev_agent_attrs, next_agent_attrs = self.get_prev_next_agents_attrs(i)
+            self.server_socks[i].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
-        # get previous and next agent attributes
-        prev_agent_attrs, next_agent_attrs = self.get_prev_next_agents_attrs(agent_idx)
 
-        # send prev_agent_attrs, next_agent_attrs to agent
-        if self.is_first_training:
-            prev_agent_attrs = None
-        self.server_socks[agent_idx].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+    # def send_prev_next_agent_attrs(self, agent_idx):
+    #
+    #     # get previous and next agent attributes
+    #     prev_agent_attrs, next_agent_attrs = self.get_prev_next_agents_attrs(agent_idx)
+    #
+    #     # send prev_agent_attrs, next_agent_attrs to agent
+    #     if self.is_first_training:
+    #         prev_agent_attrs = None
+    #     self.server_socks[agent_idx].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
+    #
+    #     # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
+    #     if not self.is_first_training:
+    #         self.server_socks[agent_idx].sleep()
+    #
+    #     self.is_first_training = False
 
-        # VERY IMPORTANT !!! server is waiting for previos agent sending model snapshot to current agent
-        if not self.is_first_training:
-            self.server_socks[agent_idx].sleep()
+    # def train_with_cur_agent(self, agent_idx, epoch, trained_data_num):
+    #
+    #     data_nums = self.train_data_nums[agent_idx]
+    #     batches = (data_nums - 1) // self.train_args.batch_size + 1
+    #
+    #     for batch_idx in range(1, batches + 1):
+    #         self.optimizer.zero_grad()
+    #
+    #         # get agent_output and target from agent
+    #         agent_output = self.server_socks[agent_idx].recv('agent_output')
+    #         target = self.server_socks[agent_idx].recv('target')
+    #
+    #         # store gradient in agent_output_clone
+    #         agent_output_clone = Variable(agent_output).float()
+    #         if self.train_args.cuda:
+    #             agent_output_clone = agent_output_clone.cuda()
+    #             target = target.cuda()
+    #         agent_output_clone.requires_grad_()
+    #
+    #         # server forward
+    #         server_output = self.model(agent_output_clone)
+    #         loss = F.cross_entropy(server_output, target)
+    #
+    #         # server backward
+    #         loss.backward()
+    #         self.optimizer.step()
+    #
+    #         # send gradient to agent
+    #         self.server_socks[agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
+    #
+    #         trained_data_num += len(target)
+    #         if batch_idx % self.train_args.log_interval == 0:
+    #             print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+    #                 epoch, self.agents_attrs[agent_idx], trained_data_num, self.all_train_data_nums,
+    #                 100. * batch_idx / batches, loss.item()))
+    #
+    #     return trained_data_num
 
-        self.is_first_training = False
+    def iter_with_cur_agent(self, is_training):
 
-    def train_with_cur_agent(self, agent_idx, epoch, trained_data_num):
+        data_nums = self.train_data_nums[self.cur_agent_idx]
 
-        data_nums = self.train_data_nums[agent_idx]
+        print(data_nums)
+
         batches = (data_nums - 1) // self.train_args.batch_size + 1
 
         for batch_idx in range(1, batches + 1):
-            self.optimizer.zero_grad()
 
             # get agent_output and target from agent
-            agent_output = self.server_socks[agent_idx].recv('agent_output')
-            target = self.server_socks[agent_idx].recv('target')
+            print('before agent output')
+            agent_output = self.server_socks[self.cur_agent_idx].recv('agent_output')
+            print('after agent output')
+            target = self.server_socks[self.cur_agent_idx].recv('target')
 
             # store gradient in agent_output_clone
             agent_output_clone = Variable(agent_output).float()
             if self.train_args.cuda:
                 agent_output_clone = agent_output_clone.cuda()
                 target = target.cuda()
-            agent_output_clone.requires_grad_()
+
+            if is_training:
+                self.optimizer.zero_grad()
+                agent_output_clone.requires_grad_()
 
             # server forward
             server_output = self.model(agent_output_clone)
             loss = F.cross_entropy(server_output, target)
 
-            # server backward
-            loss.backward()
-            self.optimizer.step()
+            if is_training:
+                # server backward
+                loss.backward()
+                self.optimizer.step()
 
-            # send gradient to agent
-            self.server_socks[agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
+                # send gradient to agent
+                self.server_socks[self.cur_agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
 
-            trained_data_num += len(target)
-            if batch_idx % self.train_args.log_interval == 0:
-                print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, self.agents_attrs[agent_idx], trained_data_num, self.all_train_data_nums,
-                    100. * batch_idx / batches, loss.item()))
+                self.trained_data_num += len(target)
+                if batch_idx % self.train_args.log_interval == 0:
+                    print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                        self.epoch, self.agents_attrs[self.cur_agent_idx], self.trained_data_num,
+                        self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
 
-        return trained_data_num
-
-    def train_epoch(self, epoch):
-
-        self.model.train()
-
-        trained_data_num = 0
-        for i in range(self.train_args.agent_nums):
-            self.send_prev_next_agent_attrs(i)
-
-            print('starting training with' + str(self.agents_attrs[i]))
-            trained_data_num = self.train_with_cur_agent(i, epoch, trained_data_num)
-
-    def test_with_cur_agent(self, agent_idx, test_loss, correct):
-
-        data_nums = self.test_data_nums[agent_idx]
-        batches = (data_nums - 1) // self.train_args.batch_size + 1
-        for batch_idx in range(1, batches + 1):
-
-            # get agent_output and target from agent
-            agent_output = self.server_socks[agent_idx].recv('agent_output')
-            target = self.server_socks[agent_idx].recv('target')
-
-            agent_output_clone = Variable(agent_output).float()
-
-            if self.train_args.cuda:
-                agent_output_clone = agent_output_clone.cuda()
-                target = target.cuda()
-
-            # server forward
-            server_output = self.model(agent_output_clone)
-            loss = F.cross_entropy(server_output, target)
-
-            test_loss += loss
-
-            pred = server_output.data.max(1)[1]
-
-            correct += pred.eq(target.data).cpu().sum()
-
-        return test_loss, correct
-
-    def test_epoch(self, epoch):
-
-        self.model.eval()
-
-        test_loss = 0
-        correct = 0
-        batches = 0
-
-        for i in range(self.train_args.agent_nums):
-
-            self.send_prev_next_agent_attrs(i)
-
-            test_loss, correct = self.test_with_cur_agent(i, test_loss, correct)
-            batches += (self.test_data_nums[i] - 1) // self.train_args.batch_size + 1
-
-            if epoch is self.train_args.epochs - 1:
-                self.server_socks[i].send(True, 'is_training_done')
             else:
-                self.server_socks[i].send(False, 'is_training_done')
+                self.test_loss += loss
+                pred = server_output.data.max(1)[1]
+                self.correct += pred.eq(target.data).cpu().sum()
 
-        test_loss /= batches
+        if not is_training:
+            self.batches += batches
 
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, self.all_test_data_nums,
-            100. * correct / self.all_test_data_nums))
+    # def wait_for_agent_sending_model(self):
+    #     self.server_socks[self.cur_agent_idx].sleep()
+
+    def iter_one_epoch(self, is_training):
+
+        if is_training:
+            self.model.train()
+            self.trained_data_num = 0
+
+        else:
+            self.model.eval()
+            self.test_loss = 0
+            self.correct = 0
+            self.batches = 0
+
+        for i in range(self.train_args.agent_nums):
+            self.cur_agent_idx = i
+            self.server_socks[i].send(self.is_first_training, 'is_first_training')
+            if not self.is_first_training:
+                self.server_socks[self.cur_agent_idx].sleep()
+            self.is_first_training = False
+
+            train_str = 'training' if is_training else 'testing'
+            print('start %s with %s' % (train_str, str(self.agents_attrs[i])))
+
+            self.iter_with_cur_agent(is_training=is_training)
+
+            if not is_training:
+                if self.epoch == self.train_args.epochs - 1:
+                    self.server_socks[i].send(True, 'is_training_done')
+                else:
+                    self.server_socks[i].send(False, 'is_training_done')
+
+        if not is_training:
+            self.test_loss /= self.train_args.agent_nums
+            print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+                self.test_loss, self.correct, self.all_test_data_nums,
+                100. * self.correct / self.all_test_data_nums))
+
+
+    # def train_epoch(self):
+    #
+    #     self.model.train()
+    #
+    #     self.trained_data_num = 0
+    #     # trained_data_num = 0
+    #     for i in range(self.train_args.agent_nums):
+    #         if not is_first_training:
+    #             self.wait_for_agent_sending_model(self.server_socks[i])
+    #         print('starting training with' + str(self.agents_attrs[i]))
+    #         self.cur_agent_idx = i
+    #         self.interact_with_one_agent()
+    #         # trained_data_num = self.train_with_cur_agent(trained_data_num)
+
+    # def test_with_cur_agent(self, agent_idx, test_loss, correct):
+    #
+    #     data_nums = self.test_data_nums[agent_idx]
+    #     batches = (data_nums - 1) // self.train_args.batch_size + 1
+    #     for batch_idx in range(1, batches + 1):
+    #
+    #         # get agent_output and target from agent
+    #         agent_output = self.server_socks[agent_idx].recv('agent_output')
+    #         target = self.server_socks[agent_idx].recv('target')
+    #
+    #         agent_output_clone = Variable(agent_output).float()
+    #
+    #         if self.train_args.cuda:
+    #             agent_output_clone = agent_output_clone.cuda()
+    #             target = target.cuda()
+    #
+    #         # server forward
+    #         server_output = self.model(agent_output_clone)
+    #         loss = F.cross_entropy(server_output, target)
+    #
+    #         test_loss += loss
+    #
+    #         pred = server_output.data.max(1)[1]
+    #
+    #         correct += pred.eq(target.data).cpu().sum()
+    #
+    #     return test_loss, correct
+    #
+    # def test_epoch(self):
+    #
+    #     self.model.eval()
+    #
+    #     test_loss = 0
+    #     correct = 0
+    #     batches = 0
+    #
+    #     for i in range(self.train_args.agent_nums):
+    #
+    #         # self.send_prev_next_agent_attrs(i)
+    #
+    #         test_loss, correct = self.test_with_cur_agent(i, test_loss, correct)
+    #         batches += (self.test_data_nums[i] - 1) // self.train_args.batch_size + 1
+    #
+    #         if epoch is self.train_args.epochs - 1:
+    #             self.server_socks[i].send(True, 'is_training_done')
+    #         else:
+    #             self.server_socks[i].send(False, 'is_training_done')
+    #
+    #     test_loss /= batches
+    #
+    #     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    #         test_loss, correct, self.all_test_data_nums,
+    #         100. * correct / self.all_test_data_nums))
 
     def start_training(self):
 
@@ -273,16 +383,23 @@ class Server(Logger):
 
         self.send_train_args_to_agents()
 
-        if not self.is_simulate:  # for real hospitals
-            self.get_data_nums_from_agents()
+        self.send_agents_attrs_to_agents()
 
-        else:  # for simulated accuracy test
-            self.get_total_data_nums_from_first_agent()
+        if self.is_simulate:  # for simulated accuracy test
+            self.recv_total_data_nums_from_first_agent()
             self.send_id_lists_to_agents()
 
+        else:  # for real hospitals
+            self.recv_data_nums_from_agents()
+
+        self.is_first_training = True
         for epoch in range(self.train_args.epochs):
             # start training and testing
-            self.train_epoch(epoch=epoch)
-            self.test_epoch(epoch=epoch)
+            self.epoch = epoch
+            # self.train_epoch()
+            # self.test_epoch()
+            self.iter_one_epoch(is_training=True)
+            self.iter_one_epoch(is_training=False)
+
 
 

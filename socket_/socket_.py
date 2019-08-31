@@ -1,7 +1,6 @@
 
 from socket import *
 import pickle
-import time
 
 from logger import *
 
@@ -188,7 +187,7 @@ class Socket(Logger):
         """
 
         self.__logger.debug('----------------------------------------------------------------------')
-        self.__logger.debug('RECV\n')
+        self.__logger.debug('RECV ( %s ) \n' % data_name)
 
         while True:
             # receive data header
