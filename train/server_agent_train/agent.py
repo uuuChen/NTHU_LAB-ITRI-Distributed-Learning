@@ -4,7 +4,6 @@ from torch.autograd import Variable
 
 from socket_.socket_ import *
 from logger import *
-import time
 
 # DataSet Imports
 from dataSet.MNIST_dataSet import *
@@ -72,12 +71,12 @@ class Agent(Logger):
         self.train_dataSet = dataSet(train_data_args)
         self.test_dataSet = dataSet(test_data_args)
 
-    def conn_to_server(self):
+    def _conn_to_server(self):
         # connect to server, agent and server socket setting
         self.agent_server_sock = Socket(self.server_host_port, False)
         self.agent_server_sock.connect()
 
-    def recv_train_args_from_server(self):
+    def _recv_train_args_from_server(self):
         self.train_args = self.agent_server_sock.recv('train_args')
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
@@ -86,7 +85,7 @@ class Agent(Logger):
         else:
             self.get_dataSet(shuffle=True)
 
-    def recv_agents_attrs_from_server(self):
+    def _recv_agents_attrs_from_server(self):
         # receive own IP and distributed port
         self.cur_host_port = self.agent_server_sock.recv('cur_host_port')
         self.to_agent_sock = Socket(self.cur_host_port, True)
@@ -94,14 +93,14 @@ class Agent(Logger):
         # receive previous, next agents from server
         self.prev_agent_attrs, self.next_agent_attrs = self.agent_server_sock.recv('prev_next_agent_attrs')
 
-    def send_total_data_nums_to_server(self):
+    def _send_total_data_nums_to_server(self):
         if self.agent_server_sock.recv('is_first_agent'):
-            self.send_data_nums_to_server()
+            self._send_data_nums_to_server()
 
-    def recv_id_list_from_server(self):
+    def _recv_id_list_from_server(self):
         self.train_id_list, self.test_id_list = self.agent_server_sock.recv('train_test_id_list')
 
-    def training_setting(self):
+    def _training_setting(self):
 
         if self.is_simulate:
             # set dataSet's "db_id_list" and store train and test data numbers
@@ -127,19 +126,19 @@ class Agent(Logger):
                                      lr=self.train_args.lr,
                                      momentum=self.train_args.momentum)
 
-    def send_data_nums_to_server(self):
+    def _send_data_nums_to_server(self):
         train_data_nums = self.train_dataSet.get_data_nums_from_database()
         test_data_nums = self.test_dataSet.get_data_nums_from_database()
         self.agent_server_sock.send(train_data_nums, 'train_data_nums')
         self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 
-    def send_model_to_next_agent(self):
+    def _send_model_to_next_agent(self):
         # send model to next agent
         self.to_agent_sock.accept()
         self.to_agent_sock.send(self.model, 'agent_model')
         self.to_agent_sock.close()
 
-    def iter_through_db_once(self, is_training):
+    def _iter_through_db_once(self, is_training):
 
         print('%s starts training....' % self.cur_name)
 
@@ -182,7 +181,7 @@ class Agent(Logger):
                 agent_output.backward(gradient=agent_output_grad)
                 self.optim.step()
 
-    def get_prev_model_from_prev_agent(self):
+    def _get_prev_model_from_prev_agent(self):
         if not self.agent_server_sock.recv('is_first_training'):
             from_agent_sock = Socket(self.prev_agent_attrs['host_port'], False)
             from_agent_sock.connect()
@@ -192,54 +191,53 @@ class Agent(Logger):
             # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent
             self.agent_server_sock.awake()
 
-    def train_agent(self):
-        self.get_prev_model_from_prev_agent()
-        self.iter_through_db_once(is_training=True)
-        print('%s done training' % self.cur_name)
-        self.send_model_to_next_agent()
+    def _iter(self, is_training):
 
-    def test_agent(self):
-        self.get_prev_model_from_prev_agent()
-        self.iter_through_db_once(is_training=False)
-        print('%s done testing' % self.cur_name)
+        self._get_prev_model_from_prev_agent()
+        self._iter_through_db_once(is_training=is_training)
 
-        # if it is the last epoch
-        if self.agent_server_sock.recv('is_training_done'):
+        train_str = 'training' if is_training else 'testing'
+        print('%s done %s' % (self.cur_name, train_str))
 
-            # if it is the last agent to test
-            if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:  # no need to send model
-                self.agent_server_sock.close()
-            else:   # need to send model
-                self.send_model_to_next_agent()
-                self.agent_server_sock.close()
-            return True
+        if is_training:
+            self._send_model_to_next_agent()
+
         else:
-            self.send_model_to_next_agent()
-            return False
+            if self.agent_server_sock.recv('is_training_done'):
+
+                # if it is the last agent to test
+                if int(self.cur_name.split("_")[1]) is self.train_args.agent_nums:  # no need to send model
+                    self.agent_server_sock.close()
+                else:  # need to send model
+                    self._send_model_to_next_agent()
+                    self.agent_server_sock.close()
+                return True
+            else:
+                self._send_model_to_next_agent()
+                return False
 
     def start_training(self):
 
-        self.conn_to_server()
+        self._conn_to_server()
 
-        self.recv_train_args_from_server()
+        self._recv_train_args_from_server()
 
-        self.recv_agents_attrs_from_server()
+        self._recv_agents_attrs_from_server()
 
         if self.is_simulate:
-            self.send_total_data_nums_to_server()
-            self.recv_id_list_from_server()
+            self._send_total_data_nums_to_server()
+            self._recv_id_list_from_server()
 
         else:
-            self.send_data_nums_to_server()
+            self._send_data_nums_to_server()
 
-        self.training_setting()
+        self._training_setting()
 
         while True:
-            self.train_agent()
-            done = self.test_agent()
+            self._iter(is_training=True)
+            done = self._iter(is_training=False)
             if done:
                 break
-
 
            
 
