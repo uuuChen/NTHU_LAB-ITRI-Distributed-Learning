@@ -5,7 +5,7 @@ from model.MLP import *
 from data.data_args import *  # import data arguments
 
 # Socket Imports
-from train.server_agent_train.agent import Agent
+from train.agent import Agent
 
 os.chdir('../../../')
 

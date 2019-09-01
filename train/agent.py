@@ -1,4 +1,6 @@
 import torch
+import os
+
 from torch.autograd import Variable
 
 from socket_.socket_ import Socket
@@ -6,16 +8,15 @@ from logger import Logger
 
 from train.central import Central
 
+
 class Agent(Logger):
 
-    def __init__(self, model, server_host_port, cur_name):
+    def __init__(self, server_host_port, cur_name):
         Logger.__init__(self)
-        self.model = model
         self.server_host_port = server_host_port
         self.cur_name = cur_name
 
     def _conn_to_server(self):
-        # connect to server, agent and server socket setting
         self.agent_server_sock = Socket(self.server_host_port, False)
         self.agent_server_sock.connect()
 
@@ -24,12 +25,14 @@ class Agent(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
         self.central = Central(data_name=self.train_args.dataSet)
-        if self.is_simulate:
-            self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=False,
-                                                                             is_simulate=True)
-        else:
-            self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=True,
-                                                                             is_simulate=False)
+        self.model = self.central.get_model(is_agent=True)
+        # if self.is_simulate:
+        #     train_dataSet, test_dataSet = self.central.get_dataSet(shuffle=False,
+        #                                                            is_simulate=True)
+        # else:
+        #     train_dataSet, test_dataSet = self.central.get_dataSet(shuffle=True,
+        #                                                            is_simulate=False)
+        self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
 
     def _recv_agents_attrs_from_server(self):
         # receive own IP and distributed port
@@ -68,9 +71,7 @@ class Agent(Logger):
         if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
-        self.optim = torch.optim.SGD(self.model.parameters(),
-                                     lr=self.train_args.lr,
-                                     momentum=self.train_args.momentum)
+        self.optim = torch.optim.SGD(self.model.parameters(), lr=self.train_args.lr, momentum=self.train_args.momentum)
 
     def _send_data_nums_to_server(self):
         train_data_nums = self.train_dataSet.get_data_nums_from_database()
@@ -135,6 +136,9 @@ class Agent(Logger):
             print('{} at {}: [{}/{} ({:.0f}%)]'.format(train_str, server_host_port, trained_data_num, data_nums,
                                                        100.0 * batch_idx / batches))
 
+        train_str = 'training' if is_training else 'testing'
+        print('{} done {} \n'.format(self.cur_name, train_str))
+
     def _get_model_from_prev_agent(self):
         print('\nwait for previous agent {} model snapshot...'.format(self.prev_agent_attrs['host_port']))
         if not self.agent_server_sock.recv('is_first_training'):
@@ -152,9 +156,6 @@ class Agent(Logger):
         self._get_model_from_prev_agent()
 
         self._iter_through_db_once(is_training=is_training)
-
-        train_str = 'training' if is_training else 'testing'
-        print('{} done {} \n'.format(self.cur_name, train_str))
 
         if is_training:
             self._send_model_to_next_agent()
@@ -194,3 +195,8 @@ class Agent(Logger):
             done = self._iter(is_training=False)
             if done:
                 break
+
+
+
+
+

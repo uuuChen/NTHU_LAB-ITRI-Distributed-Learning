@@ -6,7 +6,7 @@ import argparse
 # --------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--is-simulate', type=bool, default=True, metavar='N',
+parser.add_argument('--is-simulate', type=bool, default=False, metavar='N',
                     help='does the project use for accuracy simulation or not (actual hospitals usage) (default: True)')
 
 parser.add_argument('--train-batch-size', type=int, default=512, metavar='N',
@@ -15,8 +15,8 @@ parser.add_argument('--train-batch-size', type=int, default=512, metavar='N',
 parser.add_argument('--test-batch-size', type=int, default=512, metavar='N',
                     help='input batch size for training (default: 512)')
 
-parser.add_argument('--agent-nums', type=int, default=4, metavar='N',
-                    help='input agents number (default: 4)')
+parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
+                    help='input agents number (default: 2)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
@@ -41,8 +41,6 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
 
 parser.add_argument('--log-interval', type=int, default=1, metavar='N',
                     help='how many batches to wait before logging training status')
-
-train_args = parser.parse_args(args=[])
 
 MNIST_TRAINING_ARGS = parser.parse_args(args=[])
 

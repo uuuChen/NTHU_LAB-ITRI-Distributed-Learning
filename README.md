@@ -9,6 +9,29 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+
+#### "uuuChen 09/02 01:00"
+1. <新增> | "central.py": 根據 data_name 選取對應的 dataSet, train_args, 
+model，並實作 "get_model()", "get_dataSet()", "get_train_args()"等 相關
+function
+
+2. <新增> | "local_central_train.py": 匯集各 dataSet 的 "local_central_train"，
+傳入 data_name ，再呼叫 "start_training()" 便開始訓練
+
+3. <新增> | "local_split_train.py": 匯集各 dataSet 的 "local_split_train"，
+傳入 data_name ，再呼叫 "start_training()" 便開始訓練
+
+4. <新增> | "train_args.py": 匯集各 dataSet 的 train_args
+
+#### 目前狀況
+
+1. server.py, agent.py 無論是否 "is_simulate"，正確率皆下降，目前還不知道原因
+
+2. central.py 應該沒有錯，因為 "local_central_train.py", "local_split_train.py"
+訓練時的正確率正常
+ 
+---
+
 #### "uuuChen 08/31 18:00"
 
 簡化 "server.py", "agent.py" 程式

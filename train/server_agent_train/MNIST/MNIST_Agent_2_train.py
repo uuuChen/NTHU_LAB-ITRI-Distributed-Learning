@@ -4,7 +4,7 @@ from model.LeNet import *
 # DataSet Imports
 # from data.data_args import *  # import data arguments
 
-from train.server_agent_train.agent import Agent
+from train.agent import Agent
 
 import os
 
@@ -28,7 +28,7 @@ server_host_port = ('localhost', 8081)
 
 if __name__ == '__main__':
 
-    agent = Agent(model_agent, server_host_port, cur_agent_name)
+    agent = Agent(server_host_port, cur_agent_name)
     agent.start_training()
 
 

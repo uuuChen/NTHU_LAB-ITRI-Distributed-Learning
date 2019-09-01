@@ -97,9 +97,9 @@ if __name__ == '__main__':
 
     lc_train = Local_Central_Train()
 
-    lc_train.start_training('ECG')
+    # lc_train.start_training('ECG')
 
-    # lc_train.start_training('MNIST')
+    lc_train.start_training('MNIST')
 
     # lc_train.start_training('DRD')
 

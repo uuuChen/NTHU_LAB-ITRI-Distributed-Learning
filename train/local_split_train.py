@@ -20,6 +20,7 @@ class Local_Split_Train:
         self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=True)
 
         self.server_model = self.central.get_model(is_server=True)
+
         self.agent_model = self.central.get_model(is_agent=True)
 
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
@@ -85,6 +86,7 @@ class Local_Split_Train:
             loss = F.nll_loss(output, target)
 
             if is_training:
+                # server backward
                 loss.backward()
                 self.server_optim.step()
 
@@ -123,11 +125,11 @@ if __name__ == '__main__':
 
     lc_train = Local_Split_Train()
 
-    lc_train.start_training('MNIST')
+    # lc_train.start_training('MNIST')
 
     # lc_train.start_training('DRD')
 
-    # lc_train.start_training('ECG')
+    lc_train.start_training('ECG')
 
 
 

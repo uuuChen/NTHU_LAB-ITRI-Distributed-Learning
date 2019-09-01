@@ -1,24 +1,28 @@
 import random
+import os
+
+import torch
+from torch.nn import functional as F
+import torch.optim as optim
 from torch.autograd import Variable
 
-# Model Imports
-from model.LeNet import *
-from model.AlexNet import *
-from model.MLP import *
-from model.VGGNet import *
-from data.data_args import *
+from train.central import Central
 
 # Socket Imports
-from socket_.socket_ import *
+from socket_.socket_ import Socket
 
-from logger import *
+from logger import Logger
 
 
 class Server(Logger):
 
-    def __init__(self, train_args):
+    def __init__(self, data_name):
 
         Logger.__init__(self)
+
+        self.central = Central(data_name=data_name)
+        self.train_args = self.central.get_train_args()
+        self.model = self.central.get_model(is_server=True)
 
         # server socket setting
         self.server_port_begin = 8080
@@ -29,39 +33,25 @@ class Server(Logger):
         self.agents_attrs = []
 
         # stored data from agent
-        self.train_data_nums = [0] * train_args.agent_nums
-        self.test_data_nums = [0] * train_args.agent_nums
+        self.train_data_nums = [0] * self.train_args.agent_nums
+        self.test_data_nums = [0] * self.train_args.agent_nums
         self.all_train_data_nums = 0
         self.all_test_data_nums = 0
-
-        # training setting
-        self.is_simulate = train_args.is_simulate
-        self.is_first_training = True
-        self.train_args = train_args
-
-        if self.train_args.model is 'LeNet':
-            self.model = Server_LeNet()
-        elif self.train_args.model is 'AlexNet':
-            self.model = Server_AlexNet()
-        elif self.train_args.model is 'MLP':
-            self.model = Server_MLP(conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'],
-                                    label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
-
-        elif self.train_args.model is 'VGGNet':
-            self.model = VGGNet()
 
         self._training_setting()
 
     def _training_setting(self):
+        self.is_simulate = self.train_args.is_simulate
+        self.is_first_training = True
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         # seeding the CPU for generating random numbers so that the results are deterministic
         torch.manual_seed(self.train_args.seed)
         if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
-        self.optimizer = optim.SGD(self.model.parameters(),
-                                   lr=self.train_args.lr,
-                                   momentum=self.train_args.momentum)
+        self.optim = optim.SGD(self.model.parameters(),
+                               lr=self.train_args.lr,
+                               momentum=self.train_args.momentum)
 
     def _conn_to_agents(self):
 
@@ -124,11 +114,6 @@ class Server(Logger):
             agent_train_id_list = all_train_id_list[train_start_idx: train_start_idx + agent_train_data_nums]
             agent_test_id_list = all_test_id_list[test_start_idx: test_start_idx + agent_test_data_nums]
 
-            self.train_data_nums[i] = agent_train_data_nums
-            self.test_data_nums[i] = agent_test_data_nums
-
-            self.server_socks[i].send([agent_train_id_list, agent_test_id_list], 'train_test_id_list')
-
             train_start_idx += agent_train_data_nums
             test_start_idx += agent_test_data_nums
 
@@ -136,6 +121,11 @@ class Server(Logger):
             left_test_data_nums -= agent_test_data_nums
 
             left_agents_nums -= 1
+
+            self.train_data_nums[i] = agent_train_data_nums
+            self.test_data_nums[i] = agent_test_data_nums
+
+            self.server_socks[i].send([agent_train_id_list, agent_test_id_list], 'train_test_id_list')
 
     def _recv_data_nums_from_agents(self):
 
@@ -186,7 +176,7 @@ class Server(Logger):
                 target = target.cuda()
 
             if is_training:
-                self.optimizer.zero_grad()
+                self.optim.zero_grad()
                 agent_output_clone.requires_grad_()
 
             # server forward
@@ -194,10 +184,9 @@ class Server(Logger):
             loss = F.cross_entropy(server_output, target)
 
             if is_training:
-
                 # server backward
                 loss.backward()
-                self.optimizer.step()
+                self.optim.step()
 
                 # send gradient to agent
                 self.server_socks[cur_agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
@@ -275,6 +264,7 @@ class Server(Logger):
             self.epoch = epoch
             self._iter_one_epoch(is_training=True)
             self._iter_one_epoch(is_training=False)
+
 
 
 

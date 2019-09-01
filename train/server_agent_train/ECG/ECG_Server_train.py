@@ -2,7 +2,7 @@
 import argparse
 
 # Server Imports
-from train.server_agent_train.server import *
+from train.server import *
 
 # training settings
 parser = argparse.ArgumentParser()
