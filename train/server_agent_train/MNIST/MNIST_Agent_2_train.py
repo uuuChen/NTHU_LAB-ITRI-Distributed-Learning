@@ -1,17 +1,9 @@
-# Model Imports
-from model.LeNet import *
-
-# DataSet Imports
-# from data.data_args import *  # import data arguments
 
 from train.agent import Agent
 
 import os
 
-os.chdir('../../../')
-
 # training settings
-model_agent = Agent_LeNet()
 
 cur_agent_name = 'agent_2'
 
@@ -27,6 +19,8 @@ server_host_port = ('localhost', 8081)
 
 
 if __name__ == '__main__':
+
+    os.chdir('../../../')
 
     agent = Agent(server_host_port, cur_agent_name)
     agent.start_training()

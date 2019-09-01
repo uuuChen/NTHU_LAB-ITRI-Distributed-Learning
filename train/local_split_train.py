@@ -2,7 +2,6 @@
 from train.central import *
 from torch.autograd import Variable
 
-os.chdir('../')
 
 class Local_Split_Train:
 
@@ -123,13 +122,15 @@ class Local_Split_Train:
 
 if __name__ == '__main__':
 
+    os.chdir('../')
+
     lc_train = Local_Split_Train()
 
-    # lc_train.start_training('MNIST')
+    lc_train.start_training('MNIST')
 
     # lc_train.start_training('DRD')
 
-    lc_train.start_training('ECG')
+    # lc_train.start_training('ECG')
 
 
 

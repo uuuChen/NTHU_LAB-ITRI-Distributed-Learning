@@ -3,11 +3,13 @@
 from train.server import *
 import os
 
-os.chdir('../../../')
+data_name = 'MNIST'
 
 if __name__ == '__main__':
 
-    server = Server(data_name='MNIST')
+    os.chdir('../../../')
+
+    server = Server(data_name=data_name)
     server.start_training()
 
 

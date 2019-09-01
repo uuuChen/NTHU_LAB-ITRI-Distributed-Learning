@@ -6,7 +6,7 @@ import argparse
 # --------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--is-simulate', type=bool, default=False, metavar='N',
+parser.add_argument('--is-simulate', type=bool, default=True, metavar='N',
                     help='does the project use for accuracy simulation or not (actual hospitals usage) (default: True)')
 
 parser.add_argument('--train-batch-size', type=int, default=512, metavar='N',

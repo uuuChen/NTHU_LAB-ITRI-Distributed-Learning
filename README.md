@@ -9,6 +9,10 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 09/02 02:30"
+1. <更動> | "server.py": 整理程式碼，更加易讀，功能不變
+2. <更動> | "agent.py": 整理程式碼，更加易讀，連接下一個 agent 時除了 model，
+也會把 optimizer 傳過去
 
 #### "uuuChen 09/02 01:00"
 1. <新增> | "central.py": 根據 data_name 選取對應的 dataSet, train_args, 
