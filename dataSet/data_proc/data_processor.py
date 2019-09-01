@@ -21,7 +21,15 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.use_gridFS = data_args['use_gridFS']
 
-        self.is_simulate = data_args['is_simulate']
+        if 'is_simulate' in data_args.keys():
+            self.is_simulate = data_args['is_simulate']
+        else:
+            self.is_simulate = False
+
+        if 'shuffle' in data_args.keys():
+            self.shuffle = data_args['shuffle']
+        else:
+            self.shuffle = False
 
         self.data_nums_dir_path = data_args['data_nums_dir_path']
 
@@ -44,7 +52,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         self.db_id_ptr = 0
 
         self.db_id_list = list(range(1, self.get_data_nums_from_database() + 1))
-        if data_args['shuffle']:
+        if self.shuffle:
             random.shuffle(self.db_id_list)
 
     def _upload_data_and_labels_to_database(self):

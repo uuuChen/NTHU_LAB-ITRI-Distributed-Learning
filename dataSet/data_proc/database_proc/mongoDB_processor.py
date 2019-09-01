@@ -191,6 +191,8 @@ class MongoDB_Processor(Logger):
         batch_data = []
         batch_labels = []
 
+        print(id_list)
+
         find_query = {'ID': {"$in": id_list}}
         batch_data_labels = self.coll_find_query(coll_name=coll_name,
                                                  query=find_query)

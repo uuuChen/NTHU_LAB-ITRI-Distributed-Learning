@@ -2,10 +2,11 @@
 from model.LeNet import *
 
 # DataSet Imports
-from data.data_args import *  # import data arguments
+# from data.data_args import *  # import data arguments
 
-# Socket Imports
 from train.server_agent_train.agent import Agent
+
+import os
 
 os.chdir('../../../')
 
@@ -22,7 +23,7 @@ server_host_port = ('localhost', 8083)
 # ==================================
 # LAN testing
 # ==================================
-# server_host_port = ('172.20.10.2', 8080)
+# server_host_port = ('172.20.10.2', 8083)
 
 
 if __name__ == '__main__':

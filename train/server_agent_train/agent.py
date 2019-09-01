@@ -1,16 +1,10 @@
-
 import torch
 from torch.autograd import Variable
 
-from socket_.socket_ import *
-from logger import *
+from socket_.socket_ import Socket
+from logger import Logger
 
-# DataSet Imports
-from dataSet.MNIST_dataSet import *
-from dataSet.DRD_dataSet import *
-from dataSet.Xray_dataSet import *
-from dataSet.ECG_dataSet import *
-from data.data_args import *  # import data arguments
+from train.central import Central
 
 class Agent(Logger):
 
@@ -19,44 +13,6 @@ class Agent(Logger):
         self.model = model
         self.server_host_port = server_host_port
         self.cur_name = cur_name
-
-
-    def get_dataSet(self, shuffle):
-
-        data_name = self.train_args.dataSet
-
-        if data_name == 'MNIST':
-            dataSet = MNIST_DataSet
-            train_data_args = MNIST_TRAIN_ARGS
-            test_data_args = MNIST_TEST_ARGS
-
-        elif data_name == 'DRD':
-            dataSet = DRD_DataSet
-            train_data_args = DRD_TRAIN_ARGS
-            test_data_args = DRD_TEST_ARGS
-
-        elif data_name == 'ECG':
-            dataSet = ECG_DataSet
-            train_data_args = ECG_TRAIN_ARGS
-            test_data_args = ECG_TEST_ARGS
-
-        elif data_name == 'Xray':
-            dataSet = Xray_DataSet
-            train_data_args = Xray_TRAIN_ARGS
-            test_data_args = Xray_TEST_ARGS
-
-        else:
-            raise Exception('DataSet ( %s ) Not Exist !' % data_name)
-
-        training_args = {}
-        training_args['shuffle'] = shuffle
-        training_args['is_simulate'] = self.is_simulate
-
-        train_data_args.update(training_args)
-        test_data_args.update(training_args)
-
-        self.train_dataSet = dataSet(train_data_args)
-        self.test_dataSet = dataSet(test_data_args)
 
     def _conn_to_server(self):
         # connect to server, agent and server socket setting
@@ -67,10 +23,13 @@ class Agent(Logger):
         self.train_args = self.agent_server_sock.recv('train_args')
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
+        self.central = Central(data_name=self.train_args.dataSet)
         if self.is_simulate:
-            self.get_dataSet(shuffle=False)  # shuffle or not won't influence the results
+            self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=False,
+                                                                             is_simulate=True)
         else:
-            self.get_dataSet(shuffle=True)  # must shuffle
+            self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=True,
+                                                                             is_simulate=False)
 
     def _recv_agents_attrs_from_server(self):
         # receive own IP and distributed port
@@ -235,8 +194,3 @@ class Agent(Logger):
             done = self._iter(is_training=False)
             if done:
                 break
-
-           
-
-
-

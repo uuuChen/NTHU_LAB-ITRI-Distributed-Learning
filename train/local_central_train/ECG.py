@@ -6,7 +6,6 @@ import torch.optim as optim
 from torch.autograd import Variable
 
 # Model Imports
-from model.AlexNet import *
 from model.MLP import *
 
 # DataSet Imports

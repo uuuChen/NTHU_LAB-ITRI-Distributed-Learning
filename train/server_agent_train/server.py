@@ -6,6 +6,7 @@ from model.LeNet import *
 from model.AlexNet import *
 from model.MLP import *
 from model.VGGNet import *
+from data.data_args import *
 
 # Socket Imports
 from socket_.socket_ import *
@@ -43,7 +44,9 @@ class Server(Logger):
         elif self.train_args.model is 'AlexNet':
             self.model = Server_AlexNet()
         elif self.train_args.model is 'MLP':
-            self.model = Server_MLP()
+            self.model = Server_MLP(conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'],
+                                    label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
+
         elif self.train_args.model is 'VGGNet':
             self.model = VGGNet()
 
@@ -246,7 +249,7 @@ class Server(Logger):
                     self.server_socks[i].send(False, 'is_training_done')
 
         if not is_training:
-            self.test_loss /= self.train_args.agent_nums
+            self.test_loss /= self.batches
             print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 self.test_loss, self.correct, self.all_test_data_nums,
                 100. * self.correct / self.all_test_data_nums))

@@ -2,10 +2,11 @@
 from model.LeNet import *
 
 # DataSet Imports
-from data.data_args import *  # import data arguments
+# from data.data_args import *  # import data arguments
 
-# Socket Imports
 from train.server_agent_train.agent import Agent
+
+import os
 
 os.chdir('../../../')
 
