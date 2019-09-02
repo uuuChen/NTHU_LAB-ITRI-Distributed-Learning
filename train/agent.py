@@ -64,8 +64,8 @@ class Agent(Logger):
         self.train_id_list, self.test_id_list = self.agent_server_sock.recv('train_test_id_list')
 
         # set dataSet's "db_id_list" and store train and test data numbers
-        self.train_dataSet.set_db_id_list(self.train_id_list)
-        self.test_dataSet.set_db_id_list(self.test_id_list)
+        self.train_dataSet.set_usage_data_ids(self.train_id_list)
+        self.test_dataSet.set_usage_data_ids(self.test_id_list)
 
         self.train_data_nums = len(self.train_id_list)
         self.test_data_nums = len(self.test_id_list)

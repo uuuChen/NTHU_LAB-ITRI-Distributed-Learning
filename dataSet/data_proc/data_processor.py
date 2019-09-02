@@ -49,11 +49,11 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self._make_sure_data_and_labels_in_database()
 
-        self.db_id_ptr = 0
+        self.data_id_ptr = 0
 
-        self.db_id_list = list(range(1, self.get_data_nums_from_database() + 1))
+        self.usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
         if self.shuffle:
-            random.shuffle(self.db_id_list)
+            random.shuffle(self.usage_data_ids)
 
     def _upload_data_and_labels_to_database(self):
 
@@ -103,21 +103,21 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         self._make_sure_data_and_labels_in_database()
 
         if self.is_simulate:
-            data_nums = len(self.db_id_list)
+            data_nums = len(self.usage_data_ids)
         else:
             data_nums = self.get_data_nums_from_database()
 
-        old_id_ptr = self.db_id_ptr
+        old_id_ptr = self.data_id_ptr
 
         if old_id_ptr + batch_size >= data_nums:
             new_id_ptr = 0
-            id_list = self.db_id_list[old_id_ptr:]
+            id_list = self.usage_data_ids[old_id_ptr:]
 
         else:
             new_id_ptr = old_id_ptr + batch_size
-            id_list = self.db_id_list[old_id_ptr: new_id_ptr]
+            id_list = self.usage_data_ids[old_id_ptr: new_id_ptr]
 
-        self.db_id_ptr = new_id_ptr
+        self.data_id_ptr = new_id_ptr
 
         if self.use_gridFS:
             data, labels = self.gridFS_coll_read_batch(coll_name=self.coll_name,
@@ -174,17 +174,17 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         else:
             self.coll_delete_all(coll_name=self.coll_name)
 
-    def set_db_id_list(self, id_list):
+    def set_usage_data_ids(self, id_list):
 
-        """ When Class "agent"'s attribute "is_simulate" is True, use this function to set "db_id_list" with "id_list",
-            and "id_list" is obtained from server.
+        """ When Class "agent"'s attribute "is_simulate" is True, use this function to set "usage_data_ids" with
+            "id_list", and "id_list" is obtained from server.
 
-            "db_id_list" is used in function "_get_data_and_labels_from_database". It can decide to read the data and
-            labels that match these ids from the database.
+            "usage_data_ids" is used in function "_get_data_and_labels_from_database". It can decide to read the data
+            and labels that match these ids from the database.
 
         """
 
-        self.db_id_list = id_list
+        self.usage_data_ids = id_list
 
     @abstractmethod
     def _get_data_and_labels_from_local(self):

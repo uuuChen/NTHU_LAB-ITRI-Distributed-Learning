@@ -9,6 +9,7 @@ class Local_Central_Train:
         pass
 
     def _build(self, data_name):
+
         self.data_name = data_name
 
         self.central = Central(data_name=data_name)
