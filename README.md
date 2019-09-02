@@ -61,7 +61,7 @@ bool 變數，此值為 True 的話表示進行正確率模擬，假設每一個
 
 5. <更動> | "data_processor.py" 中 "_get_data_and_labels_from_database()"
 : 更動 data_nums 的獲得方式，將不再直接取得整個 database 的資料數，考慮
-到模擬時真實的訓練數量是由 server 分配，因此以 "db_id_list" 為判斷訓練資料
+到模擬時真實的訓練數量是由 server 分配，因此以 "usage_data_ids" 為判斷訓練資料
 數量的依據
 
 
