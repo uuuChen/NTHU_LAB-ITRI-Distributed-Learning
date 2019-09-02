@@ -194,18 +194,15 @@ class Server(Logger):
             agent_output = self.server_socks[cur_agent_idx].recv('agent_output')
             target = self.server_socks[cur_agent_idx].recv('target')
 
-            # store gradient in agent_output_clone
-            agent_output_clone = Variable(agent_output).float()
+            server_input = Variable(agent_output, requires_grad=True).float()
             if self.train_args.cuda:
-                agent_output_clone, target = agent_output_clone.cuda(), target.cuda()
-
-            if is_training:
-                self.optim.zero_grad()
-                agent_output_clone.requires_grad_()
+                server_input = server_input.cuda()
 
             # server forward
-            server_output = self.model(agent_output_clone)
-            loss = F.cross_entropy(server_output, target)
+            if is_training:
+                self.optim.zero_grad()
+            server_output = self.model(server_input)
+            loss = F.nll_loss(server_output, target)
 
             if is_training:
                 # server backward
@@ -213,7 +210,7 @@ class Server(Logger):
                 self.optim.step()
 
                 # send gradient to agent
-                self.server_socks[cur_agent_idx].send(agent_output_clone.grad.data, 'agent_output_clone_grad')
+                self.server_socks[cur_agent_idx].send(server_input.grad.data, 'agent_output_grad_data')
 
                 self.trained_data_num += len(target)
                 if batch_idx % self.train_args.log_interval == 0:

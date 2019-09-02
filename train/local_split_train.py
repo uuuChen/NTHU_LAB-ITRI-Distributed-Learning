@@ -61,27 +61,23 @@ class Local_Split_Train:
 
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
 
+            data, target = Variable(data).float(), Variable(target).long()
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
 
-            data, target = Variable(data).float(), Variable(target).long()
-
+            # agent forward
             if is_training:
                 self.agent_optim.zero_grad()
-
-            # agent forward
             agent_output = self.agent_model(data)
 
+            server_input = Variable(agent_output, requires_grad=True).float()
+            if self.train_args.cuda:
+                server_input = server_input.cuda()
+
             # server forward
-            server_input = agent_output
             if is_training:
                 self.server_optim.zero_grad()
-                server_input = Variable(agent_output).float()
-                if self.train_args.cuda:
-                    server_input = server_input.cuda()
-                server_input.requires_grad_()
             output = self.server_model(server_input)
-
             loss = F.nll_loss(output, target)
 
             if is_training:

@@ -52,10 +52,10 @@ class Local_Central_Train:
 
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
 
+            data, target = Variable(data).float(), Variable(target).long()
+
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
-
-            data, target = Variable(data).float(), Variable(target).long()
 
             if is_training:
                 self.optim.zero_grad()

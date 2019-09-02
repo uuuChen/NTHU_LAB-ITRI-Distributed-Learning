@@ -9,6 +9,10 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChent 09/02 15:00"
+1. <更動> | "server.py", "agent.py": 訓練時完全比照 "local_split_train.py" 
+程式碼，然而正確率效果並不如 "local_split_train.py" 
+ 
 #### "uuuChen 09/02 13:00"
 1. <更動> | "data_processor.py": "將 db_id_list" 更名為 "usage_data_ids" 
 

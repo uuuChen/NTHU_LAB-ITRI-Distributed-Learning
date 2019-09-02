@@ -76,35 +76,35 @@ class Agent(Logger):
         self.agent_server_sock.send(train_data_nums, 'train_data_nums')
         self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 
-    def _send_model_and_optim_to_next_agent(self):
+    def _send_model_to_next_agent(self):
         # send model to next agent
         self.to_agent_sock.accept()
         self.to_agent_sock.send(self.model, 'agent_model')
-        self.to_agent_sock.send(self.optim, 'agent_optim')
+        # self.to_agent_sock.send(self.optim, 'agent_optim')
         self.to_agent_sock.close()
 
     def _iter(self, is_training):
 
-        self._whether_to_get_model_and_optim_from_prev_agent()
+        self._whether_to_get_model_from_prev_agent()
 
         self._iter_through_database_once(is_training=is_training)
 
         if is_training:
-            self._send_model_and_optim_to_next_agent()
+            self._send_model_to_next_agent()
 
         else:
             return self._whether_is_training_done()
 
-    def _whether_to_get_model_and_optim_from_prev_agent(self):
+    def _whether_to_get_model_from_prev_agent(self):
 
-        print('\nwait for previous agent {} model snapshot...'.format(self.prev_agent_attrs['host_port']))
+        print('\nwait for previous agent {} sending model snapshot...'.format(self.prev_agent_attrs['host_port']))
 
         if not self.agent_server_sock.recv('is_first_training'):
 
             from_agent_sock = Socket(self.prev_agent_attrs['host_port'], False)
             from_agent_sock.connect()
             self.model = from_agent_sock.recv('agent_model')
-            self.optim = from_agent_sock.recv('agent_optim')
+            # self.optim = from_agent_sock.recv('agent_optim')
             from_agent_sock.close()
 
             # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent
@@ -135,10 +135,9 @@ class Agent(Logger):
 
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
 
+            data, target = Variable(data).float(), Variable(target).long()
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
-
-            data, target = Variable(data).float(), Variable(target).long()
 
             # agent forward
             if is_training:
@@ -151,8 +150,7 @@ class Agent(Logger):
 
             # receive gradient from server if training
             if is_training:
-                # get agent_output_clone
-                agent_output_grad = self.agent_server_sock.recv('agent_output_clone_grad')
+                agent_output_grad = self.agent_server_sock.recv('agent_output_grad_data')  # get agent_output_clone
 
                 # agent backward
                 agent_output.backward(gradient=agent_output_grad)
@@ -171,11 +169,11 @@ class Agent(Logger):
         if self.agent_server_sock.recv('is_training_done'):
             is_last_agent = (int(self.cur_name.split("_")[1]) == self.train_args.agent_nums)
             if not is_last_agent:
-                self._send_model_and_optim_to_next_agent()
+                self._send_model_to_next_agent()
             self.agent_server_sock.close()
             return True
         else:
-            self._send_model_and_optim_to_next_agent()
+            self._send_model_to_next_agent()
             return False
 
     def start_training(self):
