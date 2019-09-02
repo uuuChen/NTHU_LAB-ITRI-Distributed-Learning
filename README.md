@@ -30,15 +30,6 @@ function
 
 4. <新增> | "train_args.py": 匯集各 dataSet 的 train_args
 
-#### 目前狀況
-
-1. server.py, agent.py 無論是否 "is_simulate"，正確率皆下降，目前還不知道原因
-
-2. central.py 應該沒有錯，因為 "local_central_train.py", "local_split_train.py"
-訓練時的正確率正常
- 
----
-
 #### "uuuChen 08/31 18:00"
 
 簡化 "server.py", "agent.py" 程式
