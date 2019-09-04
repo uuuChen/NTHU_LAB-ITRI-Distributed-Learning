@@ -79,13 +79,13 @@ class Agent(Logger):
     def _send_model_to_next_agent(self):
         # send model to next agent
         self.to_agent_sock.accept()
-        self.to_agent_sock.send(self.model, 'agent_model')
-        # self.to_agent_sock.send(self.optim, 'agent_optim')
+        self.to_agent_sock.send(self.model.state_dict(), 'model_state_dict')
+        self.to_agent_sock.send(self.optim.state_dict(), 'optim_state_dict')
         self.to_agent_sock.close()
 
     def _iter(self, is_training):
 
-        self._whether_to_get_model_from_prev_agent()
+        self._whether_to_recv_model_from_prev_agent()
 
         self._iter_through_database_once(is_training=is_training)
 
@@ -95,7 +95,7 @@ class Agent(Logger):
         else:
             return self._whether_is_training_done()
 
-    def _whether_to_get_model_from_prev_agent(self):
+    def _whether_to_recv_model_from_prev_agent(self):
 
         print('\nwait for previous agent {} sending model snapshot...'.format(self.prev_agent_attrs['host_port']))
 
@@ -103,8 +103,13 @@ class Agent(Logger):
 
             from_agent_sock = Socket(self.prev_agent_attrs['host_port'], False)
             from_agent_sock.connect()
-            self.model = from_agent_sock.recv('agent_model')
-            # self.optim = from_agent_sock.recv('agent_optim')
+
+            model_state_dict = from_agent_sock.recv('model_state_dict')
+            optim_state_dict = from_agent_sock.recv('optim_state_dict')
+
+            self.model.load_state_dict(model_state_dict)
+            self.optim.load_state_dict(optim_state_dict)
+
             from_agent_sock.close()
 
             # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent

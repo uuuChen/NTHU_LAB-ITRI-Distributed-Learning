@@ -9,7 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
-#### "uuuChent 09/02 15:00"
+#### "uuuChen 09/04 22:00"
+1. <除錯> | "server.py", "agent.py": 原先直接將 model, optimizer 傳給下個
+agent，更改為傳 model.stage_dict(), optim.state_dict()。更動後正確率與
+central train 相近許多
+ 
+#### "uuuChen 09/02 15:00"
 1. <更動> | "server.py", "agent.py": 訓練時完全比照 "local_split_train.py" 
 程式碼，然而正確率效果並不如 "local_split_train.py" 
  
