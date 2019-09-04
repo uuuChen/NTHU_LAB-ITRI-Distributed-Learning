@@ -260,6 +260,16 @@ class Socket(Logger):
     def awake(self):
         self._send(True, '_awake')
 
+    @staticmethod
+    def get_host_name():
+        try:
+            s = socket(AF_INET, SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+        finally:
+            s.close()
+        return ip
+
     def getpeername(self):
         return self.socket.getpeername()
 

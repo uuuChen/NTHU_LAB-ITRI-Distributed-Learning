@@ -15,7 +15,7 @@ from logger import Logger
 
 class Server(Logger):
 
-    def __init__(self, data_name):
+    def __init__(self, data_name, use_localhost=True):
 
         Logger.__init__(self)
 
@@ -39,6 +39,7 @@ class Server(Logger):
         self.all_test_data_nums = 0
 
         # training setting
+        self.use_localhost = use_localhost
         self.is_simulate = self.train_args.is_simulate
         self.is_first_training = True
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
@@ -52,7 +53,12 @@ class Server(Logger):
     def _conn_to_agents(self):
 
         for i in range(self.train_args.agent_nums):
-            server_sock = Socket(('localhost', self.server_port_begin + i), True)
+            if self.use_localhost:
+                host_name = 'localhost'
+            else:
+                host_name = Socket.get_host_name()
+            print('Server is waiting for connections on (\'{}\')'.format(host_name))
+            server_sock = Socket((host_name, self.server_port_begin + i), True)
             self.server_socks.append(server_sock)
 
         for i in range(self.train_args.agent_nums):
