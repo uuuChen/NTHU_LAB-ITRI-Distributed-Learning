@@ -9,6 +9,18 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 09/06 17:20"
+1. <更動> | "VGGNet.py" : 
+實現 VGG11、VGG13、VGG16、VGG19 的模型
+改用全連接層作為分類器，使其對應到目標的分類個數上 ( 原為使用多層卷積層，訓練不起來問題可能是出在此處 )
+目前測試用 VGG16 訓練 MNIST 成功，但測試 Xray 常出現顯卡記憶體不足的狀況，VGG 模型還是太占記憶體空間了
+2. <新增> | "data/Xray/Xray_preprocessing.py" : 
+    1. resize() : convert (1024, 1024) to (256, 256) 
+    2. to_gray() : convert (1024, 1024, 4) to (1024, 1204)
+    3. delete_multi_label() : delete multi-label images
+    4. balance() : down sampling the selected directory
+    5. overview() : check the labels of images in the selected directory
+
 #### "uuuChen 09/04 23:30"
 1. <更動> | 將原本在 "local_central_train/"、"local_split_train/"、
 "server_agent_train/"的檔案刪除，以 "local_central_train.py"、
