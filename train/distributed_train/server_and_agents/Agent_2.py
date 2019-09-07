@@ -1,5 +1,5 @@
 
-from train.server_agent_train.agent import Agent
+from train.distributed_train.agent import Agent
 
 import os
 

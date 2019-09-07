@@ -5,7 +5,7 @@ from torch.autograd import Variable
 from socket_.socket_ import Socket
 from logger import Logger
 
-from train.central import Central
+from train.switch import *
 
 
 class Agent(Logger):

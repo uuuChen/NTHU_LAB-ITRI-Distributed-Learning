@@ -1,6 +1,6 @@
 
 # Server Imports
-from train.server_agent_train.server import *
+from train.distributed_train.server import *
 import os
 
 data_name = 'MNIST'

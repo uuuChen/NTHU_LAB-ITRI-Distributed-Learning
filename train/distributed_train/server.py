@@ -5,7 +5,7 @@ from torch.nn import functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
-from train.central import Central
+from train.switch import *
 
 # Socket Imports
 from socket_.socket_ import Socket
