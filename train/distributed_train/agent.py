@@ -27,9 +27,9 @@ class Agent(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
 
-        self.central = Central(data_name=self.train_args.dataSet)
-        self.model = self.central.get_model(is_agent=True)
-        self.train_dataSet, self.test_dataSet = self.central.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
+        self.switch = Switch(data_name=self.train_args.dataSet)
+        self.model = self.switch.get_model(is_agent=True)
+        self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
 
         if self.is_simulate:  # have to wait for "id_list" receiving from server
             self.train_data_nums = None

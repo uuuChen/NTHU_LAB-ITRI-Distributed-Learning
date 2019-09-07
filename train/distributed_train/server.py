@@ -20,9 +20,9 @@ class Server(Logger):
         Logger.__init__(self)
 
         # get model and train args by "data_name"
-        self.central = Central(data_name=data_name)
-        self.model = self.central.get_model(is_server=True)
-        self.train_args = self.central.get_train_args()
+        self.switch = Switch(data_name=data_name)
+        self.model = self.switch.get_model(is_server=True)
+        self.train_args = self.switch.get_train_args()
 
         # server socket setting
         self.server_port_begin = 8080
