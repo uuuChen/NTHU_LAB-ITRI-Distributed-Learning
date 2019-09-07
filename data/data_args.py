@@ -167,11 +167,11 @@ Xray_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'images'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
-    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample_labels.csv'),
+    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'labels.csv'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
 }
@@ -181,11 +181,11 @@ Xray_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'images'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
-    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample_labels.csv'),
+    'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'labels.csv'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }

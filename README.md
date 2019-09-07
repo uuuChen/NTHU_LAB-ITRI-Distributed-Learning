@@ -9,6 +9,22 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+
+#### "Edward1997 09/07 15:20"
+1. <更動> | 正名 : 
+    1. local_central_train 資料夾 --> central_train 資料夾
+    2. local_central_train.py --> central_train.py
+    3. central.py --> switch.py
+    4. local_split_train 資料夾 --> central_split_train 資料夾
+    5. local_split_train.py --> central_split_train.py
+2. <更動> | "model/*.py"、"central_train.py"、"central_split_train.py": 
+    1. central_train.py 和 central_split_train.py 中使用 cross_entropy() 取代 nll_loss() 作為 loss function
+    2. model/*.py 中輸出不必再通過 log_softmax()
+    * 註解 : cross_entropy(x) ~= nll_loss( log_softmax(x) )
+3. <新增> | train_args.py 中 Xray 部分
+4. <更動> | Xray with VGG16 訓練參數
+    * 使用epoch = 10, lr = 0.01, momentum = 0.9, image_size = ( 256, 256 ) 訓練通過
+
 #### "Edward1997 09/06 17:20"
 1. <更動> | "VGGNet.py" : 
 實現 VGG11、VGG13、VGG16、VGG19 的模型

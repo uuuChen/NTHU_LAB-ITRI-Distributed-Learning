@@ -1,8 +1,6 @@
 '''VGG11/13/16/19 in Pytorch.'''
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
-import torch.optim as optim
 from torch.nn import functional as F
 
 
@@ -19,15 +17,54 @@ class VGG(nn.Module):
     def __init__(self, vgg_name, class_num):
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512*4*4, class_num)
-        #self.activator = nn.Sigmoid()
+        self.classifier = nn.Linear(512*8*8, class_num)
 
 # 模型计算时的前向过程，也就是按照这个过程进行计算
     def forward(self, x):
         out = self.features(x)
         out = out.view(out.size(0), -1)
         out = self.classifier(out)
-        #out = self.activator(out)
+
+        return out
+
+    def _make_layers(self, cfg):
+        layers = []
+        in_channels = 1
+        for x in cfg:
+            if x == 'M':
+                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            else:
+                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                           nn.BatchNorm2d(x),
+                           nn.ReLU(inplace=True)]
+                in_channels = x
+        layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
+        return nn.Sequential(*layers)
+
+
+class Server_VGG(nn.Module):
+    # 初始化参数：
+    def __init__(self, vgg_name, class_num):
+        super(Server_VGG, self).__init__()
+        self.classifier = nn.Linear(512 * 8 * 8, class_num)
+
+    # 模型计算时的前向过程，也就是按照这个过程进行计算
+    def forward(self, x):
+        out = x.view(x.size(0), -1)
+        out = self.classifier(out)
+
+        return out
+
+
+class Agent_VGG(nn.Module):
+# 初始化参数：
+    def __init__(self, vgg_name, class_num):
+        super(Agent_VGG, self).__init__()
+        self.features = self._make_layers(cfg[vgg_name])
+
+# 模型计算时的前向过程，也就是按照这个过程进行计算
+    def forward(self, x):
+        out = self.features(x)
 
         return out
 

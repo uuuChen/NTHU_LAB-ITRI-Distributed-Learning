@@ -24,7 +24,9 @@ Xray_class_id = {
 
 class Xray_DataSet(Data_Processor):
 
-    def __init__(self, data_args):
+    def __init__(self, data_args, shuffle=False):
+
+        data_args['shuffle'] = shuffle
 
         self.__logger = self.get_logger(unique_name=__name__,
                                         debug=DEBUG)
@@ -73,17 +75,14 @@ class Xray_DataSet(Data_Processor):
                 file_name = file_name[0]
 
                 # if csv file name matches image file name, the label of the former will be stored in labels (list)
-                if file_name == image_file_names[read_image_files]:  # image_file_name has to remove str '.jpg'
-                    label = row[1].split('|')
-                    label_id = []
-                    for i in range(len(label)):
-                        label_id.append(Xray_class_id[label[i]])
+                if file_name == image_file_names[read_image_files]:
+                    label_id = Xray_class_id[row[1]]
                     labels.append(label_id)  # store the label
 
                     read_image_files += 1
-                    if read_image_files == len(image_file_names):  # if numbers of image files read equals numbers of
-                                                                   # batch images, then break
-                        break
+                    if read_image_files == len(image_file_names):   # if numbers of image files read equals numbers of
+                        break                                       # batch images, then break
+
 
         self.__logger.debug('Done !')
 
@@ -109,7 +108,7 @@ class Xray_DataSet(Data_Processor):
     def _get_data_and_labels_from_database(self, batch_size):
         return super()._get_data_and_labels_from_database(batch_size=batch_size)
 
-    def get_data_and_labels(self, batch_size, image_size, data_preprocess=True, toTensor=True, one_hot=False):
+    def get_data_and_labels(self, batch_size, image_size = (256, 256), data_preprocess=True, toTensor=True, one_hot=False):
 
         data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
 
@@ -118,8 +117,7 @@ class Xray_DataSet(Data_Processor):
 
             for data_ in data:
                 data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
-                data_ = data_.reshape(1, 100, 100)
-                data_ = data_.transpose((2, 0, 1))
+                data_ = data_.reshape(1, image_size[0], image_size[1])
                 preproc_data.append(data_)
 
             data = np.array(preproc_data)
@@ -130,8 +128,7 @@ class Xray_DataSet(Data_Processor):
 
         if toTensor:
             data = torch.from_numpy(data)
-            for i in range(len(labels)):
-                labels[i] = torch.from_numpy(labels[i])
+            labels = torch.from_numpy(labels)
 
         return data, labels
 

@@ -16,7 +16,7 @@ class LeNet(nn.Module):
        x = F.relu(self.fc1(x))
        x = F.relu(self.fc2(x))
        x = self.fc3(x)
-       return F.log_softmax(x, dim=1)
+       return x
    def num_flat_features(self, x):
        size = x.size()[1:]
        num_features = 1
@@ -47,7 +47,7 @@ class Server_LeNet(nn.Module):
        x = F.relu(self.fc1(x))
        x = F.relu(self.fc2(x))
        x = self.fc3(x)
-       return F.log_softmax(x, dim=1)
+       return x
    def num_flat_features(self, x):
        size = x.size()[1:]
        num_features = 1

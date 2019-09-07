@@ -26,7 +26,7 @@ class MLP(nn.Module):
 
          x = self.fc4(x)
 
-         return F.log_softmax(x, dim=1)
+         return x
 
 
 class Agent_MLP(nn.Module):
@@ -64,7 +64,7 @@ class Server_MLP(nn.Module):
 
         x = self.fc4(x)
 
-        return F.log_softmax(x, dim=1)
+        return x
 
 
 

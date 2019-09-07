@@ -64,6 +64,7 @@ def reset():
 
 def resize(images_dir_path='sample/', image_size = (256,256)):
     # convert (1024, 1024) to (256, 256)
+    print('resize @ {}'.format(images_dir_path))
 
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
@@ -72,7 +73,7 @@ def resize(images_dir_path='sample/', image_size = (256,256)):
     image_file_names.sort(key=sort_key)
 
     for file_name in image_file_names:
-        print('convert {}'.format(file_name))
+        # print('convert {}'.format(file_name))
         file_path = os.path.join(images_dir_path, file_name)
         # read img
         img = Image.open(file_path)
@@ -84,6 +85,7 @@ def resize(images_dir_path='sample/', image_size = (256,256)):
 
 def to_gray(images_dir_path='sample/'):
     # convert (1024, 1024, 4) to (1024, 1204)
+    print('to_gray @ {}'.format(images_dir_path))
 
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
@@ -107,12 +109,13 @@ def to_gray(images_dir_path='sample/'):
             img.save(file_path)
 
             convert += 1
-            print('convert {}'.format(file_name))
+            # print('convert {}'.format(file_name))
 
     print('convert {} images, total {} images'.format(convert, len(image_file_names)))
 
 
 def delete_multi_label(images_dir_path='sample/'):
+    print('delete_multi_label @ {}'.format(images_dir_path))
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
@@ -142,7 +145,7 @@ def delete_multi_label(images_dir_path='sample/'):
 
 def balance(images_dir_path='sample/', limit = 100000):
     # down sampling the selected directory
-
+    print('balance @ {}, limit is {}'.format(images_dir_path, limit))
     reset()
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
@@ -170,12 +173,12 @@ def balance(images_dir_path='sample/', limit = 100000):
                 if summary[Xray_class_id[label[0]]][1] >= limit:
                     os.remove(file_path)
                     delete += 1
-                    print('too more label : {}, delete {}'.format(label[0], row[0]))
+                    # print('too more label : {}, delete {}'.format(label[0], row[0]))
                     continue
 
                 summary[Xray_class_id[label[0]]][1] += 1
 
-    print('delete {} images'.format(delete))
+    print('delete {} images, remain {}'.format(delete, image_file_nums - delete))
     sum = 0
     for i in range(len(summary)):
         sum += summary[i][1]
@@ -185,6 +188,7 @@ def balance(images_dir_path='sample/', limit = 100000):
 
 def overview(images_dir_path='sample/'):
     # check the labels of images in the selected directory
+    print('overview @ {}'.format(images_dir_path))
 
     reset()
     # sort file
@@ -212,12 +216,12 @@ def overview(images_dir_path='sample/'):
     for i in range(len(summary)):
         sum += summary[i][1]
         print('{} : {}'.format(summary[i][0], summary[i][1]))
-    print('total : {}'.format(sum))
+    print('Total : {}'.format(sum))
 
-
-resize()
-to_gray()
-delete_multi_label()
-balance(limit=2)
+# resize('test/')
+# to_gray('test/')
+# delete_multi_label('test/')
+overview()
+# balance(images_dir_path='test/', limit = 200)
 
 

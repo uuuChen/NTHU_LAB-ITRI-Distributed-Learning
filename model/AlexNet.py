@@ -57,7 +57,7 @@ class AlexNet(nn.Module):
 
         x = self.classifier(x)
 
-        return F.log_softmax(x, dim=1)
+        return x
 
 
 class Agent_AlexNet(nn.Module):
@@ -127,7 +127,7 @@ class Server_AlexNet(nn.Module):
 
         x = self.classifier(x)
 
-        return F.log_softmax(x, dim=1)
+        return x
 
 
 
