@@ -10,6 +10,12 @@
 3. <除錯> | 已有某功能但出錯，將其更正
 
 
+#### "Edward1997 09/10 17:20"
+1. <新增> | "central_train.py", "distributed_train/server.py" 中 save_acc 功能
+    儲存 train loss 以及 test loss, accuracy
+2. <更動> | "distributed_train/server.py" loss function
+    null_loss -> cross_entropy
+
 #### "Edward1997 09/07 15:20"
 1. <更動> | 正名 : 
     1. local_central_train 資料夾 --> central_train 資料夾

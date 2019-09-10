@@ -9,6 +9,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
+        self.save_acc = open(data_name + "_central_acc.txt", "w")
 
         self.data_name = data_name
 
@@ -30,6 +31,8 @@ class Central_Train:
             self.model.cuda()  # move all model parameters to the GPU
 
         self.optim = optim.SGD(self.model.parameters(), lr=self.train_args.lr,  momentum=self.train_args.momentum)
+
+
 
     def _iter_epoch(self, is_training):
 
@@ -76,10 +79,15 @@ class Central_Train:
                 if batch_idx % self.train_args.log_interval == 0:
                     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
+                    if batch_idx == batches:
+                        self.save_acc.write('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\r\n'.format(
+                            self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
 
         if not is_training:
             test_loss /= batches
             print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+                test_loss, correct, data_nums, 100. * correct / data_nums))
+            self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 test_loss, correct, data_nums, 100. * correct / data_nums))
 
 
@@ -91,6 +99,8 @@ class Central_Train:
             self.epoch = epoch
             self._iter_epoch(is_training=True)
             self._iter_epoch(is_training=False)
+
+        self.save_acc.close()
 
 
 if __name__ == '__main__':
