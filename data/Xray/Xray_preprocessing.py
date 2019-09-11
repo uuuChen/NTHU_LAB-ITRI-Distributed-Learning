@@ -218,7 +218,8 @@ def overview(images_dir_path='sample/'):
         print('{} : {}'.format(summary[i][0], summary[i][1]))
     print('Total : {}'.format(sum))
 
-# resize('test/')
+
+resize('test_no_multilabel/')
 # to_gray('test/')
 # delete_multi_label('test/')
 overview()

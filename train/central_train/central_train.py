@@ -72,7 +72,7 @@ class Central_Train:
             else:
                 pred = output.data.max(1)[1]
                 correct += pred.eq(target.data).cpu().sum()
-                test_loss += loss
+                test_loss += loss.item()
 
             if is_training:
                 trained_data_num += data.shape[0]
@@ -106,7 +106,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'MNIST'
+    data_name = 'Xray'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
