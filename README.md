@@ -9,6 +9,10 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 09/11 13:00"
+1. <更動> | "train_args" 裡 "DRD": 將 "test_batch_size" 從 500 改為 100
+2. <更動> | 'server.py': 與  "Edward1997 09/11 9:20" 的更動相同
+
 #### "Edward1997 09/11 9:20"
 1. <更動> | "central_train.py"
     test_loss += loss --> test_loss += loss.item()

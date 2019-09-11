@@ -234,7 +234,7 @@ class Server(Logger):
                             self.epoch, self.trained_data_num,
                             self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
             else:
-                self.test_loss += loss
+                self.test_loss += loss.item()
                 pred = server_output.data.max(1)[1]
                 self.correct += pred.eq(target.data).cpu().sum()
 

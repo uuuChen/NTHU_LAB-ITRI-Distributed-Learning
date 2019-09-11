@@ -102,7 +102,7 @@ parser.add_argument('--is-simulate', type=bool, default=True, metavar='N',
 parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
                     help='input batch size for training (default: 100)')
 
-parser.add_argument('--test-batch-size', type=int, default=500, metavar='N',
+parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
                     help='input batch size for training (default: 500)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
