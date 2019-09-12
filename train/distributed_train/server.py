@@ -19,6 +19,9 @@ class Server(Logger):
 
         Logger.__init__(self)
 
+        # save train loss and test accuracy
+        self.save_acc = open(data_name + "_distributed_acc.txt", "w")
+
         # get model and train args by "data_name"
         self.switch = Switch(data_name=data_name)
         self.model = self.switch.get_model(is_server=True)
@@ -179,6 +182,9 @@ class Server(Logger):
         print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
             self.test_loss, self.correct, self.all_test_data_nums,
             100. * self.correct / self.all_test_data_nums))
+        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
+            self.test_loss, self.correct, self.all_test_data_nums,
+            100. * self.correct / self.all_test_data_nums))
 
     def _iter_through_agent_database(self, is_training, cur_agent_idx):
 
@@ -208,7 +214,7 @@ class Server(Logger):
             if is_training:
                 self.optim.zero_grad()
             server_output = self.model(server_input)
-            loss = F.nll_loss(server_output, target)
+            loss = F.cross_entropy(server_output, target)
 
             if is_training:
                 # server backward
@@ -223,9 +229,12 @@ class Server(Logger):
                     print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
                         self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
-
+                    if self.trained_data_num == self.all_train_data_nums:
+                        self.save_acc.write('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\r\n'.format(
+                            self.epoch, self.trained_data_num,
+                            self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
             else:
-                self.test_loss += loss
+                self.test_loss += loss.item()
                 pred = server_output.data.max(1)[1]
                 self.correct += pred.eq(target.data).cpu().sum()
 

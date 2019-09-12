@@ -62,7 +62,7 @@ def reset():
     ]
 
 
-def resize(images_dir_path='sample/', image_size = (256,256)):
+def resize(images_dir_path='sample/', image_size=(256, 256)):
     # convert (1024, 1024) to (256, 256)
     print('resize @ {}'.format(images_dir_path))
 
@@ -218,10 +218,5 @@ def overview(images_dir_path='sample/'):
         print('{} : {}'.format(summary[i][0], summary[i][1]))
     print('Total : {}'.format(sum))
 
-# resize('test/')
-# to_gray('test/')
-# delete_multi_label('test/')
-overview()
-# balance(images_dir_path='test/', limit = 200)
 
 

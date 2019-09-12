@@ -9,6 +9,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
+        self.save_acc = open(data_name + "_central_acc.txt", "w")
 
         self.data_name = data_name
 
@@ -31,6 +32,8 @@ class Central_Train:
 
         self.optim = optim.SGD(self.model.parameters(), lr=self.train_args.lr,  momentum=self.train_args.momentum)
 
+
+
     def _iter_epoch(self, is_training):
 
         if is_training:
@@ -49,7 +52,6 @@ class Central_Train:
         correct = 0
         batches = (data_nums - 1) // batch_size + 1
         for batch_idx in range(1, batches + 1):
-
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
 
             data, target = Variable(data).float(), Variable(target).long()
@@ -69,17 +71,22 @@ class Central_Train:
             else:
                 pred = output.data.max(1)[1]
                 correct += pred.eq(target.data).cpu().sum()
-                test_loss += loss
+                test_loss += loss.item()
 
             if is_training:
                 trained_data_num += data.shape[0]
                 if batch_idx % self.train_args.log_interval == 0:
                     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
+                    if batch_idx == batches:
+                        self.save_acc.write('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\r\n'.format(
+                            self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
 
         if not is_training:
             test_loss /= batches
             print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+                test_loss, correct, data_nums, 100. * correct / data_nums))
+            self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 test_loss, correct, data_nums, 100. * correct / data_nums))
 
 
@@ -92,11 +99,13 @@ class Central_Train:
             self._iter_epoch(is_training=True)
             self._iter_epoch(is_training=False)
 
+        self.save_acc.close()
+
 
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'MNIST'
+    data_name = 'Xray'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

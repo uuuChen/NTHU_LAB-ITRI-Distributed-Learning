@@ -26,7 +26,7 @@ class Switch:
 
         self._build(data_name)
 
-    def _build(self,data_name):
+    def _build(self, data_name):
 
         if data_name == 'MNIST':
 

@@ -3,9 +3,10 @@
 from train.distributed_train.server import *
 import os
 
-data_name = 'MNIST'
+# data_name = 'MNIST'
 # data_name = 'ECG'
 # data_name = 'DRD'
+data_name = 'Xray'
 
 if __name__ == '__main__':
 
