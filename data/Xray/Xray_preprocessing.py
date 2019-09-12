@@ -218,5 +218,14 @@ def overview(images_dir_path='sample/'):
         print('{} : {}'.format(summary[i][0], summary[i][1]))
     print('Total : {}'.format(sum))
 
+<<<<<<< HEAD
+=======
+
+resize('test_no_multilabel/')
+# to_gray('test/')
+# delete_multi_label('test/')
+overview()
+# balance(images_dir_path='test/', limit = 200)
+>>>>>>> fbc2bc04b63d6597906940f055e5cdb33014031d
 
 

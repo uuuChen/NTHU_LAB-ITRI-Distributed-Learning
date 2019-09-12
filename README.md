@@ -9,6 +9,21 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 09/11 13:00"
+1. <更動> | "train_args" 裡 "DRD": 將 "test_batch_size" 從 500 改為 100
+2. <更動> | 'server.py': 與  "Edward1997 09/11 9:20" 的更動相同
+
+#### "Edward1997 09/11 9:20"
+1. <更動> | "central_train.py"
+    test_loss += loss --> test_loss += loss.item()
+    減緩記憶體不足問題
+    在更動前，Xray batch_size = 1, image_size = (128, 128) 也訓練不起來
+
+#### "Edward1997 09/10 17:20"
+1. <新增> | "central_train.py", "distributed_train/server.py" 中 save_acc 功能
+    儲存 train loss 以及 test loss, accuracy
+2. <更動> | "distributed_train/server.py" loss function
+    null_loss -> cross_entropy
 
 #### "Edward1997 09/07 15:20"
 1. <更動> | 正名 : 
