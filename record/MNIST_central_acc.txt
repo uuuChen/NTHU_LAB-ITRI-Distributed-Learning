@@ -1,0 +1,42 @@
+開始時間 : Fri Sep 13 14:38:47 2019
+Train set: Average loss: 0.7658, Accuracy: 44876/60000 (74%)
+
+Test set: Average loss: 0.1433, Accuracy: 9560/10000 (95%)
+
+Train set: Average loss: 0.1334, Accuracy: 57517/60000 (95%)
+
+Test set: Average loss: 0.1238, Accuracy: 9603/10000 (96%)
+
+Train set: Average loss: 0.0937, Accuracy: 58239/60000 (97%)
+
+Test set: Average loss: 0.1004, Accuracy: 9659/10000 (96%)
+
+Train set: Average loss: 0.0776, Accuracy: 58526/60000 (97%)
+
+Test set: Average loss: 0.0861, Accuracy: 9730/10000 (97%)
+
+Train set: Average loss: 0.0698, Accuracy: 58665/60000 (97%)
+
+Test set: Average loss: 0.0826, Accuracy: 9745/10000 (97%)
+
+Train set: Average loss: 0.0634, Accuracy: 58771/60000 (97%)
+
+Test set: Average loss: 0.0784, Accuracy: 9758/10000 (97%)
+
+Train set: Average loss: 0.0607, Accuracy: 58838/60000 (98%)
+
+Test set: Average loss: 0.0604, Accuracy: 9801/10000 (98%)
+
+Train set: Average loss: 0.0548, Accuracy: 58898/60000 (98%)
+
+Test set: Average loss: 0.0658, Accuracy: 9791/10000 (97%)
+
+Train set: Average loss: 0.0498, Accuracy: 59016/60000 (98%)
+
+Test set: Average loss: 0.0726, Accuracy: 9779/10000 (97%)
+
+Train set: Average loss: 0.0481, Accuracy: 59023/60000 (98%)
+
+Test set: Average loss: 0.0683, Accuracy: 9786/10000 (97%)
+
+結束時間 : Fri Sep 13 14:40:55 2019

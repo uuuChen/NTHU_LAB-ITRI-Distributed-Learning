@@ -1,7 +1,8 @@
 
 from train.switch import *
 from torch.autograd import Variable
-
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Central_Train:
 
@@ -9,7 +10,12 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_acc = open(data_name + "_central_acc.txt", "w")
+        self.save_acc = open("record/" + data_name + "_central_acc.txt", "w")
+
+        self.train_loss = []
+        self.train_acc = []
+        self.test_loss = []
+        self.test_acc = []
 
         self.data_name = data_name
 
@@ -48,7 +54,7 @@ class Central_Train:
         data_nums = dataSet.get_data_nums_from_database()
 
         trained_data_num = 0
-        test_loss = 0
+        total_loss = 0
         correct = 0
         batches = (data_nums - 1) // batch_size + 1
         for batch_idx in range(1, batches + 1):
@@ -68,38 +74,72 @@ class Central_Train:
             if is_training:
                 loss.backward()
                 self.optim.step()
-            else:
-                pred = output.data.max(1)[1]
-                correct += pred.eq(target.data).cpu().sum()
-                test_loss += loss.item()
+
+            pred = output.data.max(1)[1]
+            correct += pred.eq(target.data).cpu().sum()
+            total_loss += loss.item()
 
             if is_training:
                 trained_data_num += data.shape[0]
                 if batch_idx % self.train_args.log_interval == 0:
                     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
-                    if batch_idx == batches:
-                        self.save_acc.write('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\r\n'.format(
-                            self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
 
-        if not is_training:
-            test_loss /= batches
+        total_loss /= batches
+        if is_training:
+            self.train_acc.append(100. * correct / data_nums)
+            self.train_loss.append(total_loss)
+            self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
+                self.epoch, total_loss, correct, data_nums, 100. * correct / data_nums))
+        else:
+            self.test_acc.append(100. * correct / data_nums)
+            self.test_loss.append(total_loss)
             print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-                test_loss, correct, data_nums, 100. * correct / data_nums))
+                total_loss, correct, data_nums, 100. * correct / data_nums))
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
-                test_loss, correct, data_nums, 100. * correct / data_nums))
+                total_loss, correct, data_nums, 100. * correct / data_nums))
 
+
+    def record_time(self, hint):
+        localtime = time.asctime( time.localtime(time.time()) )
+        self.save_acc.write(hint + localtime + '\r\n\n')
+
+    def plot_acc_loss(self):
+        x = np.arange(1,  self.train_args.epochs + 1)
+
+        plt.xlabel("epoch")
+        plt.ylabel("loss")
+        plt.title("Loss")
+        plt.grid(linestyle=":")
+        plt.plot(x, np.array(self.train_loss), label='train')
+        plt.plot(x, np.array(self.test_loss), label='test')
+        plt.legend()
+        plt.savefig("record/" + self.data_name + "_loss.png", dpi=300, format="png")
+
+        plt.figure()
+        plt.xlabel("epoch")
+        plt.ylabel("acc")
+        plt.title("Accuracy")
+        plt.grid(linestyle=":")
+        plt.plot(x, np.array(self.train_acc), label='train')
+        plt.plot(x, np.array(self.test_acc), label='test')
+        plt.legend()
+        plt.savefig("record/" + self.data_name + "_acc.png", dpi=300, format="png")
 
     def start_training(self, data_name):
 
         self._build(data_name=data_name)
+        self.record_time('開始時間 : ')
 
         for epoch in range(1,  self.train_args.epochs + 1):
             self.epoch = epoch
             self._iter_epoch(is_training=True)
             self._iter_epoch(is_training=False)
 
+        self.record_time('結束時間 : ')
         self.save_acc.close()
+        self.plot_acc_loss()
+
 
 
 if __name__ == '__main__':

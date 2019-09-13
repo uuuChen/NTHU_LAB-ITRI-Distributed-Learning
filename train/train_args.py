@@ -152,7 +152,6 @@ parser.add_argument('--train-batch-size', type=int, default=10, metavar='N',
 parser.add_argument('--test-batch-size', type=int, default=10, metavar='N',
                     help='input batch size for training (default: 500)')
 
-<<<<<<< HEAD
 parser.add_argument('--model', type=str, default='VGG', metavar='N',
                     help='training model (default: MLP)')
 
@@ -162,10 +161,7 @@ parser.add_argument('--dataSet', type=str, default='Xray', metavar='N',
 parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
                     help='input agents number (default: 2)')
 
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
-=======
 parser.add_argument('--epochs', type=int, default=50, metavar='N',
->>>>>>> fbc2bc04b63d6597906940f055e5cdb33014031d
                     help='number of epochs to train (default: 30)')
 
 parser.add_argument('--lr', type=float, default=0.001, metavar='LR',

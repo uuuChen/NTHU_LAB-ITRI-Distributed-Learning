@@ -9,6 +9,13 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 09/14 9:55"
+1. <更動> | "central_train.py"
+    紀錄效能方式調整
+    1. txt檔，紀錄訓練開始與結束時間，紀錄 train loss、train accuracy、test loss、tes accuracy 每 epoch 為單位
+    2. 圖檔train、test loss 比較圖、train、test accuracy 比較圖
+2. <更動> | "VGGNet.py"
+    增加Dropout layers
 #### "uuuChen 09/11 13:00"
 1. <更動> | "train_args" 裡 "DRD": 將 "test_batch_size" 從 500 改為 100
 2. <更動> | 'server.py': 與  "Edward1997 09/11 9:20" 的更動相同
