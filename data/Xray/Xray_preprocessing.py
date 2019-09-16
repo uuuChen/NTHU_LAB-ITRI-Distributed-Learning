@@ -66,11 +66,7 @@ def resize(images_dir_path='sample/', image_size=(256, 256)):
     # convert (1024, 1024) to (256, 256)
     print('resize @ {}'.format(images_dir_path))
 
-    # sort file
-    sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
-
     image_file_names = os.listdir(images_dir_path)
-    image_file_names.sort(key=sort_key)
 
     for file_name in image_file_names:
         # print('convert {}'.format(file_name))
@@ -87,11 +83,7 @@ def to_gray(images_dir_path='sample/'):
     # convert (1024, 1024, 4) to (1024, 1204)
     print('to_gray @ {}'.format(images_dir_path))
 
-    # sort file
-    sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
-
     image_file_names = os.listdir(images_dir_path)
-    image_file_names.sort(key=sort_key)
 
     convert = 0
     for file_name in image_file_names:
@@ -218,14 +210,5 @@ def overview(images_dir_path='sample/'):
         print('{} : {}'.format(summary[i][0], summary[i][1]))
     print('Total : {}'.format(sum))
 
-<<<<<<< HEAD
-=======
-
-resize('test_no_multilabel/')
-# to_gray('test/')
-# delete_multi_label('test/')
-overview()
-# balance(images_dir_path='test/', limit = 200)
->>>>>>> fbc2bc04b63d6597906940f055e5cdb33014031d
 
 

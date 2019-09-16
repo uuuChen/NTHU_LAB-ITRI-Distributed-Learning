@@ -167,7 +167,7 @@ Xray_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_balanced'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
@@ -181,7 +181,7 @@ Xray_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_balanced'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
