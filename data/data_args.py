@@ -65,6 +65,16 @@ Xray_COMMON_ARGS = {
     'use_gridFS': True,
 }
 
+CatDog_COMMON_ARGS = {
+    'data_name': 'CatDog',
+
+    'dir_path': 'data/CatDog/',
+
+    'label_class_nums': 2,
+
+    'use_gridFS': True,
+}
+
 MNIST_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 DRD_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
@@ -72,6 +82,9 @@ DRD_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 ECG_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 Xray_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
+
+CatDog_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
+
 
 # --------------------------------
 #  PRIVATE dataSet PRIVATE arguments
@@ -167,7 +180,7 @@ Xray_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_balanced'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
@@ -181,11 +194,35 @@ Xray_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'sample'),
+    'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_balanced'),
 
     'images_dir_idx_ptr_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
     'labels_csv_file_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'labels.csv'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+}
+
+CatDog_TRAIN_ARGS = {
+    'train': True,
+
+    'data_type': 'train',
+
+    'images_dir_path': os.path.join(CatDog_COMMON_ARGS['dir_path'], 'train'),
+
+    'images_dir_idx_ptr_path': os.path.join(CatDog_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
+}
+
+CatDog_TEST_ARGS = {
+    'train': False,
+
+    'data_type': 'test',
+
+    'images_dir_path': os.path.join(CatDog_COMMON_ARGS['dir_path'], 'test'),
+
+    'images_dir_idx_ptr_path': os.path.join(CatDog_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
@@ -206,6 +243,9 @@ ECG_TEST_ARGS.update(ECG_COMMON_ARGS)
 
 Xray_TRAIN_ARGS.update(Xray_COMMON_ARGS)
 Xray_TEST_ARGS.update(Xray_COMMON_ARGS)
+
+CatDog_TRAIN_ARGS.update(CatDog_COMMON_ARGS)
+CatDog_TEST_ARGS.update(CatDog_COMMON_ARGS)
 
 
 

@@ -145,7 +145,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'Xray'
+    data_name = 'CatDog'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
