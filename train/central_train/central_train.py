@@ -98,14 +98,16 @@ class Central_Train:
                 total_loss, correct, data_nums, 100. * correct / data_nums))
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
+            return correct
+
 
 
     def record_time(self, hint):
         localtime = time.asctime( time.localtime(time.time()) )
         self.save_acc.write(hint + localtime + '\r\n\n')
 
-    def plot_acc_loss(self):
-        x = np.arange(1,  self.train_args.epochs + 1)
+    def plot_acc_loss(self, end_epoch):
+        x = np.arange(1,  end_epoch)
 
         plt.xlabel("epoch")
         plt.ylabel("loss")
@@ -131,21 +133,39 @@ class Central_Train:
         self._build(data_name=data_name)
         self.record_time('開始時間 : ')
 
+        end_epoch = self.train_args.epochs + 1
+        best_correct = 0
+        check_count = 0
         for epoch in range(1,  self.train_args.epochs + 1):
+            print('{}/{}'.format(epoch, self.train_args.epochs))
             self.epoch = epoch
+
             self._iter_epoch(is_training=True)
-            self._iter_epoch(is_training=False)
+            correct = self._iter_epoch(is_training=False)
+
+            # early stopping
+            if correct > best_correct:
+                best_correct = correct
+                check_count = 0
+
+            else:
+                check_count += 1
+
+            if check_count > 5:
+                print('\nEarly stop at epoch {}\n'.format(epoch))
+                end_epoch = epoch + 1
+                break
 
         self.record_time('結束時間 : ')
         self.save_acc.close()
-        self.plot_acc_loss()
+        self.plot_acc_loss(end_epoch)
 
 
 
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'CatDog'
+    data_name = 'MNIST'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

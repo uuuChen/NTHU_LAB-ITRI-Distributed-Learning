@@ -18,7 +18,7 @@ parser.add_argument('--test-batch-size', type=int, default=512, metavar='N',
 parser.add_argument('--agent-nums', type=int, default=4, metavar='N',
                     help='input agents number (default: 4)')
 
-parser.add_argument('--epochs', type=int, default=10, metavar='N',
+parser.add_argument('--epochs', type=int, default=30, metavar='N',
                     help='number of epochs to train (default: 10)')
 
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
@@ -39,7 +39,7 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 
-parser.add_argument('--log-interval', type=int, default=1, metavar='N',
+parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 
 MNIST_TRAINING_ARGS = parser.parse_args(args=[])
