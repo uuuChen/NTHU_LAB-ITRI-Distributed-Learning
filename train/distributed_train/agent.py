@@ -35,8 +35,8 @@ class Agent(Logger):
             self.train_data_nums = None
             self.test_data_nums = None
         else:
-            self.train_data_nums = self.train_dataSet.get_data_nums_from_database()
-            self.test_data_nums = self.test_dataSet.get_data_nums_from_database()
+            self.train_data_nums = self.train_dataSet.get_usage_data_nums()
+            self.test_data_nums = self.test_dataSet.get_usage_data_nums()
 
         # seeding the CPU for generating random numbers so that the
         torch.manual_seed(self.train_args.seed)
@@ -71,8 +71,8 @@ class Agent(Logger):
         self.test_data_nums = len(self.test_id_list)
 
     def _send_data_nums_to_server(self):
-        train_data_nums = self.train_dataSet.get_data_nums_from_database()
-        test_data_nums = self.test_dataSet.get_data_nums_from_database()
+        train_data_nums = self.train_dataSet.get_usage_data_nums()
+        test_data_nums = self.test_dataSet.get_usage_data_nums()
         self.agent_server_sock.send(train_data_nums, 'train_data_nums')
         self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 

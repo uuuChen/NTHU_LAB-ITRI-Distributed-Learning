@@ -17,10 +17,6 @@ from model.VGGNet import *
 # Train Args Imports
 from train.train_args import *
 
-# Related Training lib import
-from torch.autograd import Variable
-import torch.optim as optim
-import time
 
 class Switch:
 

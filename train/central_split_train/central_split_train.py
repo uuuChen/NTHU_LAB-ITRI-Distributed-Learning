@@ -1,7 +1,7 @@
 
 from train.switch import *
 from torch.autograd import Variable
-
+import torch.optim as optim
 
 class Local_Split_Train:
 
@@ -51,7 +51,7 @@ class Local_Split_Train:
             dataSet = self.test_dataSet
             batch_size = self.train_args.test_batch_size
 
-        data_nums = dataSet.get_data_nums_from_database()
+        data_nums = dataSet.get_usage_data_nums()
 
         trained_data_num = 0
         test_loss = 0
@@ -104,7 +104,6 @@ class Local_Split_Train:
             test_loss /= batches
             print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 test_loss, correct, data_nums, 100. * correct / data_nums))
-
 
     def start_training(self, data_name):
 

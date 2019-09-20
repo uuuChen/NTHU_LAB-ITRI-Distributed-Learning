@@ -8,6 +8,7 @@ data/Xray/test_balanced
 data/Xray/test
 data/CatDog/train
 data/CatDog/test
+data/data_nums
 __pycache__/
 .idea
 .DS_Store

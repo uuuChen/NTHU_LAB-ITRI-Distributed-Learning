@@ -12,6 +12,7 @@ GLOBAL_COMMON_ARGS = {
     'db_test_data_labels_coll_name': 'test_data_labels',
 
     'data_nums_dir_path': 'data/data_nums',
+
 }
 
 # --------------------------------
@@ -28,6 +29,8 @@ MNIST_COMMON_ARGS = {
     'data_length': 28 * 28,
 
     'use_gridFS': False,
+
+    'down_sampling': False,
 }
 
 DRD_COMMON_ARGS = {
@@ -52,6 +55,9 @@ ECG_COMMON_ARGS = {
     'MLP_conn_node_nums': 500,
 
     'use_gridFS': False,
+
+    'down_sampling': False,
+
 }
 
 
@@ -113,6 +119,8 @@ MNIST_TEST_ARGS = {
 DRD_TRAIN_ARGS = {
     'train': True,
 
+    'down_sampling': True,
+
     'data_type': 'train',
 
     # 'images_dir_path': os.path.join(DRD_COMMON_ARGS['dir_path'], 'sample'),
@@ -127,6 +135,8 @@ DRD_TRAIN_ARGS = {
 
 DRD_TEST_ARGS = {
     'train': False,
+
+    'down_sampling': False,
 
     'data_type': 'test',
 
@@ -178,6 +188,8 @@ ECG_TEST_ARGS = {
 Xray_TRAIN_ARGS = {
     'train': True,
 
+    'down_sampling': False,
+
     'data_type': 'train',
 
     'images_dir_path': os.path.join(Xray_COMMON_ARGS['dir_path'], 'train_balanced'),
@@ -191,6 +203,8 @@ Xray_TRAIN_ARGS = {
 
 Xray_TEST_ARGS = {
     'train': False,
+
+    'down_sampling': False,
 
     'data_type': 'test',
 

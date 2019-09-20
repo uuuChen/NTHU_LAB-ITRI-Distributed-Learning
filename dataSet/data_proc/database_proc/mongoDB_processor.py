@@ -137,6 +137,16 @@ class MongoDB_Processor(Logger):
 
         self.__logger.debug('Done !')
 
+    def coll_read_all_labels(self, coll_name):
+        labels = []
+        cursor = self.coll_find_all(coll_name=coll_name)
+        for i, cursor_ in list(enumerate(cursor, start=1)):
+            self.__logger.debug('Read %s Labels' % (int(i) + 1))
+            label = cursor_['label']
+            labels.append(label)
+        self.__logger.debug('Done !')
+        return labels
+
     def coll_read_all(self, coll_name):
 
         """Return all the data and labels in the collection.
@@ -331,6 +341,16 @@ class MongoDB_Processor(Logger):
                 out_file.close()
 
         self.__logger.debug('Done !')
+
+    def gridFS_coll_read_all_labels(self, coll_name):
+        all_grid_outs = self.gridFS_coll_find_all(coll_name)
+        labels = []
+        for i, grid_out in list(enumerate(all_grid_outs)):
+            self.__logger.debug('Read %s Labels' % (int(i) + 1))
+            label = grid_out.label
+            labels.append(label)
+        self.__logger.debug('Done !')
+        return labels
 
     def gridFS_coll_read_batch(self, coll_name, id_list):
 

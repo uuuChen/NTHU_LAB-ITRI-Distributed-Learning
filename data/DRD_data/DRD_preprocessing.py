@@ -1,8 +1,7 @@
 import csv
 import os
-import numpy as np
 from PIL import Image
-import io
+
 
 summary = [
     ['0', 0],
@@ -44,7 +43,6 @@ def resize(images_dir_path='sample/', image_size=(256, 256)):
 
     print('convert {} images'.format(len(image_file_names)))
 
-
 def balance(images_dir_path='sample/', limit = 100000):
     # down sampling the selected directory
     print('balance @ {}, limit is {}'.format(images_dir_path, limit))
@@ -79,6 +77,7 @@ def balance(images_dir_path='sample/', limit = 100000):
                     continue
 
                 summary[int(label[0])] [1] += 1
+
 
     print('delete {} images, remain {}'.format(delete, image_file_nums - delete))
     sum = 0
@@ -118,5 +117,6 @@ def overview(images_dir_path='sample/'):
 
 
 overview('train/')
+
 
 

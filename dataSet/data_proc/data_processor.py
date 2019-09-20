@@ -2,6 +2,7 @@ import os
 import numpy as np
 import torch
 import random
+import collections
 from PIL import Image
 from abc import ABCMeta, abstractmethod
 
@@ -39,6 +40,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.coll_name = data_args['db_data_labels_coll_name']
 
+        self.down_sampling = data_args['down_sampling']
+
         unique_name = data_args['data_type'] + '_' + self.data_name + '_' + __name__
         self.__logger = self.get_logger(unique_name=unique_name,
                                         debug=DEBUG)
@@ -51,7 +54,12 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.data_id_ptr = 0
 
-        self.usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
+        if self.down_sampling:
+            usage_data_ids = self._down_sampling()
+        else:
+            usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
+        self.usage_data_ids = usage_data_ids
+
         if self.shuffle:
             random.shuffle(self.usage_data_ids)
 
@@ -100,16 +108,11 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
     def _get_data_and_labels_from_database(self, batch_size):
 
-        self._make_sure_data_and_labels_in_database()
-
-        if self.is_simulate:
-            data_nums = len(self.usage_data_ids)
-        else:
-            data_nums = self.get_data_nums_from_database()
+        usage_data_nums = self.get_usage_data_nums()
 
         old_id_ptr = self.data_id_ptr
 
-        if old_id_ptr + batch_size >= data_nums:
+        if old_id_ptr + batch_size >= usage_data_nums:
             new_id_ptr = 0
             id_list = self.usage_data_ids[old_id_ptr:]
 
@@ -140,9 +143,6 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         return np.array(preproc_data)
 
-    def _preproc_non_image_data(self, data):
-        pass
-
     def _trans_labels_to_one_hot(self, labels, class_nums):
 
         one_hot_labels = np.zeros((labels.shape[0], class_nums))
@@ -160,11 +160,19 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
     def get_data_nums_from_database(self):
         if self.use_gridFS:
             db_data_nums = self.gridFS_coll_find_all(coll_name=self.coll_name).count()
-
         else:
             db_data_nums = self.coll_find_all(coll_name=self.coll_name).count()
-
         return db_data_nums
+
+    def get_all_labels_from_database(self):
+
+        """ Get all labels in database that have not been shuffled. """
+
+        if self.use_gridFS:
+            all_labels = self.gridFS_coll_read_all_labels(self.coll_name)
+        else:
+            all_labels = self.coll_read_all_labels(self.coll_name)
+        return all_labels
 
     def delete_coll_from_database(self):
 
@@ -176,15 +184,52 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
     def set_usage_data_ids(self, id_list):
 
-        """ When Class "agent"'s attribute "is_simulate" is True, use this function to set "usage_data_ids" with
-            "id_list", and "id_list" is obtained from server.
-
-            "usage_data_ids" is used in function "_get_data_and_labels_from_database". It can decide to read the data
+        """ "usage_data_ids" is used in function "_get_data_and_labels_from_database". It can decide to read the data
             and labels that match these ids from the database.
 
         """
 
         self.usage_data_ids = id_list
+
+    def get_usage_data_nums(self):
+        return len(self.usage_data_ids)
+
+    def _down_sampling(self, bm_idx=2):
+        labels = self.get_all_labels_from_database()
+        labels_nums = {}
+        labels_idxs = {}
+        sample_labels_nums = {}
+        sample_labels_idxs = []
+        idx = 0
+        if not (1 <= abs(bm_idx) <= self.label_class_nums):
+            print('bench_mark index exceeds categories numbers! change the index from ({}) to ({})'.
+                  format(bm_idx, self.label_class_nums))
+            bm_idx = self.label_class_nums
+        if bm_idx < 0:
+            bm_idx += (self.label_class_nums + 1)
+        for label in labels:
+            if label not in labels_nums.keys():
+                labels_nums[label] = 0
+                labels_idxs[label] = []
+            labels_nums[label] += 1
+            labels_idxs[label].append(idx)
+            idx += 1
+        print('origin labels nums: {}'.format(labels_nums))  # >> {0: 6149, 1: 588, 2: 1283, 4: 166, 3: 221}
+        sorted_labels_nums_list = sorted(labels_nums.items(), key=lambda x: x[1], reverse=True)  # 由資料數量高排到低
+        bm_sample_nums = sorted_labels_nums_list[bm_idx - 1][1]
+        sorted_labels_nums = collections.OrderedDict(sorted_labels_nums_list)
+        for sorted_cat_idx, label in list(enumerate(sorted_labels_nums.keys(), start=1)):
+            if sorted_cat_idx <= bm_idx:
+                sample_labels_nums[label] = bm_sample_nums
+            else:
+                sample_labels_nums[label] = sorted_labels_nums[label]
+        print('sample labels nums: {}'.format(dict(sorted(sample_labels_nums.items(), key=lambda x: x[0]))))  # >> {0:
+        # 166, 1: 166, 2: 166, 3: 166, 4: 166}
+        for label in labels_idxs.keys():
+            random.shuffle(labels_idxs[label])
+            sample_labels_idxs += labels_idxs[label][:sample_labels_nums[label]]
+        sample_labels_idxs.sort()
+        return sample_labels_idxs
 
     @abstractmethod
     def _get_data_and_labels_from_local(self):

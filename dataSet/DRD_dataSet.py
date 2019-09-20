@@ -1,4 +1,5 @@
 import csv
+import collections
 
 from dataSet.data_proc.data_processor import *
 
@@ -9,8 +10,7 @@ class DRD_DataSet(Data_Processor):
 
     def __init__(self, data_args):
 
-        self.__logger = self.get_logger(unique_name=__name__,
-                                        debug=DEBUG)
+        self.__logger = self.get_logger(unique_name=__name__, debug=DEBUG)
 
         self.images_dir_path = data_args['images_dir_path']
 
@@ -23,7 +23,6 @@ class DRD_DataSet(Data_Processor):
         Data_Processor.__init__(self, data_args=data_args)
 
     def _read_labels_csv_file(self, csv_file_path, image_file_paths):
-
 
         """Read the labels corresponding to image_file_paths from csv file which path is "csv_file_path".
 
@@ -72,13 +71,10 @@ class DRD_DataSet(Data_Processor):
         self.__logger.debug('[Get DRD Data And Labels]')
 
         image_names_sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
-        image_file_paths = self._read_images_directory(images_dir_path=self.images_dir_path,
-                                                       images_dir_idx_ptr_path=self.images_dir_idx_ptr_path,
-                                                       sort_key=image_names_sort_key,
-                                                       get_image_paths=True)
+        image_file_paths = self._read_images_directory(self.images_dir_path, self.images_dir_idx_ptr_path,
+                                                       sort_key=image_names_sort_key, get_image_paths=True)
 
-        image_labels = self._read_labels_csv_file(csv_file_path=self.labels_csv_file_path,
-                                                  image_file_paths=image_file_paths)
+        image_labels = self._read_labels_csv_file(self.labels_csv_file_path, image_file_paths)
 
         self.__logger.debug('[Get DRD Data And Labels Successfully]')
 
@@ -104,6 +100,7 @@ class DRD_DataSet(Data_Processor):
                                                                  labels=labels)
 
         return data, labels
+
 
 
 

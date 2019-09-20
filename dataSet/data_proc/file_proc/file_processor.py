@@ -41,8 +41,6 @@ class File_Processor(Logger):
         if old_dir_idx_ptr + batch_size >= image_file_nums:
             new_dir_idx_ptr = batch_size - image_file_nums + old_dir_idx_ptr
             batch_image_file_names = image_file_names[old_dir_idx_ptr:] + image_file_names[:new_dir_idx_ptr]
-
-
         else:
             new_dir_idx_ptr = old_dir_idx_ptr + batch_size
             batch_image_file_names = image_file_names[old_dir_idx_ptr: new_dir_idx_ptr]

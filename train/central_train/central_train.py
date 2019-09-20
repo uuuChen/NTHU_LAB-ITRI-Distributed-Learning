@@ -1,8 +1,9 @@
-
 from train.switch import *
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 import numpy as np
+import torch.optim as optim
+import time
 
 class Central_Train:
 
@@ -36,9 +37,7 @@ class Central_Train:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
 
-        self.optim = optim.SGD(self.model.parameters(), lr=self.train_args.lr,  momentum=self.train_args.momentum)
-
-
+        self.optim = optim.Adam(self.model.parameters(), lr=self.train_args.lr)
 
     def _iter_epoch(self, is_training):
 
@@ -51,7 +50,7 @@ class Central_Train:
             dataSet = self.test_dataSet
             batch_size = self.train_args.test_batch_size
 
-        data_nums = dataSet.get_data_nums_from_database()
+        data_nums = dataSet.get_usage_data_nums()
 
         trained_data_num = 0
         total_loss = 0
@@ -100,10 +99,8 @@ class Central_Train:
                 total_loss, correct, data_nums, 100. * correct / data_nums))
             return correct
 
-
-
     def record_time(self, hint):
-        localtime = time.asctime( time.localtime(time.time()) )
+        localtime = time.asctime( time.localtime(time.time()))
         self.save_acc.write(hint + localtime + '\r\n\n')
 
     def plot_acc_loss(self, end_epoch):
@@ -137,9 +134,8 @@ class Central_Train:
         best_correct = 0
         check_count = 0
         for epoch in range(1,  self.train_args.epochs + 1):
-            print('{}/{}'.format(epoch, self.train_args.epochs))
+            print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
             self.epoch = epoch
-
             self._iter_epoch(is_training=True)
             correct = self._iter_epoch(is_training=False)
 
@@ -161,11 +157,10 @@ class Central_Train:
         self.plot_acc_loss(end_epoch)
 
 
-
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'MNIST'
+    data_name = 'DRD'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

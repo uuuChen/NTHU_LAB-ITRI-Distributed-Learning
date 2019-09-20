@@ -103,13 +103,13 @@ parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
                     help='input batch size for training (default: 100)')
 
 parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
-                    help='input batch size for training (default: 500)')
+                    help='input batch size for training (default: 100)')
 
 parser.add_argument('--epochs', type=int, default=10, metavar='N',
                     help='number of epochs to train (default: 10)')
 
-parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
-                    help='learning rate (default: 0.1)')
+parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+                    help='learning rate (default: 0.001)')
 
 parser.add_argument('--image-size', type=int, default=(100, 100), metavar='N',
                     help='image size (width, height) for training and testing (default: (100, 100))', nargs='+')
