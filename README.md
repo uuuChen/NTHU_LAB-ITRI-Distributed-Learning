@@ -9,6 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 09/24 12:50"
+1. <新增> | "Xray_augmentation.py" 資料增強功能
+    實現映射、亮暗
+1. <更動> | "Xray_preprocessing.py" 
+    根據增強資料，csv 中一筆 label 可以對應到多筆 img
+    
 #### "Edward1997 09/18 12:50"
 1. <新增> | "central_train.py" early stop 功能
 
