@@ -55,8 +55,8 @@ Xray_Augmentation = {''}
 #     fill_mode='nearest'
 # )
 
-from_path = 'images_1~11'
-to_path = 'train'
+from_path = 'images_01~11'
+to_path = 'sample_4'
 sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
 image_file_names = os.listdir(from_path)
@@ -80,8 +80,40 @@ random.seed(1)
 random.shuffle(data)
 list(zip(*data))
 
+Pneumothorax_count = 0
 for data_ in data:
-    if data_[1] == 'Emphysema':
+    aug_num = 0
+    if data_[1] == 'Hernia':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 19
+    elif data_[1] == 'Pneumonia':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 6
+    elif data_[1] == 'Fibrosis':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 2
+    elif data_[1] == 'Edema':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 3
+    elif data_[1] == 'Emphysema':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 2
+    elif data_[1] == 'Cardiomegaly':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 1
+    elif data_[1] == 'Pleural_Thickening':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 1
+    elif data_[1] == 'Consolidation':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        aug_num = 1
+    elif data_[1] == 'Pneumothorax':
+        print('augmentation on {} with label {}'.format(data_[0], data_[1]))
+        if Pneumothorax_count < 30:
+            aug_num = 1
+            Pneumothorax_count += 1
+
+    if aug_num > 0:
         img_path = os.path.join(from_path, data_[0])
         img = load_img(img_path)  # this is a PIL image, please replace to your own file path
         x = img_to_array(img)  # this is a Numpy array with shape (3, 150, 150)
@@ -95,8 +127,7 @@ for data_ in data:
             fill_mode='nearest'
         )
         i = 0
-        print(data_[0])
         for batch in datagen.flow(x, batch_size=1, save_to_dir=to_path, save_prefix=data_[0].split('.')[0], save_format='png'):
             i += 1
-            if i > 0:
+            if i >= aug_num:
                 break  # otherwise the generator would loop indefinitely

@@ -70,12 +70,14 @@ def resize(images_dir_path='sample/', image_size=(256, 256)):
 
     image_file_names = os.listdir(images_dir_path)
 
+    i = 0
     for file_name in image_file_names:
-        # print('convert {}'.format(file_name))
+        i += 1
+        print('convert {}/{}'.format(i, len(image_file_names)))
         file_path = os.path.join(images_dir_path, file_name)
         # read img
         img = Image.open(file_path)
-        img.thumbnail(image_size)
+        img = img.resize(image_size)
         img.save(file_path)
 
     print('convert {} images'.format(len(image_file_names)))
@@ -88,7 +90,10 @@ def to_gray(images_dir_path='sample/'):
     image_file_names = os.listdir(images_dir_path)
 
     convert = 0
+    i = 0
     for file_name in image_file_names:
+        i += 1
+        print('convert {}/{}'.format(i, len(image_file_names)))
         file_path = os.path.join(images_dir_path, file_name)
         # read img
         img = Image.open(file_path)
@@ -103,7 +108,43 @@ def to_gray(images_dir_path='sample/'):
             img.save(file_path)
 
             convert += 1
-            # print('convert {}'.format(file_name))
+            print('convert {}'.format(file_name))
+
+    print('convert {} images, total {} images'.format(convert, len(image_file_names)))
+
+
+def to_3_channel(images_dir_path='sample/'):
+    # convert (1024, 1024, 4) to (1024, 1204)
+    print('to_gray @ {}'.format(images_dir_path))
+
+    image_file_names = os.listdir(images_dir_path)
+
+    convert = 0
+    t = 0
+    for file_name in image_file_names:
+        t += 1
+        print('convert {}/{}'.format(t, len(image_file_names)))
+        file_path = os.path.join(images_dir_path, file_name)
+        # read img
+        img = Image.open(file_path)
+        # covert img to np
+        data = np.array(img)
+
+        if len(data.shape) < 3:
+            data_ = np.zeros(((data.shape[0], data.shape[1], 3)))
+            for i in range(data.shape[0]):
+                for j in range(data.shape[1]):
+                    data_[i][j][0] = data[i][j]
+                    data_[i][j][1] = data[i][j]
+                    data_[i][j][2] = data[i][j]
+            data = np.array(data_)
+            # convert np to img
+            img = Image.fromarray(np.uint8(data))
+            # replace the original img by preprocessed img
+            img.save(file_path)
+
+            convert += 1
+            print('convert {}'.format(file_name))
 
     print('convert {} images, total {} images'.format(convert, len(image_file_names)))
 
@@ -217,11 +258,11 @@ def overview(images_dir_path='sample/'):
     print('Total : {}'.format(sum))
 
 
-def pickout(from_path='total/', to_path='train/', limit=1000000, seed=1):
+def pickout(from_path='images_01~11/', to_path='sample_4/', limit=2000, seed=1):
 
     print('pick out datas from {} to {}'.format(from_path, to_path))
 
-    reset()
+    # reset()
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
@@ -263,8 +304,9 @@ def pickout(from_path='total/', to_path='train/', limit=1000000, seed=1):
             summary[Xray_class_id[data_[1]]][1] += 1
 
 
-delete_multi_label('images_12')
-# pickout(from_path='train', to_path='sample_3', limit=1000, seed=5)
+resize(images_dir_path='sample', image_size=(224, 224))
+to_3_channel('sample')
+
 
 
 
