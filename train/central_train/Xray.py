@@ -14,58 +14,60 @@ import time
 
 # Model Imports
 from model.VGGNet import *
-
-# DataSet Imports
-from dataSet.data_proc import data_processor
+from model.AlexNet import *
+import torchvision.models as models
 
 os.chdir('../../')
 
-# training settings
-parser = argparse.ArgumentParser()
+# 訓練模型 : VGG or AlexNet
+# VGG class_num 為此資料集的類別數量
+model = models.vgg16(pretrained=True)
+# AlexNet
+# model = AlexNet()
 
+# 資料路徑
+train_img_path = 'data/Xray/sample_5'
+test_img_path = 'data/Xray/sample_test2'
+label_csv_path = 'data/Xray/labels.csv'
+
+# 訓練參數設定
+parser = argparse.ArgumentParser()
+# batch size GPU 記憶體不足時調小
 parser.add_argument('--batch-size', type=int, default=10, metavar='N',
                     help='input batch size for training (default: 512)')
-
+# learning rate 嘗試 0.01 ~ 0.001
+parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                    help='learning rate (default: 0.01)')
+# 其他參數
 parser.add_argument('--epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 30)')
-
-parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
-                    help='learning rate (default: 0.01)')
-
 parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
-
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
-
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-
-parser.add_argument('--log-interval', type=int, default=100, metavar='N',
+parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
-
 train_args = parser.parse_args(args=[])
-
-
-#plot
-save_acc = open("record/Xray_acc.txt", "w")
-train_loss = []
-train_acc = []
-test_loss = []
-test_acc = []
-
-# train args
-model = VGG('VGG19', 15)
 train_args.cuda = not train_args.no_cuda and torch.cuda.is_available()
 torch.manual_seed(train_args.seed)
 if train_args.cuda:
     torch.cuda.manual_seed(train_args.seed)  # set a random seed for the current GPU
     model.cuda()  # move all model parameters to the GPU
 
+# 畫圖參數
+save_acc = open("record/Xray_acc.txt", "w")
+train_loss = []
+train_acc = []
+test_loss = []
+test_acc = []
+
+# 優化器
 optim = optim.Adam(model.parameters(), lr=train_args.lr)
 
-# dataSet
-Xray_class_id = {
+# 資料及編號字典，若資料集所給類別不為數字，需自製對照字典如下
+class_id = {
     'Hernia': 0,
     'Pneumonia': 1,
     'Fibrosis': 2,
@@ -83,29 +85,21 @@ Xray_class_id = {
     'No Finding': 14,
 }
 
-summary = [
-    ['Hernia', 0],
-    ['Pneumonia', 0],
-    ['Fibrosis', 0],
-    ['Edema', 0],
-    ['Emphysema', 0],
-    ['Cardiomegaly', 0],
-    ['Pleural_Thickening', 0],
-    ['Consolidation', 0],
-    ['Pneumothorax', 0],
-    ['Mass', 0],
-    ['Nodule', 0],
-    ['Atelectasis', 0],
-    ['Effusion', 0],
-    ['Infiltration', 0],
-    ['No Finding', 0],
-]
 def get_dataSet(from_path):
+    # 從資料夾中取出所有圖片路徑
+    # 從 .csv 中取出圖片對應類別
+
+    # 圖片名稱排序規則
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
+    # 從目標資料夾讀出所有檔案名稱
+    # 資料夾最好只放該資料集的圖片，以免取到不需要的檔案
     image_file_names = os.listdir(from_path)
+    # 將所有名稱依指定規則排序
     image_file_names.sort(key=sort_key)
+    # 取得圖片數目
     image_file_nums = len(image_file_names)
+
     image_labels = []
     id = 0
     with open('data/Xray/labels.csv', newline='') as csvfile:
@@ -147,10 +141,10 @@ def _iter_epoch(is_training, epoch):
 
     batch_size = train_args.batch_size
     if is_training:
-        from_path = 'data/Xray/sample_3'
+        from_path = train_img_path
         model.train()
     else:
-        from_path = 'data/Xray/images_12'
+        from_path = test_img_path
         model.eval()
     dataSet = get_dataSet(from_path)
 
@@ -164,13 +158,13 @@ def _iter_epoch(is_training, epoch):
 
         datas = []
         targets = []
-        image_size = (256, 256)
+        image_size = (224, 224)
         for data_, target_ in data:
             data_ = os.path.join(from_path, data_)
             data_ = np.array(Image.open(data_).resize(image_size)) / 255
-            data_ = data_.reshape(1, image_size[0], image_size[1])
+            data_ = data_.transpose((2, 0, 1))
             datas.append(data_)
-            targets.append(Xray_class_id[target_])
+            targets.append(class_id[target_])
         data, target = np.array(datas), np.array(targets)
         data, target = torch.from_numpy(data), torch.from_numpy(target)
         data, target = Variable(data).float(), Variable(target).long()
@@ -261,7 +255,7 @@ for epoch in range(1,  train_args.epochs + 1):
     else:
         check_count += 1
 
-    if check_count > 10:
+    if check_count >= 10 and epoch >= 20:
         print('\nEarly stop at epoch {}\n'.format(epoch))
         end_epoch = epoch + 1
         break
