@@ -9,6 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 10/1 19:00"
+1. <新增> | "train/DRD": 以數據集增強集中式訓練 DRD，並且沒有經過 dataBase
+2. <新增> | "data_processor.py" 裡 "_up_sampling": 根據 local 的 csv 檔，
+決定要如何數據增強。benchmark 為 n 表示以第 n 高的 label 為基準，讓比基準少的
+label 進行數據增強
+
 #### "Edward1997 09/24 12:50"
 1. <新增> | "Xray_augmentation.py" 資料增強功能
     實現映射、亮暗

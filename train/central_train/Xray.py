@@ -155,7 +155,6 @@ def _iter_epoch(is_training, epoch):
     batches = (data_nums - 1) // batch_size + 1
     for batch_idx in range(1, batches + 1):
         data = get_data_label(dataSet, batch_size)
-
         datas = []
         targets = []
         image_size = (224, 224)

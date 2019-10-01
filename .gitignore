@@ -1,6 +1,7 @@
 test*
 data/DRD_data/train
 data/DRD_data/test
+data/DRD_data/
 data/ECG_data/
 data/Xray/train_balanced
 data/Xray/train

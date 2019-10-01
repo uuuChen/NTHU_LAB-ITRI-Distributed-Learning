@@ -1,0 +1,6 @@
+開始時間 : Tue Oct  1 18:53:06 2019
+
+Epoch 1 
+Train set: Average loss: 1.6071, Accuracy: 4/18 (22%)
+Test set: Average loss: 1.4485, Accuracy: 2/10 (20%)
+
