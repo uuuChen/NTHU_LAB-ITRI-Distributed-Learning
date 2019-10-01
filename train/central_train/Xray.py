@@ -21,7 +21,7 @@ os.chdir('../../')
 
 # 訓練模型 : VGG or AlexNet
 # VGG class_num 為此資料集的類別數量
-model = models.vgg16(pretrained=True)
+model = VGG('VGG16', class_num=15)
 # AlexNet
 # model = AlexNet()
 
@@ -33,13 +33,13 @@ label_csv_path = 'data/Xray/labels.csv'
 # 訓練參數設定
 parser = argparse.ArgumentParser()
 # batch size GPU 記憶體不足時調小
-parser.add_argument('--batch-size', type=int, default=10, metavar='N',
+parser.add_argument('--batch-size', type=int, default=5, metavar='N',
                     help='input batch size for training (default: 512)')
 # learning rate 嘗試 0.01 ~ 0.001
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 # 其他參數
-parser.add_argument('--epochs', type=int, default=50, metavar='N',
+parser.add_argument('--epochs', type=int, default=100, metavar='N',
                     help='number of epochs to train (default: 30)')
 parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                     help='SGD momentum (default: 0.5)')
@@ -102,6 +102,7 @@ def get_dataSet(from_path):
 
     image_labels = []
     id = 0
+    # 讀出所有 label 與圖片對應，再與資料夾中所有圖片名稱對應
     with open('data/Xray/labels.csv', newline='') as csvfile:
         rows = csv.reader(csvfile)
         for row in rows:
@@ -109,6 +110,7 @@ def get_dataSet(from_path):
                 break
             image_csv_name = row[0].split('_')
             image_file_name = image_file_names[id].split('_')
+            # 若對應到名字，將該組 label 與圖片名稱記下
             while image_csv_name[0] == image_file_name[0] and image_csv_name[1].split('.')[0] == image_file_name[1].split('.')[0]:
                 label = row[1]
                 image_labels.append(label)
@@ -116,7 +118,7 @@ def get_dataSet(from_path):
                 if id == image_file_nums:
                     break
                 image_file_name = image_file_names[id].split('_')
-
+    # 將資料以配對好的形式洗亂
     dataSet = list(zip(image_file_names, image_labels))
     random.seed(3)
     random.shuffle(dataSet)
@@ -127,11 +129,14 @@ def get_dataSet(from_path):
 
 dataSet_id = 0
 def get_data_label(dataSet, batch_size):
+    # 根據batch_size大小，讀取圖片
     global dataSet_id
     if dataSet_id+batch_size < len(dataSet):
+        # 若剩餘的數量 > batch_size，讀取一個 batch_size
         data = dataSet[dataSet_id:dataSet_id+batch_size]
         dataSet_id += batch_size
     else:
+        # 若剩餘的數量 < batch_size，讀取到資料尾
         data = dataSet[dataSet_id:]
         dataSet_id = 0
 
@@ -140,27 +145,34 @@ def get_data_label(dataSet, batch_size):
 def _iter_epoch(is_training, epoch):
 
     batch_size = train_args.batch_size
+    # 判斷訓練或測試階段
     if is_training:
         from_path = train_img_path
         model.train()
     else:
         from_path = test_img_path
         model.eval()
+    # 取得訓練/測試資料集
     dataSet = get_dataSet(from_path)
 
-    data_nums = len(dataSet)
-    trained_data_num = 0
-    total_loss = 0
-    correct = 0
-    batches = (data_nums - 1) // batch_size + 1
+    data_nums = len(dataSet)  # 資料總數
+    trained_data_num = 0  # 紀錄已訓練資料數量
+    total_loss = 0  # 紀錄 loss 總和
+    correct = 0  # 紀錄正確資料總數
+    batches = (data_nums - 1) // batch_size + 1  # 一次訓練一個 batch_size，總共需要跑幾次迴圈
     for batch_idx in range(1, batches + 1):
+        # 取得一個 batch_size 的圖片名稱與對應 label
         data = get_data_label(dataSet, batch_size)
+
         datas = []
         targets = []
         image_size = (224, 224)
         for data_, target_ in data:
+            # 根據名稱 + 路徑讀取圖片
             data_ = os.path.join(from_path, data_)
+            # 每個點為 0 ~ 255，需要 / 255
             data_ = np.array(Image.open(data_).resize(image_size)) / 255
+            # 調整資料維度順序
             data_ = data_.transpose((2, 0, 1))
             datas.append(data_)
             targets.append(class_id[target_])
@@ -174,23 +186,29 @@ def _iter_epoch(is_training, epoch):
         if is_training:
             optim.zero_grad()
 
+        # 輸資料進模型
         output = model(data)
+        # 計算 loss
         loss = F.cross_entropy(output, target)
 
+        # 訓練階段要更新參數
         if is_training:
             loss.backward()
             optim.step()
 
+        # 統計正確數量、loss
         pred = output.data.max(1)[1]
         correct += pred.eq(target.data).cpu().sum()
         total_loss += loss.item()
 
+        # 紀錄效能
         if is_training:
             trained_data_num += data.shape[0]
             if batch_idx % train_args.log_interval == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item()))
 
+    # 紀錄效能
     total_loss /= batches
     if is_training:
         train_acc.append(100. * correct / data_nums)
@@ -207,10 +225,12 @@ def _iter_epoch(is_training, epoch):
         return correct
 
 def record_time(hint):
+    # 紀錄開始/結束時間
     localtime = time.asctime( time.localtime(time.time()) )
     save_acc.write(hint + localtime + '\r\n\n')
 
 def plot_acc_loss(end_epoch):
+    # 繪製正確率與 loss 圖
     x = np.arange(1,  end_epoch)
 
     plt.xlabel("epoch")
@@ -254,7 +274,7 @@ for epoch in range(1,  train_args.epochs + 1):
     else:
         check_count += 1
 
-    if check_count >= 10 and epoch >= 20:
+    if check_count >= 10 and epoch >= 50:
         print('\nEarly stop at epoch {}\n'.format(epoch))
         end_epoch = epoch + 1
         break
