@@ -9,6 +9,8 @@ data/Xray/test_balanced
 data/Xray/test
 data/CatDog/train
 data/CatDog/test
+data/OCT/sample_1
+data/OCT/sample_test1
 data/data_nums
 __pycache__/
 .idea

@@ -46,7 +46,7 @@ class Agent(Logger):
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
 
-        self.optim = torch.optim.SGD(self.model.parameters(), lr=self.train_args.lr, momentum=self.train_args.momentum)
+        self.optim = torch.optim.Adam(self.model.parameters(), lr=self.train_args.lr)
 
     def _recv_agents_attrs_from_server(self):
         # receive own IP and distributed port
@@ -73,6 +73,7 @@ class Agent(Logger):
     def _send_data_nums_to_server(self):
         train_data_nums = self.train_dataSet.get_usage_data_nums()
         test_data_nums = self.test_dataSet.get_usage_data_nums()
+        print('train_data_nums : {} test_data_nums : {}'.format(train_data_nums, test_data_nums))
         self.agent_server_sock.send(train_data_nums, 'train_data_nums')
         self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 

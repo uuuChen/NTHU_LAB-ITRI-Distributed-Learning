@@ -5,6 +5,7 @@ from dataSet.DRD_dataSet import DRD_DataSet
 from dataSet.Xray_dataSet import Xray_DataSet
 from dataSet.ECG_dataSet import ECG_DataSet
 from dataSet.CatDog_dataSet import CatDog_DataSet
+from dataSet.OCT_dataSet import OCT_DataSet
 # import data arguments
 from data.data_args import *
 
@@ -85,6 +86,18 @@ class Switch:
             test_data_args = CatDog_TEST_ARGS
 
             train_args = CatDog_TRAINING_ARGS
+
+            central_model = VGG('VGG16', train_data_args['label_class_nums'])
+            server_model = Server_VGG('VGG16', train_data_args['label_class_nums'])
+            agent_model = Agent_VGG('VGG16', train_data_args['label_class_nums'])
+
+        elif data_name == 'OCT':
+
+            dataSet = OCT_DataSet
+            train_data_args = OCT_TRAIN_ARGS
+            test_data_args = OCT_TEST_ARGS
+
+            train_args = OCT_TRAINING_ARGS
 
             central_model = VGG('VGG16', train_data_args['label_class_nums'])
             server_model = Server_VGG('VGG16', train_data_args['label_class_nums'])

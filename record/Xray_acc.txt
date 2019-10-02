@@ -1,0 +1,84 @@
+開始時間 : Thu Sep 26 17:19:54 2019
+
+Epoch 1 
+Train set: Average loss: 474495248.1592, Accuracy: 73/134 (54%)
+Test set: Average loss: 1277206.6786, Accuracy: 106/134 (79%)
+
+Epoch 2 
+Train set: Average loss: 204062.6473, Accuracy: 85/134 (63%)
+Test set: Average loss: 5960.0261, Accuracy: 106/134 (79%)
+
+Epoch 3 
+Train set: Average loss: 23359.9487, Accuracy: 86/134 (64%)
+Test set: Average loss: 2978.4457, Accuracy: 106/134 (79%)
+
+Epoch 4 
+Train set: Average loss: 1695.7409, Accuracy: 82/134 (61%)
+Test set: Average loss: 649.4164, Accuracy: 106/134 (79%)
+
+Epoch 5 
+Train set: Average loss: 429.6495, Accuracy: 74/134 (55%)
+Test set: Average loss: 20.0854, Accuracy: 106/134 (79%)
+
+Epoch 6 
+Train set: Average loss: 7.0649, Accuracy: 98/134 (73%)
+Test set: Average loss: 1.0498, Accuracy: 106/134 (79%)
+
+Epoch 7 
+Train set: Average loss: 1.1741, Accuracy: 106/134 (79%)
+Test set: Average loss: 1.0528, Accuracy: 106/134 (79%)
+
+Epoch 8 
+Train set: Average loss: 1.1121, Accuracy: 106/134 (79%)
+Test set: Average loss: 1.0002, Accuracy: 106/134 (79%)
+
+Epoch 9 
+Train set: Average loss: 1.1168, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9659, Accuracy: 106/134 (79%)
+
+Epoch 10 
+Train set: Average loss: 1.0666, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9832, Accuracy: 106/134 (79%)
+
+Epoch 11 
+Train set: Average loss: 1.0996, Accuracy: 106/134 (79%)
+Test set: Average loss: 1.0700, Accuracy: 106/134 (79%)
+
+Epoch 12 
+Train set: Average loss: 1.0596, Accuracy: 106/134 (79%)
+Test set: Average loss: 1.0133, Accuracy: 106/134 (79%)
+
+Epoch 13 
+Train set: Average loss: 1.0969, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9488, Accuracy: 106/134 (79%)
+
+Epoch 14 
+Train set: Average loss: 0.9947, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9381, Accuracy: 106/134 (79%)
+
+Epoch 15 
+Train set: Average loss: 1.0126, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9328, Accuracy: 106/134 (79%)
+
+Epoch 16 
+Train set: Average loss: 0.9369, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9364, Accuracy: 106/134 (79%)
+
+Epoch 17 
+Train set: Average loss: 1.0268, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9334, Accuracy: 106/134 (79%)
+
+Epoch 18 
+Train set: Average loss: 0.9706, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9309, Accuracy: 106/134 (79%)
+
+Epoch 19 
+Train set: Average loss: 1.0028, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9325, Accuracy: 106/134 (79%)
+
+Epoch 20 
+Train set: Average loss: 1.0207, Accuracy: 106/134 (79%)
+Test set: Average loss: 0.9314, Accuracy: 106/134 (79%)
+
+結束時間 : Thu Sep 26 17:20:35 2019
+

@@ -5,9 +5,6 @@ import random
 import collections
 from PIL import Image
 from abc import ABCMeta, abstractmethod
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-from keras.preprocessing.image import ImageDataGenerator
 
 from dataSet.data_proc.database_proc.mongoDB_processor import MongoDB_Processor
 from dataSet.data_proc.file_proc.file_processor import File_Processor
@@ -62,6 +59,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
             usage_data_ids = self._down_sampling()
         else:
             usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
+            print('usage_data_ids : {}'.format(len(usage_data_ids)))
         self.usage_data_ids = usage_data_ids
 
         if self.shuffle:

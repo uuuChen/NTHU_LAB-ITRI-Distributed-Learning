@@ -81,6 +81,16 @@ CatDog_COMMON_ARGS = {
     'use_gridFS': True,
 }
 
+OCT_COMMON_ARGS = {
+    'data_name': 'OCT',
+
+    'dir_path': 'data/OCT/',
+
+    'label_class_nums': 5,
+
+    'use_gridFS': True,
+}
+
 MNIST_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 DRD_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
@@ -90,6 +100,8 @@ ECG_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 Xray_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 CatDog_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
+
+OCT_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 
 # --------------------------------
@@ -241,6 +253,35 @@ CatDog_TEST_ARGS = {
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
+
+OCT_TRAIN_ARGS = {
+    'train': True,
+
+    'down_sampling': False,
+
+    'data_type': 'train',
+
+    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample_1'),
+
+    'images_dir_idx_ptr_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
+}
+
+OCT_TEST_ARGS = {
+    'train': False,
+
+    'down_sampling': False,
+
+    'data_type': 'test',
+
+    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample_test1'),
+
+    'images_dir_idx_ptr_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
+
+    'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+}
+
 # --------------------------------
 #  merge dataSET COMMON and PRIVATE arguments
 # --------------------------------
@@ -261,5 +302,7 @@ Xray_TEST_ARGS.update(Xray_COMMON_ARGS)
 CatDog_TRAIN_ARGS.update(CatDog_COMMON_ARGS)
 CatDog_TEST_ARGS.update(CatDog_COMMON_ARGS)
 
+OCT_TRAIN_ARGS.update(OCT_COMMON_ARGS)
+OCT_TEST_ARGS.update(OCT_COMMON_ARGS)
 
 

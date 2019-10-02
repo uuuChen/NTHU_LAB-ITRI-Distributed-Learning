@@ -51,7 +51,7 @@ class Server(Logger):
         if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
-        self.optim = optim.SGD(self.model.parameters(),  lr=self.train_args.lr, momentum=self.train_args.momentum)
+        self.optim = optim.Adam(self.model.parameters(),  lr=self.train_args.lr)
 
     def _conn_to_agents(self):
 
