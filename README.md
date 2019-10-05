@@ -9,6 +9,9 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 10/1 22:10"
+1. <新增> | "OCT_dataSet.py", 以及相關 code 使其可進行分散式訓練
+
 #### "uuuChen 10/1 19:00"
 1. <新增> | "train/DRD": 以數據集增強集中式訓練 DRD，並且沒有經過 dataBase
 2. <新增> | "data_processor.py" 裡 "_up_sampling": 根據 local 的 csv 檔，
@@ -39,7 +42,7 @@ label 進行數據增強
 2. <更動> | 'server.py': 與  "Edward1997 09/11 9:20" 的更動相同
 
 #### "Edward1997 09/11 9:20"
-1. <更動> | "central_train.py"
+1. <除錯> | "central_train.py"
     test_loss += loss --> test_loss += loss.item()
     減緩記憶體不足問題
     在更動前，Xray batch_size = 1, image_size = (128, 128) 也訓練不起來
