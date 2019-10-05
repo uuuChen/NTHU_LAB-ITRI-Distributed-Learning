@@ -165,7 +165,7 @@ class Central_Train:
         if normalize:
             plt.savefig("record/" + self.data_name + "_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
-            plt.savefig("record/" + self.data_name + "_confusion_matrix.png", dpi=300, format="png")
+            plt.savefig("record/" + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
 
 
     def plot_acc_loss(self, end_epoch):
@@ -179,7 +179,7 @@ class Central_Train:
         plt.plot(x, np.array(self.train_loss), label='train')
         plt.plot(x, np.array(self.test_loss), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_loss.png", dpi=300, format="png")
+        plt.savefig("record/" + self.data_name + "_central_loss.png", dpi=300, format="png")
 
         plt.figure()
         plt.xlabel("epoch")
@@ -189,7 +189,7 @@ class Central_Train:
         plt.plot(x, np.array(self.train_acc), label='train')
         plt.plot(x, np.array(self.test_acc), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_acc.png", dpi=300, format="png")
+        plt.savefig("record/" + self.data_name + "_central_acc.png", dpi=300, format="png")
 
     def start_training(self, data_name):
 
