@@ -12,6 +12,7 @@
 
 #### "Edward1997 10/05 11:55"
 1. <新增> | "central_train" 函數 plot_confusion_matrix，紀錄 confusion_matrix
+須在各 dataSet.py 中新增 self.class_id 參數
 
 #### "uuuChen 10/1 22:10"
 1. <新增> | "OCT_dataSet.py", 以及相關 code 使其可進行分散式訓練

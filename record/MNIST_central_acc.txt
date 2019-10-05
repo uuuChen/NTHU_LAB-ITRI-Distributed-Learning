@@ -1,12 +1,12 @@
-開始時間 : Sat Oct  5 11:54:05 2019
+開始時間 : Sat Oct  5 11:58:06 2019
 
 Epoch 1 
-Train set: Average loss: 1.1842, Accuracy: 38658/60000 (64%)
-Test set: Average loss: 0.1972, Accuracy: 9387/10000 (93%)
+Train set: Average loss: 1.1524, Accuracy: 38687/60000 (64%)
+Test set: Average loss: 0.2110, Accuracy: 9288/10000 (92%)
 
 Epoch 2 
-Train set: Average loss: 0.1754, Accuracy: 56728/60000 (94%)
-Test set: Average loss: 0.1391, Accuracy: 9587/10000 (95%)
+Train set: Average loss: 0.1797, Accuracy: 56690/60000 (94%)
+Test set: Average loss: 0.1372, Accuracy: 9575/10000 (95%)
 
-結束時間 : Sat Oct  5 11:54:33 2019
+結束時間 : Sat Oct  5 11:58:35 2019
 
