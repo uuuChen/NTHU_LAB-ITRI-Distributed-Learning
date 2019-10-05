@@ -215,7 +215,7 @@ class Central_Train:
             else:
                 check_count += 1
 
-            if check_count > 5:
+            if check_count >= 5 and epoch >= 20:
                 print('\nEarly stop at epoch {}\n'.format(epoch))
                 end_epoch = epoch + 1
                 break
