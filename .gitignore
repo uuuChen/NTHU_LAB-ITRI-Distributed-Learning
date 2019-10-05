@@ -12,7 +12,6 @@ data/CatDog/test
 data/OCT/sample_1
 data/OCT/sample_test1
 data/data_nums
-record/
 __pycache__/
 .idea
 .DS_Store
