@@ -101,7 +101,10 @@ class Central_Train:
                 total_loss, correct, data_nums, 100. * correct / data_nums))
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
-            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(), classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
+            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(),
+                classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
+            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(),
+                classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name)
             return correct
 
     def record_time(self, hint):
@@ -159,7 +162,11 @@ class Central_Train:
                         ha="center", va="center",
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
-        plt.savefig("record/" + self.data_name + "_confusion_matrix.png", dpi=300, format="png")
+        if normalize:
+            plt.savefig("record/" + self.data_name + "_confusion_matrix(normalize).png", dpi=300, format="png")
+        else:
+            plt.savefig("record/" + self.data_name + "_confusion_matrix.png", dpi=300, format="png")
+
 
     def plot_acc_loss(self, end_epoch):
         x = np.arange(1,  end_epoch)
