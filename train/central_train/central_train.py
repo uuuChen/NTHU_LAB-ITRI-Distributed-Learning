@@ -1,9 +1,12 @@
 from train.switch import *
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+from sklearn.utils.multiclass import unique_labels
 import numpy as np
 import torch.optim as optim
 import time
+
 
 class Central_Train:
 
@@ -73,7 +76,6 @@ class Central_Train:
             if is_training:
                 loss.backward()
                 self.optim.step()
-
             pred = output.data.max(1)[1]
             correct += pred.eq(target.data).cpu().sum()
             total_loss += loss.item()
@@ -90,22 +92,79 @@ class Central_Train:
             self.train_loss.append(total_loss)
             self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
                 self.epoch, total_loss, correct, data_nums, 100. * correct / data_nums))
+            print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+                total_loss, correct, data_nums, 100. * correct / data_nums))
         else:
             self.test_acc.append(100. * correct / data_nums)
             self.test_loss.append(total_loss)
-            print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
+            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(), classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
             return correct
 
     def record_time(self, hint):
         localtime = time.asctime( time.localtime(time.time()))
         self.save_acc.write(hint + localtime + '\r\n\n')
 
+    def plot_confusion_matrix(self, target, pred, classes, data_name,
+                              normalize=False,
+                              title=None,
+                              cmap=plt.cm.Blues):
+        """
+        This function prints and plots the confusion matrix.
+        Normalization can be applied by setting `normalize=True`.
+        """
+        if not title:
+            if normalize:
+                title = data_name + ' Normalized confusion matrix'
+            else:
+                title = data_name + ' Confusion matrix, without normalization'
+
+        # Compute confusion matrix
+        cm = confusion_matrix(target, pred)
+        # Only use the labels that appear in the data
+        classes = classes[unique_labels(target, pred)]
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+
+        print(cm)
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+        ax.figure.colorbar(im, ax=ax)
+        # We want to show all ticks...
+        ax.set(xticks=np.arange(cm.shape[1]),
+               yticks=np.arange(cm.shape[0]),
+               # ... and label them with the respective list entries
+               xticklabels=classes, yticklabels=classes,
+               title=title,
+               ylabel='True label',
+               xlabel='Predicted label')
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=30, ha="right",
+                 rotation_mode="anchor")
+
+        # Loop over data dimensions and create text annotations.
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(j, i, format(cm[i, j], fmt),
+                        ha="center", va="center",
+                        color="white" if cm[i, j] > thresh else "black")
+        fig.tight_layout()
+        plt.savefig("record/" + self.data_name + "_confusion_matrix.png", dpi=300, format="png")
+
     def plot_acc_loss(self, end_epoch):
         x = np.arange(1,  end_epoch)
 
+        plt.figure()
         plt.xlabel("epoch")
         plt.ylabel("loss")
         plt.title("Loss")
@@ -129,6 +188,8 @@ class Central_Train:
 
         self._build(data_name=data_name)
         self.record_time('開始時間 : ')
+
+        print(np.array(list(self.test_dataSet.class_id.keys()))[0])
 
         end_epoch = self.train_args.epochs + 1
         best_correct = 0
@@ -160,7 +221,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'DRD'
+    data_name = 'MNIST'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

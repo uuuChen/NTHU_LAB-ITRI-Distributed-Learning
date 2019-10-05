@@ -5,6 +5,7 @@ from dataSet.data_proc.data_processor import *
 DEBUG = False
 
 
+
 class MNIST_DataSet(Data_Processor):
 
     def __init__(self, data_args):
@@ -13,6 +14,20 @@ class MNIST_DataSet(Data_Processor):
                                         debug=DEBUG)
 
         Data_Processor.__init__(self, data_args=data_args)
+
+        self.class_id = {
+            '0': 0,
+            '1': 1,
+            '2': 2,
+            '3': 3,
+            '4': 4,
+            '5': 5,
+            '6': 6,
+            '7': 7,
+            '8': 8,
+            '9': 9
+        }
+
 
     def _get_data_and_labels_from_local(self):
 

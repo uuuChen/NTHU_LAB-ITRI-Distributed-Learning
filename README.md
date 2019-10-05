@@ -9,6 +9,10 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+
+#### "Edward1997 10/05 11:55"
+1. <新增> | "central_train" 函數 plot_confusion_matrix，紀錄 confusion_matrix
+
 #### "uuuChen 10/1 22:10"
 1. <新增> | "OCT_dataSet.py", 以及相關 code 使其可進行分散式訓練
 
