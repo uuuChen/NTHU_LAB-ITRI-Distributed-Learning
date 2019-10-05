@@ -20,14 +20,15 @@ class OCT_DataSet(Data_Processor):
 
         self.label_class_nums = data_args['label_class_nums']
 
-        Data_Processor.__init__(self, data_args=data_args)
-
         self.class_id = {
             'NORMAL': 0,
             'CNV': 1,
             'DME': 2,
             'DRUSEN': 3
         }
+
+        Data_Processor.__init__(self, data_args=data_args)
+
 
 
     def _get_data_and_labels_from_local(self):

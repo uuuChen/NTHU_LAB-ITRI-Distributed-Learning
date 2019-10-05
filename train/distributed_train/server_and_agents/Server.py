@@ -3,11 +3,11 @@
 from train.distributed_train.server import *
 import os
 
-# data_name = 'MNIST'
+data_name = 'MNIST'
 # data_name = 'ECG'
 # data_name = 'DRD'
 # data_name = 'Xray'
-data_name = 'OCT'
+# data_name = 'OCT'
 
 if __name__ == '__main__':
 

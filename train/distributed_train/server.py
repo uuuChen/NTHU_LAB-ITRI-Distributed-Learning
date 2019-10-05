@@ -1,15 +1,19 @@
 import random
-
 import torch
 from torch.nn import functional as F
 import torch.optim as optim
 from torch.autograd import Variable
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+from sklearn.utils.multiclass import unique_labels
+import time
 
-from train.switch import *
 
 # Socket Imports
 from socket_.socket_ import Socket
 
+from train.switch import *
 from logger import Logger
 
 
@@ -19,13 +23,11 @@ class Server(Logger):
 
         Logger.__init__(self)
 
-        # save train loss and test accuracy
-        self.save_acc = open(data_name + "_distributed_acc.txt", "w")
-
         # get model and train args by "data_name"
         self.switch = Switch(data_name=data_name)
         self.model = self.switch.get_model(is_server=True)
         self.train_args = self.switch.get_train_args()
+        self.data_name = data_name
 
         # server socket setting
         self.server_port_begin = 8080
@@ -48,6 +50,17 @@ class Server(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         torch.manual_seed(self.train_args.seed) # seeding the CPU for generating random numbers so that the results are
                                                 # deterministic
+
+        # plot
+        self.save_acc = open(data_name + "_distributed_record.txt", "w")
+
+        self.train_loss = []
+        self.train_acc = []
+        self.test_loss = []
+        self.test_acc = []
+        self.preds = []
+        self.targets = []
+
         if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
@@ -167,24 +180,28 @@ class Server(Logger):
 
     def _whether_is_training_done(self, cur_agent_idx):
 
-        if self.epoch == self.train_args.epochs - 1:
+        if self.epoch == self.train_args.epochs:
             self.server_socks[cur_agent_idx].send(True, 'is_training_done')
 
         else:
             self.server_socks[cur_agent_idx].send(False, 'is_training_done')
 
-    def _train_log(self, cur_agent_idx, loss):
-        print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-            self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
-            self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
+    def _train_log(self):
+        self.train_acc.append(100. * self.correct / self.all_train_data_nums)
+        self.train_loss.append(self.loss)
+        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+            self.loss, self.correct, self.all_train_data_nums, 100*self.correct/self.all_train_data_nums))
+        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
+            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100. * self.correct / self.all_train_data_nums))
 
     def _test_log(self):
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            self.test_loss, self.correct, self.all_test_data_nums,
+        self.test_acc.append(100. * self.correct / self.all_test_data_nums)
+        self.test_loss.append(self.loss)
+        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            self.loss, self.correct, self.all_test_data_nums,
             100. * self.correct / self.all_test_data_nums))
         self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
-            self.test_loss, self.correct, self.all_test_data_nums,
-            100. * self.correct / self.all_test_data_nums))
+            self.loss, self.correct, self.all_test_data_nums, 100. * self.correct / self.all_test_data_nums))
 
     def _iter_through_agent_database(self, is_training, cur_agent_idx):
 
@@ -229,29 +246,25 @@ class Server(Logger):
                     print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
                         self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
-                    if self.trained_data_num == self.all_train_data_nums:
-                        self.save_acc.write('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\r\n'.format(
-                            self.epoch, self.trained_data_num,
-                            self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
-            else:
-                self.test_loss += loss.item()
-                pred = server_output.data.max(1)[1]
-                self.correct += pred.eq(target.data).cpu().sum()
 
-        if not is_training:
+            self.loss += loss.item()
+            pred = server_output.data.max(1)[1]
+            self.correct += pred.eq(target.data).cpu().sum()
             self.batches += batches
+            self.targets.extend(target.data.cpu())
+            self.preds.extend(pred.data.cpu())
 
     def _iter_one_epoch(self, is_training):
+
+        self.loss = 0
+        self.correct = 0
+        self.batches = 0
 
         if is_training:
             self.model.train()
             self.trained_data_num = 0
-
         else:
             self.model.eval()
-            self.test_loss = 0
-            self.correct = 0
-            self.batches = 0
 
         for agent_idx in range(self.train_args.agent_nums):
 
@@ -262,9 +275,96 @@ class Server(Logger):
             if not is_training:
                 self._whether_is_training_done(agent_idx)
 
-        if not is_training:
-            self.test_loss /= self.batches
+        self.loss /= self.batches
+        if is_training:
+            self._train_log()
+        else:
             self._test_log()
+            # if self.epoch == self.train_args.epochs:
+            #     self.plot_confusion_matrix(self.targets, self.preds, self.da)
+
+    def record_time(self, hint):
+        localtime = time.asctime( time.localtime(time.time()))
+        self.save_acc.write(hint + localtime + '\r\n\n')
+
+    def plot_confusion_matrix(self, target, pred, classes, data_name,
+                              normalize=False,
+                              title=None,
+                              cmap=plt.cm.Blues):
+        """
+        This function prints and plots the confusion matrix.
+        Normalization can be applied by setting `normalize=True`.
+        """
+        if not title:
+            if normalize:
+                title = data_name + ' Normalized confusion matrix'
+            else:
+                title = data_name + ' Confusion matrix, without normalization'
+
+        # Compute confusion matrix
+        cm = confusion_matrix(target, pred)
+        # Only use the labels that appear in the data
+        classes = classes[unique_labels(target, pred)]
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix, without normalization')
+
+        print(cm)
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+        ax.figure.colorbar(im, ax=ax)
+        # We want to show all ticks...
+        ax.set(xticks=np.arange(cm.shape[1]),
+               yticks=np.arange(cm.shape[0]),
+               # ... and label them with the respective list entries
+               xticklabels=classes, yticklabels=classes,
+               title=title,
+               ylabel='True label',
+               xlabel='Predicted label')
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=30, ha="right",
+                 rotation_mode="anchor")
+
+        # Loop over data dimensions and create text annotations.
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(j, i, format(cm[i, j], fmt),
+                        ha="center", va="center",
+                        color="white" if cm[i, j] > thresh else "black")
+        fig.tight_layout()
+        if normalize:
+            plt.savefig("record/" + self.data_name + "_confusion_matrix(normalize).png", dpi=300, format="png")
+        else:
+            plt.savefig("record/" + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
+
+    def plot_acc_loss(self):
+        x = np.arange(1,  self.train_args.epochs+1)
+
+        plt.figure()
+        plt.xlabel("epoch")
+        plt.ylabel("loss")
+        plt.title("Loss")
+        plt.grid(linestyle=":")
+        plt.plot(x, np.array(self.train_loss), label='train')
+        plt.plot(x, np.array(self.test_loss), label='test')
+        plt.legend()
+        plt.savefig("record/" + self.data_name + "_central_loss.png", dpi=300, format="png")
+
+        plt.figure()
+        plt.xlabel("epoch")
+        plt.ylabel("acc")
+        plt.title("Accuracy")
+        plt.grid(linestyle=":")
+        plt.plot(x, np.array(self.train_acc), label='train')
+        plt.plot(x, np.array(self.test_acc), label='test')
+        plt.legend()
+        plt.savefig("record/" + self.data_name + "_central_acc.png", dpi=300, format="png")
 
     def start_training(self):
 
@@ -282,10 +382,13 @@ class Server(Logger):
             self._recv_data_nums_from_agents()
 
         # start training and testing
-        for epoch in range(self.train_args.epochs):
+        self.record_time('開始時間: ')
+        for epoch in range(1, self.train_args.epochs+1):
             self.epoch = epoch
             self._iter_one_epoch(is_training=True)
             self._iter_one_epoch(is_training=False)
+        self.record_time('結束時間: ')
+        self.plot_acc_loss()
 
 
 

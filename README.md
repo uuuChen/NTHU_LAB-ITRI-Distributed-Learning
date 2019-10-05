@@ -10,6 +10,13 @@
 3. <除錯> | 已有某功能但出錯，將其更正
 
 
+#### "Edward1997 10/05 22:30"
+1. <新增> | "distributed_train" 紀錄功能
+    1. record_time : txt檔，紀錄訓練開始與結束時間，
+    紀錄 train loss、train accuracy、test loss、test accuracy，每 epoch 為單位
+    2. plot_acc_loss : 圖檔train、test loss 比較圖、train、test accuracy 比較圖
+
+
 #### "Edward1997 10/05 11:55"
 1. <新增> | "central_train" 函數 plot_confusion_matrix，紀錄 confusion_matrix
 須在各 dataSet.py 中新增 self.class_id 參數

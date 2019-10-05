@@ -14,7 +14,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_acc = open("record/" + data_name + "_central_acc.txt", "w")
+        self.save_acc = open("record/" + data_name + "_central_record.txt", "w")
 
         self.train_loss = []
         self.train_acc = []
@@ -55,6 +55,8 @@ class Central_Train:
 
         data_nums = dataSet.get_usage_data_nums()
 
+        targets = []
+        preds = []
         trained_data_num = 0
         total_loss = 0
         correct = 0
@@ -80,6 +82,9 @@ class Central_Train:
             correct += pred.eq(target.data).cpu().sum()
             total_loss += loss.item()
 
+            targets.extend(target.data.cpu())
+            preds.extend(pred.data.cpu())
+
             if is_training:
                 trained_data_num += data.shape[0]
                 if batch_idx % self.train_args.log_interval == 0:
@@ -101,10 +106,12 @@ class Central_Train:
                 total_loss, correct, data_nums, 100. * correct / data_nums))
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
-            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(),
-                classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
-            self.plot_confusion_matrix(target=target.cpu(), pred=pred.cpu(),
-                classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name)
+
+            if int(self.epoch) == int(self.train_args.epochs):
+                self.plot_confusion_matrix(target=targets, pred=preds,
+                    classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name)
+                self.plot_confusion_matrix(target=targets, pred=preds,
+                    classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
             return correct
 
     def record_time(self, hint):
@@ -196,8 +203,6 @@ class Central_Train:
         self._build(data_name=data_name)
         self.record_time('開始時間 : ')
 
-        print(np.array(list(self.test_dataSet.class_id.keys()))[0])
-
         end_epoch = self.train_args.epochs + 1
         best_correct = 0
         check_count = 0
@@ -228,7 +233,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'MNIST'
+    data_name = 'OCT'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

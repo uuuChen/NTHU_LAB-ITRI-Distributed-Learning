@@ -261,7 +261,7 @@ OCT_TRAIN_ARGS = {
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample_1'),
+    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
@@ -275,7 +275,7 @@ OCT_TEST_ARGS = {
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample_test1'),
+    'images_dir_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'sample'),
 
     'images_dir_idx_ptr_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
