@@ -14,7 +14,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_acc = open("record/" + data_name + "_central_record.txt", "w")
+        self.save_acc = open("record/" + data_name + "_distributed_record.txt", "w")
 
         self.train_loss = []
         self.train_acc = []
@@ -82,8 +82,9 @@ class Central_Train:
             correct += pred.eq(target.data).cpu().sum()
             total_loss += loss.item()
 
-            targets.extend(target.data.cpu())
-            preds.extend(pred.data.cpu())
+            if int(self.epoch) == int(self.train_args.epochs):
+                targets.extend(target.data.cpu())
+                preds.extend(pred.data.cpu())
 
             if is_training:
                 trained_data_num += data.shape[0]
@@ -109,9 +110,9 @@ class Central_Train:
 
             if int(self.epoch) == int(self.train_args.epochs):
                 self.plot_confusion_matrix(target=targets, pred=preds,
-                    classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name)
+                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name)
                 self.plot_confusion_matrix(target=targets, pred=preds,
-                    classes=np.array(list(self.test_dataSet.class_id.keys())), data_name=self.data_name, normalize=True)
+                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name, normalize=True)
             return correct
 
     def record_time(self, hint):
@@ -170,7 +171,7 @@ class Central_Train:
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
         if normalize:
-            plt.savefig("record/" + self.data_name + "_confusion_matrix(normalize).png", dpi=300, format="png")
+            plt.savefig("record/" + self.data_name + "_central_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
             plt.savefig("record/" + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
 

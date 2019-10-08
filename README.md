@@ -10,6 +10,14 @@
 3. <除錯> | 已有某功能但出錯，將其更正
 
 
+#### "Edward1997 10/08 17:15"
+1. <新增> | "distributed_train" 紀錄功能
+    1. plot_confusion_matrix，紀錄 confusion_matrix
+2. <更動> | "dataSet.py"、"data_args.py"
+    "dataSet.py" : 不必新增 self.class_id 參數
+    "data_args.py" : 作為替代，需在各 _TEST_ARGS 中增加 'class_id' 參數
+
+
 #### "Edward1997 10/05 22:30"
 1. <新增> | "distributed_train" 紀錄功能
     1. record_time : txt檔，紀錄訓練開始與結束時間，

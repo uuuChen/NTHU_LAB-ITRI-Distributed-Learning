@@ -126,6 +126,18 @@ MNIST_TEST_ARGS = {
     'data_type': 'test',
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+    'class_id':  {
+            '0': 0,
+            '1': 1,
+            '2': 2,
+            '3': 3,
+            '4': 4,
+            '5': 5,
+            '6': 6,
+            '7': 7,
+            '8': 8,
+            '9': 9
+    },
 }
 
 DRD_TRAIN_ARGS = {
@@ -280,6 +292,13 @@ OCT_TEST_ARGS = {
     'images_dir_idx_ptr_path': os.path.join(OCT_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
+    'class_id':  {
+            'NORMAL': 0,
+            'CNV': 1,
+            'DME': 2,
+            'DRUSEN': 3
+    },
+
 }
 
 # --------------------------------

@@ -231,7 +231,12 @@ class Server(Logger):
             if is_training:
                 self.optim.zero_grad()
             server_output = self.model(server_input)
+            pred = server_output.data.max(1)[1]
             loss = F.cross_entropy(server_output, target)
+
+            if int(self.epoch) == int(self.train_args.epochs):
+                self.targets.extend(target.data.cpu())
+                self.preds.extend(pred.data.cpu())
 
             if is_training:
                 # server backward
@@ -259,6 +264,8 @@ class Server(Logger):
         self.loss = 0
         self.correct = 0
         self.batches = 0
+        self.targets = []
+        self.preds = []
 
         if is_training:
             self.model.train()
@@ -280,6 +287,11 @@ class Server(Logger):
             self._train_log()
         else:
             self._test_log()
+            if int(self.epoch) == int(self.train_args.epochs):
+                self.plot_confusion_matrix(target=self.targets, pred=self.preds,
+                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name)
+                self.plot_confusion_matrix(target=self.targets, pred=self.preds,
+                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name, normalize=True)
             # if self.epoch == self.train_args.epochs:
             #     self.plot_confusion_matrix(self.targets, self.preds, self.da)
 
@@ -311,7 +323,7 @@ class Server(Logger):
         else:
             print('Confusion matrix, without normalization')
 
-        print(cm)
+        # print(cm)
 
         fig, ax = plt.subplots()
         im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
@@ -339,9 +351,9 @@ class Server(Logger):
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
         if normalize:
-            plt.savefig("record/" + self.data_name + "_confusion_matrix(normalize).png", dpi=300, format="png")
+            plt.savefig("record/" + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
-            plt.savefig("record/" + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
+            plt.savefig("record/" + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
 
     def plot_acc_loss(self):
         x = np.arange(1,  self.train_args.epochs+1)
@@ -354,7 +366,7 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_loss), label='train')
         plt.plot(x, np.array(self.test_loss), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_central_loss.png", dpi=300, format="png")
+        plt.savefig("record/" + self.data_name + "_distributed_loss.png", dpi=300, format="png")
 
         plt.figure()
         plt.xlabel("epoch")
@@ -364,7 +376,7 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_acc), label='train')
         plt.plot(x, np.array(self.test_acc), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_central_acc.png", dpi=300, format="png")
+        plt.savefig("record/" + self.data_name + "_distributed_acc.png", dpi=300, format="png")
 
     def start_training(self):
 

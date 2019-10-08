@@ -15,20 +15,6 @@ class MNIST_DataSet(Data_Processor):
 
         Data_Processor.__init__(self, data_args=data_args)
 
-        self.class_id = {
-            '0': 0,
-            '1': 1,
-            '2': 2,
-            '3': 3,
-            '4': 4,
-            '5': 5,
-            '6': 6,
-            '7': 7,
-            '8': 8,
-            '9': 9
-        }
-
-
     def _get_data_and_labels_from_local(self):
 
         self.__logger.debug('Get MNIST Images And Labels From Tensorflow ...')
