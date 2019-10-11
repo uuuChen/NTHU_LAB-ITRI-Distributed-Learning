@@ -36,6 +36,7 @@ class Switch:
             train_args = MNIST_TRAINING_ARGS
 
             central_model = LeNet()
+            # central_model = AlexNet(num_classes=10)
             server_model = Server_LeNet()
             agent_model = Agent_LeNet()
 

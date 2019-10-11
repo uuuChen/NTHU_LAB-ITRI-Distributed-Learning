@@ -15,6 +15,8 @@ class MNIST_DataSet(Data_Processor):
 
         Data_Processor.__init__(self, data_args=data_args)
 
+
+
     def _get_data_and_labels_from_local(self):
 
         self.__logger.debug('Get MNIST Images And Labels From Tensorflow ...')
@@ -26,6 +28,7 @@ class MNIST_DataSet(Data_Processor):
         data_test = datasets.MNIST(root="./data/",
                                    transform=transforms.ToTensor(),
                                    train=False)
+
 
         if self.train:
             images = data_train.data.tolist()
@@ -41,14 +44,15 @@ class MNIST_DataSet(Data_Processor):
     def _get_data_and_labels_from_database(self, batch_size):
         return super()._get_data_and_labels_from_database(batch_size=batch_size)
 
-    def get_data_and_labels(self, batch_size, image_size=None, data_preprocess=True, toTensor=True, one_hot=False):
+    def get_data_and_labels(self, batch_size, image_size=(56,56), data_preprocess=True, toTensor=True, one_hot=False):
 
         data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
 
         if data_preprocess:
             datas = []
             for data_ in data:
-                data_ = data_.reshape(1, 28, 28)
+                data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
+                data_ = data_.reshape(1, image_size[0], image_size[1])
                 datas.append(data_)
             data = np.array(datas)
 

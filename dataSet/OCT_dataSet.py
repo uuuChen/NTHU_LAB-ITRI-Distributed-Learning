@@ -4,7 +4,12 @@ from dataSet.data_proc.data_processor import *
 
 DEBUG = False
 
-
+class_id = {
+    'NORMAL': 0,
+    'CNV': 1,
+    'DME': 2,
+    'DRUSEN': 3
+}
 class OCT_DataSet(Data_Processor):
 
     def __init__(self, data_args, shuffle=False):
@@ -36,7 +41,7 @@ class OCT_DataSet(Data_Processor):
         # 讀出所有 label 與圖片對應，再與資料夾中所有圖片名稱對應
         for image_file_name in image_file_names:
             label = image_file_name.split('-')[0]
-            image_labels.append(int(self.class_id[label]))
+            image_labels.append(int(class_id[label]))
 
         # 將資料以配對好的形式洗亂
         image_file_paths = [os.path.join(from_path, image_file_name) for image_file_name in image_file_names]

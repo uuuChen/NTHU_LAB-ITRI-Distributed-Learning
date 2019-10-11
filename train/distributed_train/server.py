@@ -52,7 +52,10 @@ class Server(Logger):
                                                 # deterministic
 
         # plot
-        self.save_acc = open(data_name + "_distributed_record.txt", "w")
+        self.save_path = "record/10_09(2)/"+data_name+"/"
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
+        self.save_acc = open(self.save_path + data_name + "_distributed_record.txt", "w")
 
         self.train_loss = []
         self.train_acc = []
@@ -351,9 +354,9 @@ class Server(Logger):
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
         if normalize:
-            plt.savefig("record/" + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
+            plt.savefig(self.save_path + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
-            plt.savefig("record/" + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
+            plt.savefig(self.save_path + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
 
     def plot_acc_loss(self):
         x = np.arange(1,  self.train_args.epochs+1)
@@ -366,7 +369,7 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_loss), label='train')
         plt.plot(x, np.array(self.test_loss), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_distributed_loss.png", dpi=300, format="png")
+        plt.savefig(self.save_path + self.data_name + "_distributed_loss.png", dpi=300, format="png")
 
         plt.figure()
         plt.xlabel("epoch")
@@ -376,7 +379,7 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_acc), label='train')
         plt.plot(x, np.array(self.test_acc), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_distributed_acc.png", dpi=300, format="png")
+        plt.savefig(self.save_path + self.data_name + "_distributed_acc.png", dpi=300, format="png")
 
     def start_training(self):
 

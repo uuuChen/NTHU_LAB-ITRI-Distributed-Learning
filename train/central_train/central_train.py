@@ -14,7 +14,10 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_acc = open("record/" + data_name + "_distributed_record.txt", "w")
+        self.save_path = "record/10_11(2)/"+data_name+"/"
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
+        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
 
         self.train_loss = []
         self.train_acc = []
@@ -108,11 +111,13 @@ class Central_Train:
             self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100. * correct / data_nums))
 
+            # plot confusion_matrix
             if int(self.epoch) == int(self.train_args.epochs):
                 self.plot_confusion_matrix(target=targets, pred=preds,
                     classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name)
                 self.plot_confusion_matrix(target=targets, pred=preds,
                     classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name, normalize=True)
+
             return correct
 
     def record_time(self, hint):
@@ -129,21 +134,20 @@ class Central_Train:
         """
         if not title:
             if normalize:
-                title = data_name + ' Normalized confusion matrix'
+                title = 'Normalized confusion matrix'
             else:
-                title = data_name + ' Confusion matrix, without normalization'
+                title = 'Confusion matrix, without normalization'
 
-        # Compute confusion matrix
+            # Compute confusion matrix
         cm = confusion_matrix(target, pred)
         # Only use the labels that appear in the data
-        classes = classes[unique_labels(target, pred)]
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
         else:
             print('Confusion matrix, without normalization')
 
-        print(cm)
+        # print(cm)
 
         fig, ax = plt.subplots()
         im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
@@ -157,8 +161,16 @@ class Central_Train:
                ylabel='True label',
                xlabel='Predicted label')
 
+        for edge, spine in ax.spines.items():
+            spine.set_visible(False)
+
+        ax.set_xticks(np.arange(cm.shape[1] + 1) - .5, minor=True)
+        ax.set_yticks(np.arange(cm.shape[0] + 1) - .5, minor=True)
+        ax.grid(which="minor", color="w", linestyle='-', linewidth=3)
+        ax.tick_params(which="minor", bottom=False, left=False)
+
         # Rotate the tick labels and set their alignment.
-        plt.setp(ax.get_xticklabels(), rotation=30, ha="right",
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                  rotation_mode="anchor")
 
         # Loop over data dimensions and create text annotations.
@@ -171,9 +183,9 @@ class Central_Train:
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
         if normalize:
-            plt.savefig("record/" + self.data_name + "_central_confusion_matrix(normalize).png", dpi=300, format="png")
+            plt.savefig(self.save_path + self.data_name + "_central_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
-            plt.savefig("record/" + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
+            plt.savefig(self.save_path + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
 
 
     def plot_acc_loss(self, end_epoch):
@@ -187,7 +199,7 @@ class Central_Train:
         plt.plot(x, np.array(self.train_loss), label='train')
         plt.plot(x, np.array(self.test_loss), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_central_loss.png", dpi=300, format="png")
+        plt.savefig(self.save_path + self.data_name + "_central_loss.png", dpi=300, format="png")
 
         plt.figure()
         plt.xlabel("epoch")
@@ -197,7 +209,7 @@ class Central_Train:
         plt.plot(x, np.array(self.train_acc), label='train')
         plt.plot(x, np.array(self.test_acc), label='test')
         plt.legend()
-        plt.savefig("record/" + self.data_name + "_central_acc.png", dpi=300, format="png")
+        plt.savefig(self.save_path + self.data_name + "_central_acc.png", dpi=300, format="png")
 
     def start_training(self, data_name):
 
@@ -221,7 +233,7 @@ class Central_Train:
             else:
                 check_count += 1
 
-            if check_count >= 5 and epoch >= 20:
+            if check_count >= 5 and epoch >= 80:
                 print('\nEarly stop at epoch {}\n'.format(epoch))
                 end_epoch = epoch + 1
                 break
@@ -229,12 +241,13 @@ class Central_Train:
         self.record_time('結束時間 : ')
         self.save_acc.close()
         self.plot_acc_loss(end_epoch)
+        torch.save(self.model, self.save_path + self.data_name + '_model.pkl')
 
 
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'OCT'
+    data_name = 'MNIST'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

@@ -9,6 +9,9 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/11 20:50"
+1. <除錯> | "distributed_train" 、"central_train.py" 中 func plot_contusion_matrix
+    1. 縱座標超格問題
 
 #### "Edward1997 10/08 17:15"
 1. <新增> | "distributed_train" 紀錄功能

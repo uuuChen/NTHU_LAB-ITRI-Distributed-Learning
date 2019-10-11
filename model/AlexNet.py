@@ -9,7 +9,7 @@ class AlexNet(nn.Module):
 
         self.features = nn.Sequential(
 
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+            nn.Conv2d(1, 64, kernel_size=11, stride=4, padding=2),
 
             nn.ReLU(inplace=True),
 
@@ -38,19 +38,19 @@ class AlexNet(nn.Module):
 
         self.classifier = nn.Sequential(
 
-            nn.Linear(1024, 4096),
+            nn.Linear(256, 1024),
 
             nn.ReLU(inplace=True),
 
             nn.Dropout(0.5),
 
-            nn.Linear(4096, 4096),
+            nn.Linear(1024, 1024),
 
             nn.ReLU(inplace=True),
 
             nn.Dropout(0.5),
 
-            nn.Linear(4096, num_classes),
+            nn.Linear(1024, num_classes),
         )
 
     def forward(self, x):
