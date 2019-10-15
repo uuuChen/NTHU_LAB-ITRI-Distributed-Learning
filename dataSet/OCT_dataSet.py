@@ -10,6 +10,7 @@ class_id = {
     'DME': 2,
     'DRUSEN': 3
 }
+
 class OCT_DataSet(Data_Processor):
 
     def __init__(self, data_args, shuffle=False):

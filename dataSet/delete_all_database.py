@@ -1,3 +1,4 @@
+import os
 from train.switch import Switch
 
 def delete_dataSet_in_database(data_name, train=False):
@@ -11,7 +12,8 @@ def delete_dataSet_in_database(data_name, train=False):
 
 
 if __name__ == '__main__':
+    os.chdir("../")
     data_names = ['MNIST', 'ECG', 'OCT', 'MD']
     for data_name in data_names:
-        delete_dataSet_in_database(data_name, train=False)
         delete_dataSet_in_database(data_name, train=True)
+        delete_dataSet_in_database(data_name, train=False)

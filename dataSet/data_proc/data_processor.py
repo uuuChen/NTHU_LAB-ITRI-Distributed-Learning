@@ -33,6 +33,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
             self.shuffle = False
 
         self.data_nums_dir_path = data_args['data_nums_dir_path']
+        if not os.path.isdir(self.data_nums_dir_path):
+            os.mkdir(self.data_nums_dir_path)
 
         self.label_class_nums = data_args['label_class_nums']
 
@@ -59,9 +61,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
                                                  remove_classes=data_args['remove_classes'])
         else:
             usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
-            print('usage_data_ids : {}'.format(len(usage_data_ids)))
         self.usage_data_ids = usage_data_ids
-
         if self.shuffle:
             random.shuffle(self.usage_data_ids)
 
@@ -93,7 +93,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         if db_data_nums != local_data_nums or db_data_nums == 0:
             if not db_data_nums == 0:
-                self.delete_coll_from_database()
+                self.drop_coll_from_database()
             data_or_data_path, labels = self._get_data_and_labels_from_local()
             self._upload_data_and_labels_to_database(data_or_data_path, labels)
 
@@ -121,13 +121,15 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         return data, labels
 
-    def _preproc_image_data(self, data, image_size):
+    def _preproc_image_data(self, data, resize=False, image_size=None):
 
         preproc_data = []
 
         for data_ in data:
-            data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
-            data_ = data_.transpose((2, 0, 1))
+            data_ = np.array(Image.fromarray(data_))
+            if resize:
+                data_ = data_.resize(image_size)
+            data_ = data_.transpose((2, 0, 1)) / 255
             preproc_data.append(data_)
 
         return np.array(preproc_data)
@@ -163,7 +165,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
             all_labels = self.coll_read_all_labels(self.coll_name)
         return all_labels
 
-    def delete_coll_from_database(self):
+    def drop_coll_from_database(self):
 
         if self.use_gridFS:
             self.gridFS_coll_delete_all(self.coll_name)
@@ -225,68 +227,68 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         sample_labels_idxs.sort()
         return sample_labels_idxs
 
-    def _up_sampling(self, benchmark_idx=1):
-        local_image_file_paths, local_labels = self._get_data_and_labels_from_local()
-        local_labels_nums = {}
-        local_labels_idxs = {}
-        local_labels_file_paths_dict = {}
-        labels_argu_nums = {}
-        idx = 0
-        if not (1 <= abs(benchmark_idx) <= self.label_class_nums):
-            print('bench_mark index exceeds categories numbers! change the index from ({}) to ({})'.
-                  format(benchmark_idx, self.label_class_nums))
-            benchmark_idx = self.label_class_nums
-        if benchmark_idx < 0:
-            benchmark_idx += (self.label_class_nums + 1)
-        for image_file_path, label in list(zip(local_image_file_paths, local_labels)):
-            if label not in local_labels_nums.keys():
-                local_labels_nums[label] = 0
-                local_labels_idxs[label] = []
-                local_labels_file_paths_dict[label] = []
-            local_labels_nums[label] += 1
-            local_labels_idxs[label].append(idx)
-            local_labels_file_paths_dict[label].append(image_file_path)
-            idx += 1
-        print('origin labels nums: {}'.format(local_labels_nums))  # >> {0: 6149, 1: 588, 2: 1283, 4: 166, 3: 221}
-        sorted_labels_nums_list = sorted(local_labels_nums.items(), key=lambda x: x[1], reverse=True)  # 由資料數量高排到低
-        benchmark_sample_nums = sorted_labels_nums_list[benchmark_idx - 1][1]
-        sorted_labels_nums = collections.OrderedDict(sorted_labels_nums_list)
-        for sorted_category_idx, label in list(enumerate(sorted_labels_nums.keys(), start=1)):
-            if sorted_category_idx > benchmark_idx:
-                labels_argu_nums[label] = benchmark_sample_nums - sorted_labels_nums[label]
-        print('argumented labels nums: {}'.format(labels_argu_nums))
-        if labels_argu_nums:
-            argumented_nums = 0
-            for label in labels_argu_nums.keys():
-                random.shuffle(local_labels_file_paths_dict[label])
-                label_argu_nums = labels_argu_nums[label]
-                while True:
-                    label_argu_done = False
-                    for image_file_path in local_labels_file_paths_dict[label]:
-                        image = load_img(image_file_path)
-                        x = img_to_array(image)
-                        x = x.reshape((1,) + x.shape)
-
-                        datagen = ImageDataGenerator(
-                            brightness_range=[0.2, 0.8],
-                            horizontal_flip=True,
-                            fill_mode='nearest'
-                        )
-                        prefix = image_file_path.split('.')[0].split('\\')[-1]
-                        for batch in datagen.flow(x, batch_size=1, save_to_dir='data/DRD_data/argumentation',
-                                                  save_prefix=prefix, save_format='png'):
-                           break
-                        argumented_nums += 1
-                        if argumented_nums % 1 == 0:
-                            print('argument labels {} [{}/{}({:.1f}%)]'.format(label, argumented_nums,
-                                                                           labels_argu_nums[label],
-                                                                           100. * argumented_nums/labels_argu_nums[label]))
-                        label_argu_nums -= 1
-                        if label_argu_nums == 0:
-                            label_argu_done = True
-                            break
-                    if label_argu_done:
-                        break
+    # def _up_sampling(self, benchmark_idx=1):
+    #     local_image_file_paths, local_labels = self._get_data_and_labels_from_local()
+    #     local_labels_nums = {}
+    #     local_labels_idxs = {}
+    #     local_labels_file_paths_dict = {}
+    #     labels_argu_nums = {}
+    #     idx = 0
+    #     if not (1 <= abs(benchmark_idx) <= self.label_class_nums):
+    #         print('bench_mark index exceeds categories numbers! change the index from ({}) to ({})'.
+    #               format(benchmark_idx, self.label_class_nums))
+    #         benchmark_idx = self.label_class_nums
+    #     if benchmark_idx < 0:
+    #         benchmark_idx += (self.label_class_nums + 1)
+    #     for image_file_path, label in list(zip(local_image_file_paths, local_labels)):
+    #         if label not in local_labels_nums.keys():
+    #             local_labels_nums[label] = 0
+    #             local_labels_idxs[label] = []
+    #             local_labels_file_paths_dict[label] = []
+    #         local_labels_nums[label] += 1
+    #         local_labels_idxs[label].append(idx)
+    #         local_labels_file_paths_dict[label].append(image_file_path)
+    #         idx += 1
+    #     print('origin labels nums: {}'.format(local_labels_nums))  # >> {0: 6149, 1: 588, 2: 1283, 4: 166, 3: 221}
+    #     sorted_labels_nums_list = sorted(local_labels_nums.items(), key=lambda x: x[1], reverse=True)  # 由資料數量高排到低
+    #     benchmark_sample_nums = sorted_labels_nums_list[benchmark_idx - 1][1]
+    #     sorted_labels_nums = collections.OrderedDict(sorted_labels_nums_list)
+    #     for sorted_category_idx, label in list(enumerate(sorted_labels_nums.keys(), start=1)):
+    #         if sorted_category_idx > benchmark_idx:
+    #             labels_argu_nums[label] = benchmark_sample_nums - sorted_labels_nums[label]
+    #     print('argumented labels nums: {}'.format(labels_argu_nums))
+    #     if labels_argu_nums:
+    #         argumented_nums = 0
+    #         for label in labels_argu_nums.keys():
+    #             random.shuffle(local_labels_file_paths_dict[label])
+    #             label_argu_nums = labels_argu_nums[label]
+    #             while True:
+    #                 label_argu_done = False
+    #                 for image_file_path in local_labels_file_paths_dict[label]:
+    #                     image = load_img(image_file_path)
+    #                     x = img_to_array(image)
+    #                     x = x.reshape((1,) + x.shape)
+    #
+    #                     datagen = ImageDataGenerator(
+    #                         brightness_range=[0.2, 0.8],
+    #                         horizontal_flip=True,
+    #                         fill_mode='nearest'
+    #                     )
+    #                     prefix = image_file_path.split('.')[0].split('\\')[-1]
+    #                     for batch in datagen.flow(x, batch_size=1, save_to_dir='data/DRD_data/argumentation',
+    #                                               save_prefix=prefix, save_format='png'):
+    #                        break
+    #                     argumented_nums += 1
+    #                     if argumented_nums % 1 == 0:
+    #                         print('argument labels {} [{}/{}({:.1f}%)]'.format(label, argumented_nums,
+    #                                                                        labels_argu_nums[label],
+    #                                                                        100. * argumented_nums/labels_argu_nums[label]))
+    #                     label_argu_nums -= 1
+    #                     if label_argu_nums == 0:
+    #                         label_argu_done = True
+    #                         break
+    #                 if label_argu_done:
+    #                     break
 
     @abstractmethod
     def _get_data_and_labels_from_local(self):

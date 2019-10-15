@@ -11,7 +11,12 @@ data/CatDog/train
 data/CatDog/test
 data/OCT/sample_1
 data/OCT/sample_test1
+data/MD/train
+data/MD/test
+data/BH/train
+data/BH/test
 data/data_nums
+data/MNIST
 record/
 __pycache__/
 .idea
@@ -19,3 +24,9 @@ __pycache__/
 .ipynb_checkpoints/
 MNIST_data/
 dataSet/DataSet.py
+train/central_train/BH.py
+train/central_train/DRD.py
+train/central_train/MD.py
+train/central_train/OCT.py
+train/central_train/SC.py
+train/central_train/Xray.py

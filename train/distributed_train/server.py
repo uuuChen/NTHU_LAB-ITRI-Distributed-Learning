@@ -1,6 +1,4 @@
 import random
-import torch
-from torch.nn import functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 import numpy as np
@@ -8,7 +6,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 import time
-
 
 # Socket Imports
 from socket_.socket_ import Socket
@@ -294,18 +291,14 @@ class Server(Logger):
                 self.plot_confusion_matrix(target=self.targets, pred=self.preds,
                     classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name)
                 self.plot_confusion_matrix(target=self.targets, pred=self.preds,
-                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name, normalize=True)
-            # if self.epoch == self.train_args.epochs:
-            #     self.plot_confusion_matrix(self.targets, self.preds, self.da)
+                    classes=np.array(list(self.switch.data_args[1]['class_id'].keys())), data_name=self.data_name,
+                                           normalize=True)
 
     def record_time(self, hint):
-        localtime = time.asctime( time.localtime(time.time()))
+        localtime = time.asctime(time.localtime(time.time()))
         self.save_acc.write(hint + localtime + '\r\n\n')
 
-    def plot_confusion_matrix(self, target, pred, classes, data_name,
-                              normalize=False,
-                              title=None,
-                              cmap=plt.cm.Blues):
+    def plot_confusion_matrix(self, target, pred, classes, data_name, normalize=False, title=None, cmap=plt.cm.Blues):
         """
         This function prints and plots the confusion matrix.
         Normalization can be applied by setting `normalize=True`.
@@ -316,17 +309,13 @@ class Server(Logger):
             else:
                 title = data_name + ' Confusion matrix, without normalization'
 
-        # Compute confusion matrix
-        cm = confusion_matrix(target, pred)
-        # Only use the labels that appear in the data
-        classes = classes[unique_labels(target, pred)]
+        cm = confusion_matrix(target, pred)  # Compute confusion matrix
+        classes = classes[unique_labels(target, pred)]  # Only use the labels that appear in the data
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
         else:
             print('Confusion matrix, without normalization')
-
-        # print(cm)
 
         fig, ax = plt.subplots()
         im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
