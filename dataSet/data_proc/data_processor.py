@@ -55,8 +55,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         self.data_id_ptr = 0
 
         if self.down_sampling:
-            # self._up_sampling()
-            usage_data_ids = self._down_sampling()
+            usage_data_ids = self._down_sampling(benchmark_idx=data_args['down_sampling_benchmark'],
+                                                 remove_classes=data_args['remove_classes'])
         else:
             usage_data_ids = list(range(1, self.get_data_nums_from_database() + 1))
             print('usage_data_ids : {}'.format(len(usage_data_ids)))
@@ -183,7 +183,7 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
     def get_usage_data_nums(self):
         return len(self.usage_data_ids)
 
-    def _down_sampling(self, benchmark_idx=2):
+    def _down_sampling(self, benchmark_idx=-1, remove_classes=2):
         labels = self.get_all_labels_from_database()
         labels_nums = {}
         labels_idxs = {}
@@ -207,11 +207,16 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         sorted_labels_nums_list = sorted(labels_nums.items(), key=lambda x: x[1], reverse=True)  # 由資料數量高排到低
         benchmark_sample_nums = sorted_labels_nums_list[benchmark_idx - 1][1]
         sorted_labels_nums = collections.OrderedDict(sorted_labels_nums_list)
+        total_classes_nums = len(sorted_labels_nums.keys())
         for sorted_cat_idx, label in list(enumerate(sorted_labels_nums.keys(), start=1)):
             if sorted_cat_idx <= benchmark_idx:
                 sample_labels_nums[label] = benchmark_sample_nums
             else:
                 sample_labels_nums[label] = sorted_labels_nums[label]
+            if remove_classes > 0:
+                # 將最低 remove_classes 數量的 labels 的 sample_lables_nums 設為 0
+                if sorted_cat_idx > total_classes_nums - remove_classes:
+                    sample_labels_nums[label] = 0
         print('sample labels nums: {}'.format(dict(sorted(sample_labels_nums.items(), key=lambda x: x[0]))))  # >> {0:
         # 166, 1: 166, 2: 166, 3: 166, 4: 166}
         for label in labels_idxs.keys():
@@ -249,35 +254,39 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
         for sorted_category_idx, label in list(enumerate(sorted_labels_nums.keys(), start=1)):
             if sorted_category_idx > benchmark_idx:
                 labels_argu_nums[label] = benchmark_sample_nums - sorted_labels_nums[label]
+        print('argumented labels nums: {}'.format(labels_argu_nums))
         if labels_argu_nums:
+            argumented_nums = 0
             for label in labels_argu_nums.keys():
                 random.shuffle(local_labels_file_paths_dict[label])
                 label_argu_nums = labels_argu_nums[label]
                 while True:
                     label_argu_done = False
                     for image_file_path in local_labels_file_paths_dict[label]:
-                        print('argument label {}'.format(label))
                         image = load_img(image_file_path)
                         x = img_to_array(image)
                         x = x.reshape((1,) + x.shape)
 
                         datagen = ImageDataGenerator(
-                            brightness_range=[0.2, 1.0],
+                            brightness_range=[0.2, 0.8],
                             horizontal_flip=True,
                             fill_mode='nearest'
                         )
-
-                        prefix = image_file_path.split('.')[0].split('/')[-1]
+                        prefix = image_file_path.split('.')[0].split('\\')[-1]
                         for batch in datagen.flow(x, batch_size=1, save_to_dir='data/DRD_data/argumentation',
                                                   save_prefix=prefix, save_format='png'):
                            break
+                        argumented_nums += 1
+                        if argumented_nums % 1 == 0:
+                            print('argument labels {} [{}/{}({:.1f}%)]'.format(label, argumented_nums,
+                                                                           labels_argu_nums[label],
+                                                                           100. * argumented_nums/labels_argu_nums[label]))
                         label_argu_nums -= 1
                         if label_argu_nums == 0:
                             label_argu_done = True
                             break
                     if label_argu_done:
                         break
-
 
     @abstractmethod
     def _get_data_and_labels_from_local(self):

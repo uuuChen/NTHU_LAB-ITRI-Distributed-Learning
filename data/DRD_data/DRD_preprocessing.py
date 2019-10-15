@@ -12,18 +12,7 @@ summary = [
 ]
 
 
-def reset():
-    global summary
-    summary = [
-        ['0', 0],
-        ['1', 0],
-        ['2', 0],
-        ['3', 0],
-        ['4', 0],
-    ]
-
-
-def resize(images_dir_path='sample/', image_size=(256, 256)):
+def resize(images_dir_path, save_dir_path, image_size=(512, 512)):
     # convert (1024, 1024) to (256, 256)
     print('resize @ {}'.format(images_dir_path))
 
@@ -38,15 +27,14 @@ def resize(images_dir_path='sample/', image_size=(256, 256)):
         file_path = os.path.join(images_dir_path, file_name)
         # read img
         img = Image.open(file_path)
-        img.thumbnail(image_size)
-        img.save(file_path)
-
+        img = img.resize(image_size)
+        img.save(os.path.join(save_dir_path, file_name))
     print('convert {} images'.format(len(image_file_names)))
 
-def balance(images_dir_path='sample/', limit = 100000):
+
+def balance(images_dir_path='sample/', limit=100000):
     # down sampling the selected directory
     print('balance @ {}, limit is {}'.format(images_dir_path, limit))
-    reset()
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
@@ -77,8 +65,6 @@ def balance(images_dir_path='sample/', limit = 100000):
                     continue
 
                 summary[int(label[0])] [1] += 1
-
-
     print('delete {} images, remain {}'.format(delete, image_file_nums - delete))
     sum = 0
     for i in range(len(summary)):
@@ -91,7 +77,6 @@ def overview(images_dir_path='sample/'):
     # check the labels of images in the selected directory
     print('overview @ {}'.format(images_dir_path))
 
-    reset()
     # sort file
     sort_key = lambda x: (int(x.split('_')[0]), x.split('_')[1])
 
@@ -99,7 +84,6 @@ def overview(images_dir_path='sample/'):
     image_file_names.sort(key=sort_key)
     image_file_nums = len(image_file_names)
     id = 0
-
     with open('trainLabels.csv', newline='') as csvfile:
         rows = csv.reader(csvfile)
         for row in rows:
@@ -107,8 +91,9 @@ def overview(images_dir_path='sample/'):
                 break
             if row[1] == 'level':
                 continue
-            summary[int(row[1])][1] += 1
-
+            if row[0] == image_file_names[id]:
+                summary[int(row[1])][1] += 1
+                id += 1
     sum = 0
     for i in range(len(summary)):
         sum += summary[i][1]
@@ -116,7 +101,11 @@ def overview(images_dir_path='sample/'):
     print('Total : {}'.format(sum))
 
 
-overview('train/')
+# overview('train/')
+resize('train/', 'resized_train/', (512, 512))
+resize('test/train/train/', 'resized_test/', (512, 512))
+
+
 
 
 

@@ -17,7 +17,7 @@ class VGG(nn.Module):
     def __init__(self, vgg_name, class_num):
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512*8*8, class_num)
+        self.classifier = nn.Linear(32768, class_num)
 
 # 模型计算时的前向过程，也就是按照这个过程进行计算
     def forward(self, x):
