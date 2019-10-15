@@ -9,6 +9,20 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 10/15 13:0"
+
+1. <新增> | "data/MD/MD_preprocessing.py": 對 MD 資料進行欲處理
+
+2. <更動> | "central_dataset_import.py", "delete_all_database.py": 以
+"switch" 改寫，並移動至 "dataSet/"
+
+3. <更動> | 整理程式碼，刪除 "DRD"、"Xray" 相關程式碼，更動檔案有
+"data_args.py"、"train_args.py"、"switch.py"，並刪除 "DRD_dataSet.py"、
+"Xray_dataSet.py"。另外在 "socket/" 只保留 "socket_.py"，其他的檔案則刪除
+
+4. <新增> | "data_processor.py" init 中判斷有無 "/data_nums" 資料夾，如果
+沒有的話就新增一個
+
 #### "Edward1997 10/11 20:50"
 1. <除錯> | "distributed_train" 、"central_train.py" 中 func plot_contusion_matrix
     1. 縱座標超格問題
