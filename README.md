@@ -9,6 +9,18 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/17 18:20"
+1. <除錯> | import 問題
+    * 若在 cmd 運行，需增加
+    # set import path
+    import sys
+    import os
+    sys.path.insert(0, os.getcwd())
+    並註解掉 os.chdir('../../')
+    * 若在 pycharm 運行，則反之
+    增加 os.chdir('../../')
+    註解掉 sys.path.insert(0, os.getcwd())
+
 #### "uuuChen 10/15 13:30"
 
 1. <新增> | "data/MD/MD_preprocessing.py": 對 MD 資料進行欲處理

@@ -18,7 +18,7 @@ parser.add_argument('--test-batch-size', type=int, default=512, metavar='N',
 parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
                     help='input agents number (default: 2)')
 
-parser.add_argument('--epochs', type=int, default=20, metavar='N',
+parser.add_argument('--epochs', type=int, default=2, metavar='N',
                     help='number of epochs to train (default: 10)')
 
 parser.add_argument('--lr', type=float, default=0.01, metavar='LR',

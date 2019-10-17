@@ -1,10 +1,10 @@
-import os
 import numpy as np
 import torch
 import random
 import collections
 from PIL import Image
 from abc import ABCMeta, abstractmethod
+import os
 
 from dataSet.data_proc.database_proc.mongoDB_processor import MongoDB_Processor
 from dataSet.data_proc.file_proc.file_processor import File_Processor
@@ -34,6 +34,8 @@ class Data_Processor(MongoDB_Processor, File_Processor, metaclass=ABCMeta):
 
         self.data_nums_dir_path = data_args['data_nums_dir_path']
         if not os.path.isdir(self.data_nums_dir_path):
+            print(os.getcwd())
+            print()
             os.mkdir(self.data_nums_dir_path)
 
         self.label_class_nums = data_args['label_class_nums']

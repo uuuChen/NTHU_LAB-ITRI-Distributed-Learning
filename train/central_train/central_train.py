@@ -1,6 +1,3 @@
-import os
-os.chdir('../../')
-from train.switch import *
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
@@ -8,7 +5,14 @@ from sklearn.utils.multiclass import unique_labels
 import numpy as np
 import torch.optim as optim
 import time
+
+# set import path
 import sys
+import os
+sys.path.insert(0, os.getcwd())
+# os.chdir('../../')
+
+from train.switch import *
 
 
 
@@ -19,7 +23,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_path = "record/10_11(2)/"+data_name+"/"
+        self.save_path = "record/10_17/"+data_name+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
@@ -249,8 +253,7 @@ class Central_Train:
 
 if __name__ == '__main__':
 
-    os.chdir('../../')
-    data_name = sys.argv[1]
+    data_name = 'MNIST'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
