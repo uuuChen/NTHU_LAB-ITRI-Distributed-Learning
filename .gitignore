@@ -3,14 +3,8 @@ data/DRD_data/train
 data/DRD_data/test
 data/DRD_data/
 data/ECG_data/
-data/Xray/train_balanced
-data/Xray/train
-data/Xray/test_balanced
-data/Xray/test
-data/CatDog/train
-data/CatDog/test
-data/OCT/sample_1
-data/OCT/sample_test1
+data/OCT/test
+data/OCT/train
 data/MD/train
 data/MD/test
 data/BH/train

@@ -1,3 +1,5 @@
+import os
+os.chdir('../../')
 from train.switch import *
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
@@ -6,6 +8,9 @@ from sklearn.utils.multiclass import unique_labels
 import numpy as np
 import torch.optim as optim
 import time
+import sys
+
+
 
 
 class Central_Train:
@@ -245,7 +250,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'MNIST'
+    data_name = sys.argv[1]
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
