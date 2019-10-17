@@ -44,14 +44,13 @@ class MNIST_DataSet(Data_Processor):
     def _get_data_and_labels_from_database(self, batch_size):
         return super()._get_data_and_labels_from_database(batch_size=batch_size)
 
-    def get_data_and_labels(self, batch_size, image_size=(56,56), data_preprocess=True, toTensor=True, one_hot=False):
+    def get_data_and_labels(self, batch_size, image_size=(28, 28), data_preprocess=True, toTensor=True, one_hot=False):
 
         data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
 
         if data_preprocess:
             datas = []
             for data_ in data:
-                data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
                 data_ = data_.reshape(1, image_size[0], image_size[1])
                 datas.append(data_)
             data = np.array(datas)
