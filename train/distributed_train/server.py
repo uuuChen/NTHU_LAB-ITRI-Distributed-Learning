@@ -190,19 +190,20 @@ class Server(Logger):
     def _train_log(self):
         self.train_acc.append(100. * self.correct / self.all_train_data_nums)
         self.train_loss.append(self.loss)
-        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-            self.loss, self.correct, self.all_train_data_nums, 100*self.correct/self.all_train_data_nums))
-        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
-            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100. * self.correct / self.all_train_data_nums))
+        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
+            self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
+        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
+            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
 
     def _test_log(self):
         self.test_acc.append(100. * self.correct / self.all_test_data_nums)
         self.test_loss.append(self.loss)
-        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
             self.loss, self.correct, self.all_test_data_nums,
-            100. * self.correct / self.all_test_data_nums))
-        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
-            self.loss, self.correct, self.all_test_data_nums, 100. * self.correct / self.all_test_data_nums))
+            100 * float(self.correct) / self.all_test_data_nums))
+        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
+            self.loss, self.correct, self.all_test_data_nums,
+            100 * float(self.correct) / self.all_test_data_nums))
 
     def _iter_through_agent_database(self, is_training, cur_agent_idx):
 
@@ -257,10 +258,10 @@ class Server(Logger):
 
                 self.trained_data_num += len(target)
                 if batch_idx % self.train_args.log_interval == 0:
-                    print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {}/{} ({:.0f}%)'.format(
+                    print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {}/{} ({:.2f}%)'.format(
                         self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
                         self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item(),
-                        self.correct, self.trained_data_num, 100. * self.correct / self.trained_data_num))
+                        self.correct, self.trained_data_num, 100 * float(self.correct) / self.trained_data_num))
 
     def _iter_one_epoch(self, is_training):
 

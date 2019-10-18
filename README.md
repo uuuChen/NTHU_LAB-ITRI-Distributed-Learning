@@ -9,6 +9,9 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/18 16:20"
+1. acc to {:.2f}
+
 #### "Edward1997 10/18 14:50"
 1. distributed server train_log + acc
 2. distibuted server confusion matrix out of range

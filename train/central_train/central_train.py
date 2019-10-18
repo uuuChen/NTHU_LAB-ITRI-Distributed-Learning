@@ -9,8 +9,8 @@ import time
 # set import path
 import sys
 import os
-sys.path.insert(0, os.getcwd())
-# os.chdir('../../')
+# sys.path.insert(0, os.getcwd())
+os.chdir('../../')
 
 from train.switch import *
 
@@ -99,25 +99,25 @@ class Central_Train:
             if is_training:
                 trained_data_num += data.shape[0]
                 if batch_idx % self.train_args.log_interval == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {}/{} ({:.0f}%)'.format(
+                    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {}/{} ({:.2f}%)'.format(
                         self.epoch, trained_data_num, data_nums, 100. * batch_idx / batches, loss.item(), correct,
-                        trained_data_num, 100. * correct / trained_data_num))
+                        trained_data_num, 100 * float(correct) / trained_data_num))
 
         total_loss /= batches
         if is_training:
             self.train_acc.append(100. * correct / data_nums)
             self.train_loss.append(total_loss)
-            self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
-                self.epoch, total_loss, correct, data_nums, 100. * correct / data_nums))
-            print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-                total_loss, correct, data_nums, 100. * correct / data_nums))
+            self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
+                self.epoch, total_loss, correct, data_nums, 100 * float(correct) / data_nums))
+            print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
+                total_loss, correct, data_nums, 100 * float(correct) / data_nums))
         else:
             self.test_acc.append(100. * correct / data_nums)
             self.test_loss.append(total_loss)
-            print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-                total_loss, correct, data_nums, 100. * correct / data_nums))
-            self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
-                total_loss, correct, data_nums, 100. * correct / data_nums))
+            print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+                total_loss, correct, data_nums, 100 * float(correct) / data_nums))
+            self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
+                total_loss, correct, data_nums, 100 * float(correct) / data_nums))
 
             # plot confusion_matrix
             if int(self.epoch) == int(self.train_args.epochs):
@@ -251,7 +251,8 @@ class Central_Train:
 
 if __name__ == '__main__':
 
-    data_name = sys.argv[1]
+    # data_name = sys.argv[1]
+    data_name = 'MNIST'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
