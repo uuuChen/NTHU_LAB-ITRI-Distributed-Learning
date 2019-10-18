@@ -10,7 +10,9 @@
 3. <除錯> | 已有某功能但出錯，將其更正
 
 #### "Edward1997 10/18 14:50"
-1. coming soon
+1. distributed server train_log + acc
+2. distibuted server confusion matrix out of range
+
 
 #### "Edward1997 10/17 18:20"
 1. <除錯> | import 問題
