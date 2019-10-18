@@ -12,7 +12,7 @@ data_name = 'MNIST'
 if __name__ == '__main__':
 
     os.chdir('../../../')
-    server = Server(data_name=data_name, use_localhost=True)
+    server = Server(data_name=data_name, use_localhost=False)
     server.start_training()
 
 
