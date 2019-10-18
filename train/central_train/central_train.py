@@ -15,8 +15,6 @@ sys.path.insert(0, os.getcwd())
 from train.switch import *
 
 
-
-
 class Central_Train:
 
     def __init__(self):
@@ -253,7 +251,7 @@ class Central_Train:
 
 if __name__ == '__main__':
 
-    data_name = 'MNIST'
+    data_name = sys.argv[1]
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
