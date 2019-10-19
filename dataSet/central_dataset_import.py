@@ -15,7 +15,7 @@ def load_dataSet(data_name, from_database=False):
 
 if __name__ == '__main__':
     os.chdir("../")
-    data_names = ['MNIST']
+    data_names = ['MNIST', 'OCT']
     # data_names = ['MNIST', 'ECG', 'OCT', 'MD']
     for data_name in data_names:
         load_dataSet(data_name, from_database=False)
