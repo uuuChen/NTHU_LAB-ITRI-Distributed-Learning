@@ -206,6 +206,7 @@ class Agent(Logger):
                 break
 
 
+        torch.save(self.model,'_model.pkl')
 
 
 
