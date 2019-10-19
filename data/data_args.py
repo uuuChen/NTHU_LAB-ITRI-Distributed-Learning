@@ -49,7 +49,7 @@ MNIST_COMMON_ARGS = {
 ECG_COMMON_ARGS = {
     'data_name': 'ECG',
 
-    'dir_path': 'data/ECG_data/',
+    'dir_path': 'data/ECG/',
 
     'label_class_nums': 5,
 

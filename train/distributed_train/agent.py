@@ -206,7 +206,10 @@ class Agent(Logger):
                 break
 
 
-        torch.save(self.model,'_model.pkl')
+        self.save_path = "record/agent/"+self.train_args.dataSet+"/"
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
+        torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')
 
 
 
