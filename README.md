@@ -9,6 +9,14 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/18 16:20"
+1. acc to {:.2f}
+
+#### "Edward1997 10/18 14:50"
+1. distributed server train_log + acc
+2. distibuted server confusion matrix out of range
+
+
 #### "Edward1997 10/17 18:20"
 1. <除錯> | import 問題
     * 若在 cmd 運行，需增加

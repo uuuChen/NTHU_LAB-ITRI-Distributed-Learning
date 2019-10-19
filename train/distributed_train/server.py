@@ -25,6 +25,7 @@ class Server(Logger):
         self.model = self.switch.get_model(is_server=True)
         self.train_args = self.switch.get_train_args()
         self.data_name = data_name
+        self.train_args.dataSet = data_name
 
         # server socket setting
         self.server_port_begin = 8080
@@ -49,7 +50,7 @@ class Server(Logger):
                                                 # deterministic
 
         # plot
-        self.save_path = "record/10_09(2)/"+data_name+"/"
+        self.save_path = "record/10_18/"+data_name+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_distributed_record.txt", "w")
@@ -189,19 +190,20 @@ class Server(Logger):
     def _train_log(self):
         self.train_acc.append(100. * self.correct / self.all_train_data_nums)
         self.train_loss.append(self.loss)
-        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-            self.loss, self.correct, self.all_train_data_nums, 100*self.correct/self.all_train_data_nums))
-        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n'.format(
-            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100. * self.correct / self.all_train_data_nums))
+        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
+            self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
+        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
+            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
 
     def _test_log(self):
         self.test_acc.append(100. * self.correct / self.all_test_data_nums)
         self.test_loss.append(self.loss)
-        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
             self.loss, self.correct, self.all_test_data_nums,
-            100. * self.correct / self.all_test_data_nums))
-        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\r\n\n'.format(
-            self.loss, self.correct, self.all_test_data_nums, 100. * self.correct / self.all_test_data_nums))
+            100 * float(self.correct) / self.all_test_data_nums))
+        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
+            self.loss, self.correct, self.all_test_data_nums,
+            100 * float(self.correct) / self.all_test_data_nums))
 
     def _iter_through_agent_database(self, is_training, cur_agent_idx):
 
@@ -238,6 +240,14 @@ class Server(Logger):
                 self.targets.extend(target.data.cpu())
                 self.preds.extend(pred.data.cpu())
 
+
+            self.loss += loss.item()
+            pred = server_output.data.max(1)[1]
+            self.correct += pred.eq(target.data).cpu().sum()
+            self.batches += batches
+            self.targets.extend(target.data.cpu())
+            self.preds.extend(pred.data.cpu())
+
             if is_training:
                 # server backward
                 loss.backward()
@@ -248,16 +258,10 @@ class Server(Logger):
 
                 self.trained_data_num += len(target)
                 if batch_idx % self.train_args.log_interval == 0:
-                    print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    print('Train Epoch: {} at {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {}/{} ({:.2f}%)'.format(
                         self.epoch, self.agents_attrs[cur_agent_idx], self.trained_data_num,
-                        self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item()))
-
-            self.loss += loss.item()
-            pred = server_output.data.max(1)[1]
-            self.correct += pred.eq(target.data).cpu().sum()
-            self.batches += batches
-            self.targets.extend(target.data.cpu())
-            self.preds.extend(pred.data.cpu())
+                        self.all_train_data_nums, 100. * self.trained_data_num / self.all_train_data_nums, loss.item(),
+                        self.correct, self.trained_data_num, 100 * float(self.correct) / self.trained_data_num))
 
     def _iter_one_epoch(self, is_training):
 
@@ -328,6 +332,14 @@ class Server(Logger):
                title=title,
                ylabel='True label',
                xlabel='Predicted label')
+
+        for edge, spine in ax.spines.items():
+            spine.set_visible(False)
+
+        ax.set_xticks(np.arange(cm.shape[1] + 1) - .5, minor=True)
+        ax.set_yticks(np.arange(cm.shape[0] + 1) - .5, minor=True)
+        ax.grid(which="minor", color="w", linestyle='-', linewidth=3)
+        ax.tick_params(which="minor", bottom=False, left=False)
 
         # Rotate the tick labels and set their alignment.
         plt.setp(ax.get_xticklabels(), rotation=30, ha="right",
