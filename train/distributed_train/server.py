@@ -401,6 +401,7 @@ class Server(Logger):
         # start training and testing
         self.record_time('開始時間: ')
         for epoch in range(1, self.train_args.epochs+1):
+            print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
             self.epoch = epoch
             self._iter_one_epoch(is_training=True)
             self._iter_one_epoch(is_training=False)
