@@ -21,7 +21,7 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_path = "record/10_17/"+data_name+"/"
+        self.save_path = "record/10_20/"+data_name+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
@@ -148,7 +148,6 @@ class Central_Train:
 
             # Compute confusion matrix
         cm = confusion_matrix(target, pred)
-        # Only use the labels that appear in the data
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
@@ -252,7 +251,7 @@ class Central_Train:
 if __name__ == '__main__':
 
     # data_name = sys.argv[1]
-    data_name = 'MNIST'
+    data_name = 'ECG'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)

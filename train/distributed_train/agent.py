@@ -10,10 +10,11 @@ from train.switch import *
 
 class Agent(Logger):
 
-    def __init__(self, server_host_port, cur_name):
+    def __init__(self, server_host_port, cur_name, save_path):
         Logger.__init__(self)
         self.server_host_port = server_host_port
         self.cur_name = cur_name
+        self.save_path = save_path
 
     def _conn_to_server(self):
         self.agent_server_sock = Socket(self.server_host_port, False)
@@ -206,7 +207,7 @@ class Agent(Logger):
                 break
 
 
-        self.save_path = "record/agent/10_19/"+self.train_args.dataSet+"/"
+        self.save_path = self.save_path+self.train_args.dataSet+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')
