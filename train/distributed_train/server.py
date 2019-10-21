@@ -399,6 +399,7 @@ class Server(Logger):
 
         # start training and testing
         self.record_time('開始時間: ')
+        self.save_acc.write('Agent_nums = {}\r\n\n'.format(self.train_args.agent_nums))
         for epoch in range(1, self.train_args.epochs+1):
             print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
             self.epoch = epoch
