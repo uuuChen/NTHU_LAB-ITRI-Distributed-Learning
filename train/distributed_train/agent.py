@@ -205,7 +205,7 @@ class Agent(Logger):
             done = self._iter(is_training=False)
             if done:
                 break
-        self.save_path = self.save_path+self.train_args.dataSet+"/"
+        self.save_path = self.save_path+self.train_args.dataSet+"/agent/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')
