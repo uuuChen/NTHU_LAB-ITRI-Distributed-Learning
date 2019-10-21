@@ -8,7 +8,7 @@ cur_agent_name = 'agent_3'
 
 # server_host_port = ('localhost', 8082)
 server_host_port = ('192.168.0.189', 8082)
-save_path = "record/agent/10_20/"
+save_path = "record/10_20/"
 
 
 if __name__ == '__main__':
