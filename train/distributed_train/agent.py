@@ -1,6 +1,7 @@
 import torch
 
 from torch.autograd import Variable
+import time
 
 from socket_.socket_ import Socket
 from logger import Logger
@@ -10,11 +11,10 @@ from train.switch import *
 
 class Agent(Logger):
 
-    def __init__(self, server_host_port, cur_name, save_path):
+    def __init__(self, server_host_port, cur_name):
         Logger.__init__(self)
         self.server_host_port = server_host_port
         self.cur_name = cur_name
-        self.save_path = save_path
 
     def _conn_to_server(self):
         self.agent_server_sock = Socket(self.server_host_port, False)
@@ -205,7 +205,8 @@ class Agent(Logger):
             done = self._iter(is_training=False)
             if done:
                 break
-        self.save_path = self.save_path+self.train_args.dataSet+"/agent/"
+        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
+        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')

@@ -16,7 +16,7 @@ from logger import Logger
 
 class Server(Logger):
 
-    def __init__(self, data_name, save_path, use_localhost=True):
+    def __init__(self, data_name, save_path, agent_nums, use_localhost=True):
 
         Logger.__init__(self)
 
@@ -26,6 +26,7 @@ class Server(Logger):
         self.train_args = self.switch.get_train_args()
         self.data_name = data_name
         self.train_args.dataSet = data_name
+        self.train_args.agent_nums = agent_nums
 
         # server socket setting
         self.server_port_begin = 8080
@@ -50,7 +51,8 @@ class Server(Logger):
                                                 # deterministic
 
         # plot
-        self.save_path = save_path+"/"+data_name+"/"
+        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
+        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_distributed_record.txt", "w")

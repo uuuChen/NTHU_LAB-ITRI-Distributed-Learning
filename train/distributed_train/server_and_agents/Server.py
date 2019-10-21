@@ -1,19 +1,18 @@
 
 # Server Imports
 from train.distributed_train.server import *
+import sys
 import os
+sys.path.insert(0, os.getcwd())
 
-# data_name = 'MNIST'
-data_name = 'ECG'
-# data_name = 'DRD'
-# data_name = 'Xray'
-# data_name = 'OCT'
-save_path = "record/10_20/"
+# get args
+data_name = sys.argv[1]
+agent_nums = int(sys.argv[2])
 
 if __name__ == '__main__':
 
     os.chdir('../../../')
-    server = Server(data_name=data_name, save_path=save_path, use_localhost=False)
+    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=False)
     server.start_training()
 
 

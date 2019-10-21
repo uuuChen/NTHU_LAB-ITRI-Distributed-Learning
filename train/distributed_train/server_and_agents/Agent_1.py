@@ -1,20 +1,21 @@
 
 from train.distributed_train.agent import Agent
-
+import sys
 import os
+sys.path.insert(0, os.getcwd())
 
-cur_agent_name = 'agent_1'
+# get args
+cur_agent_num = sys.argv[1]
+server_host = sys.argv[2]
+cur_agent_name = 'agent_'+cur_agent_num
 
 # server_host_port = ('localhost', 8080)
-server_host_port = ('192.168.0.189', 8080)
-save_path = "record/10_20/"
+server_host_port = (server_host, 8080+int(cur_agent_num)-1)
 
 
 if __name__ == '__main__':
 
-    os.chdir('../../../')
-
-    agent = Agent(server_host_port, cur_agent_name, save_path)
+    agent = Agent(server_host_port, cur_agent_name)
     agent.start_training()
 
 

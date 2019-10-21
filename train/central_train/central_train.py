@@ -9,8 +9,8 @@ import time
 # set import path
 import sys
 import os
-# sys.path.insert(0, os.getcwd())
-os.chdir('../../')
+sys.path.insert(0, os.getcwd())
+# os.chdir('../../')
 
 from train.switch import *
 
@@ -21,7 +21,8 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        self.save_path = "record/10_20/"+data_name+"/"
+        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
+        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
@@ -250,8 +251,8 @@ class Central_Train:
 
 if __name__ == '__main__':
 
-    # data_name = sys.argv[1]
-    data_name = 'ECG'
+    data_name = sys.argv[1]
+    # data_name = 'ECG'
 
     lc_train = Central_Train()
     lc_train.start_training(data_name)
