@@ -15,9 +15,8 @@ def delete_dataSet_in_database(data_name, train=False):
 
 
 if __name__ == '__main__':
-    os.chdir("../")
     # data_names = ['MNIST', 'ECG', 'OCT', 'MD']
-    data_names = ['OCT']
+    data_names = ['MNIST']
     for data_name in data_names:
         delete_dataSet_in_database(data_name, train=True)
         delete_dataSet_in_database(data_name, train=False)
