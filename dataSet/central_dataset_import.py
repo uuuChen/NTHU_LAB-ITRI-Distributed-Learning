@@ -1,4 +1,7 @@
+import sys
 import os
+sys.path.insert(0, os.getcwd())
+
 from train.switch import Switch
 
 def load_dataSet(data_name, from_database=False):

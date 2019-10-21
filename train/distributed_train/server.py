@@ -413,7 +413,7 @@ class Server(Logger):
         self.save_path = self.save_path+"server/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
-        torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')
+        torch.save(self.model, self.save_path+self.train_args.dataSet+'_server_model.pkl')
 
 
 

@@ -209,7 +209,7 @@ class Agent(Logger):
         self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
-        torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')
+        torch.save(self.model, self.save_path+self.train_args.dataSet+'_agent_model.pkl')
 
 
 

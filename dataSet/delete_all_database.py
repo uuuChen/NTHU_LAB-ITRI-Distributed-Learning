@@ -1,4 +1,7 @@
+import sys
 import os
+sys.path.insert(0, os.getcwd())
+
 from train.switch import Switch
 
 def delete_dataSet_in_database(data_name, train=False):
