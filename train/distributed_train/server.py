@@ -16,7 +16,7 @@ from logger import Logger
 
 class Server(Logger):
 
-    def __init__(self, data_name, save_path, agent_nums, use_localhost=True):
+    def __init__(self, data_name, agent_nums, use_localhost=True):
 
         Logger.__init__(self)
 

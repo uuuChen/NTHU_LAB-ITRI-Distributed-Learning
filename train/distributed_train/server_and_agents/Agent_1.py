@@ -1,8 +1,8 @@
-
-from train.distributed_train.agent import Agent
 import sys
 import os
 sys.path.insert(0, os.getcwd())
+
+from train.distributed_train.agent import Agent
 
 # get args
 cur_agent_num = sys.argv[1]
