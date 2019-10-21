@@ -21,12 +21,6 @@ class Central_Train:
         pass
 
     def _build(self, data_name):
-        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
-        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
-
         self.train_loss = []
         self.train_acc = []
         self.test_loss = []
@@ -52,6 +46,13 @@ class Central_Train:
             self.model.cuda()  # move all model parameters to the GPU
 
         self.optim = optim.Adam(self.model.parameters(), lr=self.train_args.lr)
+
+
+        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
+        self.save_path = "record/"+self.data_name+"/"+date+"/"
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
+        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
 
     def _iter_epoch(self, is_training):
 
