@@ -19,7 +19,6 @@ class Server(Logger):
     def __init__(self, data_name, save_path, use_localhost=True):
 
         Logger.__init__(self)
-        self.save_path = save_path
 
         # get model and train args by "data_name"
         self.switch = Switch(data_name=data_name)
@@ -51,7 +50,7 @@ class Server(Logger):
                                                 # deterministic
 
         # plot
-        self.save_path = "record/10_20/"+data_name+"/"
+        self.save_path = save_path+"/"+data_name+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         self.save_acc = open(self.save_path + data_name + "_distributed_record.txt", "w")
@@ -408,7 +407,7 @@ class Server(Logger):
         self.record_time('結束時間: ')
         self.plot_acc_loss()
 
-        self.save_path = self.save_path+self.train_args.dataSet+"/"
+        self.save_path = self.save_path+"server/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         torch.save(self.model, self.save_path+self.train_args.dataSet+'_model.pkl')

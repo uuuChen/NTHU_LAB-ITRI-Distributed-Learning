@@ -8,7 +8,7 @@ data_name = 'ECG'
 # data_name = 'DRD'
 # data_name = 'Xray'
 # data_name = 'OCT'
-save_path = "record/server/10_20/"
+save_path = "record/10_20/"
 
 if __name__ == '__main__':
 
