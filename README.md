@@ -9,15 +9,30 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/24 17:00"
+1. <更動> Server.py、Agent1.py、central_dataset_import.py 正名
+    1. Server.py -> distributed_server_train.py
+    2. Agent1.py -> distributed_agent_train.py
+    3. central_dataset_import.py -> dataset_import.py
+
 #### "Edward1997 10/21 12:00"
-1. pycharm to terminal in Server.py + Agent_1.py
+1. <更動> | central_train.py、Server.py、Agent1.py、central_dataset_import.py、 delete_all_database.py
+    使其可用 terminal 運行
+2. <更動> | central_train.py、Server.py、Agent1.py
+    使其可由 terminal 讀取參數
+    1. central_train.py data_name
+    2. distributed_server_train.py data_name agent_nums
+    3. distributed_agent_train.py agent_num server_IP
 
 #### "Edward1997 10/18 16:20"
-1. acc to {:.2f}
+1. <更動> | central_train.py, server.py
+    使其準確率 ( accuracy ) 精確至小數點
 
 #### "Edward1997 10/18 14:50"
-1. distributed server train_log + acc
-2. distibuted server confusion matrix out of range
+1. <新增> | server.py
+    效能紀錄完善
+2. <除錯> | server.py
+    解決 confusion matrix 超界問題
 
 
 #### "Edward1997 10/17 18:20"

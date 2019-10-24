@@ -134,7 +134,7 @@ parser.add_argument('--train-batch-size', type=int, default=384, metavar='N',
 parser.add_argument('--test-batch-size', type=int, default=384, metavar='N',
                     help='input batch size for training (default: 100)')
 
-parser.add_argument('--epochs', type=int, default=50, metavar='N',
+parser.add_argument('--epochs', type=int, default=200, metavar='N',
                     help='number of epochs to train (default: 10)')
 
 parser.add_argument('--lr', type=float, default=1e-5, metavar='LR',
