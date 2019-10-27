@@ -120,7 +120,7 @@ parser.add_argument('--image-size', type=int, default=(256, 256), metavar='N',
 OCT_TRAINING_ARGS = parser.parse_args(args=[])
 
 # --------------------------------
-#  MD
+#  MC
 # --------------------------------
 
 parser = argparse.ArgumentParser()
@@ -158,4 +158,4 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 parser.add_argument('--agent-nums', type=int, default=2, metavar='N',
                     help='input agents number (default: 2)')
 
-MD_TRAINING_ARGS = parser.parse_args(args=[])
+MC_TRAINING_ARGS = parser.parse_args(args=[])

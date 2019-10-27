@@ -15,7 +15,7 @@ def delete_dataSet_in_database(data_name, train=False):
 
 
 if __name__ == '__main__':
-    # data_names = ['MNIST', 'ECG', 'OCT', 'MD']
+    # data_names = ['MNIST', 'ECG', 'OCT', 'MC']
     data_names = ['MNIST']
     for data_name in data_names:
         delete_dataSet_in_database(data_name, train=True)

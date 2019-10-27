@@ -9,6 +9,9 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 10/28 01:15"
+1. <更動> 將 MD 正名為 MC
+
 #### "Edward1997 10/24 17:00"
 1. <更動> Server.py、Agent1.py、central_dataset_import.py 正名
     1. Server.py -> distributed_server_train.py

@@ -3,7 +3,7 @@
 from dataSet.MNIST_dataSet import MNIST_DataSet
 from dataSet.ECG_dataSet import ECG_DataSet
 from dataSet.OCT_dataSet import OCT_DataSet
-from dataSet.MD_dataSet import MD_DataSet
+from dataSet.MC_dataSet import MC_DataSet
 
 # import data arguments
 from data.data_args import *
@@ -66,17 +66,17 @@ class Switch:
             server_model = Server_VGG('VGG16', train_data_args['label_class_nums'])
             agent_model = Agent_VGG('VGG16', train_data_args['label_class_nums'])
 
-        elif data_name == 'MD':
+        elif data_name == 'MC':
 
-            dataSet = MD_DataSet
-            train_data_args = MD_TRAIN_ARGS
-            test_data_args = MD_TEST_ARGS
+            dataSet = MC_DataSet
+            train_data_args = MC_TRAIN_ARGS
+            test_data_args = MC_TEST_ARGS
 
-            train_args = MD_TRAINING_ARGS
+            train_args = MC_TRAINING_ARGS
 
             central_model = AlexNet()
             server_model = Server_AlexNet(flatten_nodes=1024,
-                                          num_classes=MD_COMMON_ARGS['label_class_nums'])
+                                          num_classes=MC_COMMON_ARGS['label_class_nums'])
             agent_model = Agent_AlexNet()
 
         else:

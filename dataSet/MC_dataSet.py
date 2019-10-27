@@ -5,7 +5,7 @@ from dataSet.data_proc.data_processor import *
 DEBUG = False
 
 
-class MD_DataSet(Data_Processor):
+class MC_DataSet(Data_Processor):
 
     def __init__(self, data_args):
 
@@ -23,7 +23,7 @@ class MD_DataSet(Data_Processor):
 
     def _get_data_and_labels_from_local(self):
 
-        self.__logger.debug('[Get MD Data And Labels]')
+        self.__logger.debug('[Get MC Data And Labels]')
 
         image_file_paths = []
         image_labels = []
@@ -35,7 +35,7 @@ class MD_DataSet(Data_Processor):
                 image_file_paths.append(file_path)
                 image_labels.append(label_int)
 
-        self.__logger.debug('[Get MD Data And Labels Successfully]')
+        self.__logger.debug('[Get MC Data And Labels Successfully]')
 
         return image_file_paths, image_labels
 

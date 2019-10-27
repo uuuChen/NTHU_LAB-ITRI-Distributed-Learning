@@ -87,10 +87,10 @@ OCT_COMMON_ARGS = {
     },
 }
 
-MD_COMMON_ARGS = {
-    'data_name': 'MD',
+MC_COMMON_ARGS = {
+    'data_name': 'MC',
 
-    'dir_path': 'data/MD/',
+    'dir_path': 'data/MC/',
 
     'label_class_nums': 2,
 
@@ -108,7 +108,7 @@ ECG_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 OCT_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
-MD_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
+MC_COMMON_ARGS.update(GLOBAL_COMMON_ARGS)
 
 # --------------------------------
 #  PRIVATE dataSet PRIVATE arguments
@@ -184,30 +184,30 @@ OCT_TEST_ARGS = {
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
 
-MD_TRAIN_ARGS = {
+MC_TRAIN_ARGS = {
     'train': True,
 
     'down_sampling': False,
 
     'data_type': 'train',
 
-    'images_dir_path': os.path.join(MD_COMMON_ARGS['dir_path'], 'train'),
+    'images_dir_path': os.path.join(MC_COMMON_ARGS['dir_path'], 'train'),
 
-    'images_dir_idx_ptr_path': os.path.join(MD_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
+    'images_dir_idx_ptr_path': os.path.join(MC_COMMON_ARGS['dir_path'], 'train_images_dir_idx_ptr.txt'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_train_data_labels_coll_name'],
 }
 
-MD_TEST_ARGS = {
+MC_TEST_ARGS = {
     'train': False,
 
     'down_sampling': False,
 
     'data_type': 'test',
 
-    'images_dir_path': os.path.join(MD_COMMON_ARGS['dir_path'], 'test'),
+    'images_dir_path': os.path.join(MC_COMMON_ARGS['dir_path'], 'test'),
 
-    'images_dir_idx_ptr_path': os.path.join(MD_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
+    'images_dir_idx_ptr_path': os.path.join(MC_COMMON_ARGS['dir_path'], 'test_images_dir_idx_ptr.txt'),
 
     'db_data_labels_coll_name': GLOBAL_COMMON_ARGS['db_test_data_labels_coll_name'],
 }
@@ -224,7 +224,7 @@ ECG_TEST_ARGS.update(ECG_COMMON_ARGS)
 OCT_TRAIN_ARGS.update(OCT_COMMON_ARGS)
 OCT_TEST_ARGS.update(OCT_COMMON_ARGS)
 
-MD_TRAIN_ARGS.update(MD_COMMON_ARGS)
-MD_TEST_ARGS.update(MD_COMMON_ARGS)
+MC_TRAIN_ARGS.update(MC_COMMON_ARGS)
+MC_TEST_ARGS.update(MC_COMMON_ARGS)
 
 
