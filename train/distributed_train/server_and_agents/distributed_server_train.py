@@ -8,7 +8,7 @@ from train.distributed_train.server import *
 # get args
 data_name = sys.argv[1]
 agent_nums = int(sys.argv[2])
-use_localhost = True
+use_localhost = False
 data_names = ['MNIST', 'ECG', 'MC', 'OCT']
 
 if __name__ == '__main__':
