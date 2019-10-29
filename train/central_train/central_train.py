@@ -20,6 +20,7 @@ class Central_Train:
     def __init__(self, data_name):
         self.data_name = data_name
         self.switch = Switch(data_name=self.data_name)
+        self.train_args = self.switch.get_train_args()
         self.model = self.switch.get_model(is_central=True)
 
         date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
@@ -27,8 +28,6 @@ class Central_Train:
         self.start_epoch = 1
 
     def _build(self):
-        self.train_args = self.switch.get_train_args()
-
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True)
 
 
@@ -44,8 +43,7 @@ class Central_Train:
         self.optim = optim.Adam(self.model.parameters(), lr=self.train_args.lr)
 
 
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        if not os.path.exists(self.save_path + 'model/'):
             os.makedirs(self.save_path + 'model/')
         self.save_acc = open(self.save_path + self.data_name + "_central_record.txt", "a")
 
@@ -241,6 +239,15 @@ class Central_Train:
         return True if self._check_count >= 10 else False
 
     def start_training(self):
+        # if used previous model
+        model_exist = input("Start with exist model? (y/n) : ")
+        if model_exist == 'y':
+            date = input("model path : ")
+            lc_train.save_path = "record/" + data_name + "/" + date + "/"
+            lc_train.start_epoch = int(input("start epoch : "))
+            save_path = lc_train.save_path + "model/" + str(lc_train.start_epoch) + "epochs_model.pkl"
+            lc_train.model = torch.load(save_path)
+
         self._build()
         self.record_time('開始時間 : ')
         end_epoch = self.train_args.epochs + 1
@@ -269,15 +276,6 @@ if __name__ == '__main__':
     # data_name = 'ECG'
 
     lc_train = Central_Train(data_name)
-
-    # if used previous model
-    model_exist = input("Start with exist model? (y/n) : ")
-    if model_exist == 'y':
-        date = input("model path : ")
-        lc_train.save_path = "record/" + data_name + "/" + date + "/"
-        lc_train.start_epoch = int(input("start epoch : "))
-        save_path = lc_train.save_path + "model/" + str(lc_train.start_epoch) + "epochs_model.pkl"
-        lc_train.model = torch.load(save_path)
 
     lc_train.start_training()
 

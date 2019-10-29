@@ -43,6 +43,7 @@ class Server(Logger):
         self.all_test_data_nums = 0
 
         # training setting
+        self.start_epoch = 1
         self.use_localhost = use_localhost
         self.is_simulate = self.train_args.is_simulate
         self.is_first_training = True
@@ -50,17 +51,10 @@ class Server(Logger):
         torch.manual_seed(self.train_args.seed) # seeding the CPU for generating random numbers so that the results are
                                                 # deterministic
 
-        # plot
+        # save
         date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
-        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        self.save_acc = open(self.save_path + data_name + "_distributed_record.txt", "w")
+        self.train_args.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
 
-        self.train_loss = []
-        self.train_acc = []
-        self.test_loss = []
-        self.test_acc = []
         self.preds = []
         self.targets = []
 
@@ -69,6 +63,12 @@ class Server(Logger):
             self.model.cuda()  # move all model parameters to the GPU
         self.optim = optim.Adam(self.model.parameters(),  lr=self.train_args.lr)
 
+    def _build(self):
+
+        if not os.path.exists(self.train_args.save_path+'server/'):
+            os.makedirs(self.train_args.save_path+'server/')
+        self.save_acc = open(self.train_args.save_path + self.data_name + "_distributed_record.txt", "a")
+
     def _conn_to_agents(self):
 
         for i in range(self.train_args.agent_nums):
@@ -76,7 +76,7 @@ class Server(Logger):
                 host_name = 'localhost'
             else:
                 host_name = Socket.get_host_name()
-            print('Server is waiting for connections on (\'{}\')'.format(host_name))
+            print('Server is waiting for connections on (\'{}\', \'{}\')'.format(host_name, self.server_port_begin + i))
             server_sock = Socket((host_name, self.server_port_begin + i), True)
             self.server_socks.append(server_sock)
 
@@ -177,35 +177,27 @@ class Server(Logger):
         self.server_socks[cur_agent_idx].send(self.is_first_training, 'is_first_training')
 
         if not self.is_first_training:
-            self.record_time(self.agents_attrs[cur_agent_idx] + ' 開始 snapshot : ')
+            self.record_time(self.agents_attrs[cur_agent_idx]['name'] + ' 開始 snapshot : ')
             self.server_socks[cur_agent_idx].sleep()
-            self.record_time(self.agents_attrs[cur_agent_idx] + ' 結束 snapshot : ')
+            self.record_time(self.agents_attrs[cur_agent_idx]['name'] + ' 結束 snapshot : ')
 
         self.is_first_training = False
 
     def _whether_is_training_done(self, cur_agent_idx):
 
-        if self.epoch == self.train_args.epochs:
-            self.server_socks[cur_agent_idx].send(True, 'is_training_done')
-
-        else:
-            self.server_socks[cur_agent_idx].send(False, 'is_training_done')
+        self.server_socks[cur_agent_idx].send(self.epoch, 'cur_epoch')
 
     def _train_log(self):
-        self.train_acc.append(100. * self.correct / self.all_train_data_nums)
-        self.train_loss.append(self.loss)
-        print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
+        print('\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
             self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
-        self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
-            self.epoch, self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
+        self.save_acc.write('Train set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
+            self.loss, self.correct, self.all_train_data_nums, 100 * float(self.correct) / self.all_train_data_nums))
 
     def _test_log(self):
-        self.test_acc.append(100. * self.correct / self.all_test_data_nums)
-        self.test_loss.append(self.loss)
-        print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+        print('Test set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
             self.loss, self.correct, self.all_test_data_nums,
             100 * float(self.correct) / self.all_test_data_nums))
-        self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
+        self.save_acc.write('Test set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
             self.loss, self.correct, self.all_test_data_nums,
             100 * float(self.correct) / self.all_test_data_nums))
 
@@ -304,7 +296,12 @@ class Server(Logger):
 
     def record_time(self, hint):
         localtime = time.asctime(time.localtime(time.time()))
-        self.save_acc.write(hint + localtime + '\r\n\n')
+        self.save_acc.write(hint + localtime + '\r\n')
+
+    def record_model(self):
+        self.save_acc.close()
+        self.save_acc = open(self.train_args.save_path + self.data_name + "_distributed_record.txt", "a")
+        torch.save(self.model, self.train_args.save_path + 'server/' + str(self.epoch) + 'epochs_model.pkl')
 
     def plot_confusion_matrix(self, target, pred, classes, data_name, normalize=False, title=None, cmap=plt.cm.Blues):
         """
@@ -359,11 +356,27 @@ class Server(Logger):
                         color="white" if cm[i, j] > thresh else "black")
         fig.tight_layout()
         if normalize:
-            plt.savefig(self.save_path + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
+            plt.savefig(self.train_args.save_path + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
-            plt.savefig(self.save_path + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
+            plt.savefig(self.train_args.save_path + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
+    def read_acc_loss(self):
+        self.save_acc = open(self.train_args.save_path + self.data_name + "_distributed_record.txt", "r")
+        self.train_loss = []
+        self.train_acc = []
+        self.test_loss = []
+        self.test_acc = []
+
+        for line in self.save_acc:
+            line = line.split(' ')
+            if line[0] == 'Train':
+                self.train_loss.append(float(line[3].split(':')[1][:-1]))
+                self.train_acc.append(float(line[-1].split('%')[0][1:]))
+            elif line[0] == 'Test':
+                self.test_loss.append(float(line[3].split(':')[1][:-1]))
+                self.test_acc.append(float(line[-1].split('%')[0][1:]))
 
     def plot_acc_loss(self):
+        self.read_acc_loss()
         x = np.arange(1,  self.train_args.epochs+1)
 
         plt.figure()
@@ -374,7 +387,7 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_loss), label='train')
         plt.plot(x, np.array(self.test_loss), label='test')
         plt.legend()
-        plt.savefig(self.save_path + self.data_name + "_distributed_loss.png", dpi=300, format="png")
+        plt.savefig(self.train_args.save_path + self.data_name + "_distributed_loss.png", dpi=300, format="png")
 
         plt.figure()
         plt.xlabel("epoch")
@@ -384,10 +397,19 @@ class Server(Logger):
         plt.plot(x, np.array(self.train_acc), label='train')
         plt.plot(x, np.array(self.test_acc), label='test')
         plt.legend()
-        plt.savefig(self.save_path + self.data_name + "_distributed_acc.png", dpi=300, format="png")
+        plt.savefig(self.train_args.save_path + self.data_name + "_distributed_acc.png", dpi=300, format="png")
 
     def start_training(self):
+        # if used previous model
+        model_exist = input("Start with exist model? (y/n) : ")
+        if model_exist == 'y':
+            date = input("model path : ")
+            self.train_args.save_path = "record/" + self.data_name + "/" + date + "/"
+            self.start_epoch = int(input("start epoch : "))
+            save_path = self.train_args.save_path + "server/" + str(self.start_epoch) + "epochs_model.pkl"
+            self.model = torch.load(save_path)
 
+        self._build()
         self._conn_to_agents()
 
         self._send_train_args_to_agents()
@@ -404,18 +426,16 @@ class Server(Logger):
         # start training and testing
         self.record_time('開始時間: ')
         self.save_acc.write('Agent_nums = {}\r\n\n'.format(self.train_args.agent_nums))
-        for epoch in range(1, self.train_args.epochs+1):
+        for epoch in range(self.start_epoch, self.train_args.epochs+1):
             print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
+            self.save_acc.write('Epoch {} \r\n'.format(epoch))
             self.epoch = epoch
             self._iter_one_epoch(is_training=True)
             self._iter_one_epoch(is_training=False)
-        self.record_time('結束時間: ')
+            if self.epoch % 5 == 0:
+                self.record_model()
         self.plot_acc_loss()
 
-        self.save_path = self.save_path+"server/"
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        torch.save(self.model, self.save_path+self.train_args.dataSet+'_server_model.pkl')
 
 
 

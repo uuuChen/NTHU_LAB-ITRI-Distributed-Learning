@@ -173,7 +173,8 @@ class Agent(Logger):
 
     def _whether_is_training_done(self):
 
-        if self.agent_server_sock.recv('is_training_done'):
+        self.cur_epoch = self.agent_server_sock.recv('cur_epoch')
+        if self.train_args.epochs == self.cur_epoch:
             is_last_agent = (int(self.cur_name.split("_")[1]) == self.train_args.agent_nums)
             if not is_last_agent:
                 self._send_model_to_next_agent()
@@ -200,16 +201,18 @@ class Agent(Logger):
         else:
             self._send_data_nums_to_server()
 
+        # save
+        if not os.path.exists(self.train_args.save_path+'agent/'):
+            os.makedirs(self.train_args.save_path+'agent/')
+
         while True:
             self._iter(is_training=True)
             done = self._iter(is_training=False)
+            if self.cur_epoch % 5 == 0:
+                torch.save(self.model, self.train_args.save_path + 'agent/' + str(self.cur_epoch) + 'epochs_model.pkl')
             if done:
                 break
-        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
-        self.save_path = "record/"+self.train_args.dataSet+"/"+date+"/"
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        torch.save(self.model, self.save_path+self.train_args.dataSet+'_agent_model.pkl')
+
 
 
 

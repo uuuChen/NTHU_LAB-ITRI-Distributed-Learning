@@ -9,11 +9,26 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "Edward1997 10/29 13:50"
+1. <更動> | central_train.py
+    1. 每 5 epochs 紀錄一次模型
+    2. 每次執行前詢問是否要從已有模型繼續，追問模型時間 + 起始 epoch
+    3. 繪製 acc, loss 圖不再藉由陣列紀錄，改為讀取 record 檔中數值
+2. <更動> | server.py, agent.py
+    1. 每 5 epochs 紀錄一次模型
+    2. 每次執行前詢問是否要從已有模型繼續，追問模型路徑 + 起始 epoch
+    3. 繪製 acc, loss 圖不再藉由陣列紀錄，改為讀取 record 檔中數值
+    4. 傳送 is_training_done 改為 cur_epoch，再讓 agent 自行判斷是否結束 ( 因為 train_args 已包含 total epoch )
+    5. train_args 增加 save_path，讓 server, agent 存放模型之路徑相同，讓中斷回復更易實現
+    6. 紀錄 snapshot 起訖時間
+3. <更動> | distibuted_server_train.py, distibuted_agent_train.py
+    1. 連續跑 4 個 dataset，不中斷
+
 #### "uuuChen 10/28 01:15"
-1. <更動> 將 MD 正名為 MC
+1. <更動> | 將 MD 正名為 MC
 
 #### "Edward1997 10/24 17:00"
-1. <更動> Server.py、Agent1.py、central_dataset_import.py 正名
+1. <更動> | Server.py、Agent1.py、central_dataset_import.py 正名
     1. Server.py -> distributed_server_train.py
     2. Agent1.py -> distributed_agent_train.py
     3. central_dataset_import.py -> dataset_import.py
