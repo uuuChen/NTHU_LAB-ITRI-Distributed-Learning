@@ -177,7 +177,9 @@ class Server(Logger):
         self.server_socks[cur_agent_idx].send(self.is_first_training, 'is_first_training')
 
         if not self.is_first_training:
+            self.record_time(self.agents_attrs[cur_agent_idx] + ' 開始 snapshot : ')
             self.server_socks[cur_agent_idx].sleep()
+            self.record_time(self.agents_attrs[cur_agent_idx] + ' 結束 snapshot : ')
 
         self.is_first_training = False
 

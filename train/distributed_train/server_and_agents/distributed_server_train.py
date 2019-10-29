@@ -14,6 +14,18 @@ if __name__ == '__main__':
     server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=False)
     server.start_training()
 
+    data_name = 'ECG'
+    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=False)
+    server.start_training()
+
+    data_name = 'MC'
+    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=False)
+    server.start_training()
+
+    data_name = 'OCT'
+    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=False)
+    server.start_training()
+
 
 
 

@@ -17,24 +17,20 @@ from train.switch import *
 
 class Central_Train:
 
-    def __init__(self):
-        pass
-
-    def _build(self, data_name):
-        self.train_loss = []
-        self.train_acc = []
-        self.test_loss = []
-        self.test_acc = []
-
+    def __init__(self, data_name):
         self.data_name = data_name
+        self.switch = Switch(data_name=self.data_name)
+        self.model = self.switch.get_model(is_central=True)
 
-        self.switch = Switch(data_name=data_name)
+        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
+        self.save_path = "record/"+self.data_name+"/"+date+"/"
+        self.start_epoch = 1
 
+    def _build(self):
         self.train_args = self.switch.get_train_args()
 
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True)
 
-        self.model = self.switch.get_model(is_central=True)
 
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
 
@@ -48,11 +44,10 @@ class Central_Train:
         self.optim = optim.Adam(self.model.parameters(), lr=self.train_args.lr)
 
 
-        date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
-        self.save_path = "record/"+self.data_name+"/"+date+"/"
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
-        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "w")
+            os.makedirs(self.save_path + 'model/')
+        self.save_acc = open(self.save_path + self.data_name + "_central_record.txt", "a")
 
     def _iter_epoch(self, is_training):
 
@@ -107,18 +102,14 @@ class Central_Train:
 
         total_loss /= batches
         if is_training:
-            self.train_acc.append(100. * correct / data_nums)
-            self.train_loss.append(total_loss)
-            self.save_acc.write('Epoch {} \r\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
+            self.save_acc.write('Epoch {} \r\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
                 self.epoch, total_loss, correct, data_nums, 100 * float(correct) / data_nums))
-            print('\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
+            print('\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
                 total_loss, correct, data_nums, 100 * float(correct) / data_nums))
         else:
-            self.test_acc.append(100. * correct / data_nums)
-            self.test_loss.append(total_loss)
-            print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+            print('Test set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
                 total_loss, correct, data_nums, 100 * float(correct) / data_nums))
-            self.save_acc.write('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
+            self.save_acc.write('Test set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n\n'.format(
                 total_loss, correct, data_nums, 100 * float(correct) / data_nums))
 
             # plot confusion_matrix
@@ -133,6 +124,11 @@ class Central_Train:
     def record_time(self, hint):
         localtime = time.asctime( time.localtime(time.time()))
         self.save_acc.write(hint + localtime + '\r\n\n')
+
+    def record_model(self):
+        self.save_acc.close()
+        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "a")
+        torch.save(self.model, self.save_path + 'model/' + str(self.epoch) + 'epochs_model.pkl')
 
     def plot_confusion_matrix(self, target, pred, classes, data_name,
                               normalize=False,
@@ -196,7 +192,24 @@ class Central_Train:
         else:
             plt.savefig(self.save_path + self.data_name + "_central_confusion_matrix.png", dpi=300, format="png")
 
+    def read_acc_loss(self, end_epoch):
+        self.save_acc = open(self.save_path + data_name + "_central_record.txt", "r")
+        self.train_loss = []
+        self.train_acc = []
+        self.test_loss = []
+        self.test_acc = []
+
+        for line in self.save_acc:
+            line = line.split(' ')
+            if line[0] == 'Train':
+                self.train_loss.append(float(line[3].split(':')[1][:-1]))
+                self.train_acc.append(float(line[-1].split('%')[0][1:]))
+            elif line[0] == 'Test':
+                self.test_loss.append(float(line[3].split(':')[1][:-1]))
+                self.test_acc.append(float(line[-1].split('%')[0][1:]))
+
     def plot_acc_loss(self, end_epoch):
+        self.read_acc_loss(end_epoch)
         x = np.arange(1,  end_epoch)
 
         plt.figure()
@@ -227,27 +240,27 @@ class Central_Train:
             self._check_count += 1
         return True if self._check_count >= 10 else False
 
-    def start_training(self, data_name):
-
-        self._build(data_name=data_name)
+    def start_training(self):
+        self._build()
         self.record_time('開始時間 : ')
         end_epoch = self.train_args.epochs + 1
         self._best_correct = 0
         self._check_count = 0
-        for epoch in range(1,  self.train_args.epochs + 1):
+        for epoch in range(self.start_epoch,  self.train_args.epochs + 1):
             print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
             self.epoch = epoch
             self._iter_epoch(is_training=True)
             correct = self._iter_epoch(is_training=False)
-            early_stop = self._check_early_stop(correct)
-            if early_stop:
-                print('\nEarly stop at epoch {}\n'.format(epoch))
-                end_epoch = epoch + 1
-                break
+            # early_stop = self._check_early_stop(correct)
+            # if early_stop:
+            #     print('\nEarly stop at epoch {}\n'.format(epoch))
+            #     end_epoch = epoch + 1
+            #     break
+            if epoch % 5 == 0:
+                self.record_model()
         self.record_time('結束時間 : ')
         self.save_acc.close()
         self.plot_acc_loss(end_epoch)
-        torch.save(self.model, self.save_path + self.data_name + '_model.pkl')
 
 
 if __name__ == '__main__':
@@ -255,7 +268,17 @@ if __name__ == '__main__':
     data_name = sys.argv[1]
     # data_name = 'ECG'
 
-    lc_train = Central_Train()
-    lc_train.start_training(data_name)
+    lc_train = Central_Train(data_name)
+
+    # if used previous model
+    model_exist = input("Start with exist model? (y/n) : ")
+    if model_exist == 'y':
+        date = input("model path : ")
+        lc_train.save_path = "record/" + data_name + "/" + date + "/"
+        lc_train.start_epoch = int(input("start epoch : "))
+        save_path = lc_train.save_path + "model/" + str(lc_train.start_epoch) + "epochs_model.pkl"
+        lc_train.model = torch.load(save_path)
+
+    lc_train.start_training()
 
 
