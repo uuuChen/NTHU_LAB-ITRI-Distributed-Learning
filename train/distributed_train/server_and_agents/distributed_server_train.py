@@ -9,24 +9,14 @@ from train.distributed_train.server import *
 data_name = sys.argv[1]
 agent_nums = int(sys.argv[2])
 use_localhost = True
+data_names = ['MNIST', 'ECG', 'MC', 'OCT']
 
 if __name__ == '__main__':
 
-    data_name = 'MNIST'
-    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
-    server.start_training()
+    for data_name in data_names:
+        server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
+        server.start_training()
 
-    data_name = 'ECG'
-    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
-    server.start_training()
-
-    data_name = 'MC'
-    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
-    server.start_training()
-
-    data_name = 'OCT'
-    server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
-    server.start_training()
 
 
 

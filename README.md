@@ -9,6 +9,12 @@
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
 
+#### "uuuChen 10/30 00:20"
+1. <更動> | distibuted_server_train.py, distibuted_agent_train.py
+    1. 實作改為 for 迴圈，另外將 agent sleep 時間從 50 更動為 100
+2. <更動> | train_args.py
+    1. 將 train_agrs 中 OCT 的 epoch 從 80 改為 50
+
 #### "Edward1997 10/29 13:50"
 1. <更動> | central_train.py
     1. 每 5 epochs 紀錄一次模型

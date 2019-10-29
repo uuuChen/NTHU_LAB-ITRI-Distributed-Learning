@@ -118,7 +118,7 @@ class Local_Split_Train:
 if __name__ == '__main__':
 
     os.chdir('../../')
-    data_name = 'Xray'
+    data_name = 'MNIST'
 
     lc_train = Local_Split_Train()
     lc_train.start_training(data_name)
