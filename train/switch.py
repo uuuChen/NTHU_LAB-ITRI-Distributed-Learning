@@ -75,7 +75,7 @@ class Switch:
             train_args = MC_TRAINING_ARGS
 
             central_model = AlexNet()
-            server_model = Server_AlexNet(flatten_nodes=1024,
+            server_model = Server_AlexNet(flatten_nodes=9216,
                                           num_classes=MC_COMMON_ARGS['label_class_nums'])
             agent_model = Agent_AlexNet()
 
