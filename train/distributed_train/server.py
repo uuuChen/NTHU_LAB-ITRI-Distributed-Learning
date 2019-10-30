@@ -43,7 +43,7 @@ class Server(Logger):
         self.all_test_data_nums = 0
 
         # training setting
-        self.start_epoch = 1
+        self.train_args.start_epoch = 1
         self.use_localhost = use_localhost
         self.is_simulate = self.train_args.is_simulate
         self.is_first_training = True
@@ -408,9 +408,10 @@ class Server(Logger):
         if model_exist == 'y':
             date = input("model path : ")
             self.train_args.save_path = "record/" + self.data_name + "/" + date + "/"
-            self.start_epoch = int(input("start epoch : "))
-            save_path = self.train_args.save_path + "server/" + str(self.start_epoch) + "epochs_model.pkl"
+            self.train_args.start_epoch = int(input("start epoch : "))
+            save_path = self.train_args.save_path + "server/" + str(self.train_args.start_epoch) + "epochs_model.pkl"
             self.model = torch.load(save_path)
+            self.is_first_training = False
 
         self._build()
         self._conn_to_agents()
@@ -429,7 +430,7 @@ class Server(Logger):
         # start training and testing
         self.record_time('開始時間: ')
         self.save_acc.write('Agent_nums = {}\r\n\n'.format(self.train_args.agent_nums))
-        for epoch in range(self.start_epoch, self.train_args.epochs+1):
+        for epoch in range(self.train_args.start_epoch, self.train_args.epochs+1):
             print('Epoch [{} / {}]'.format(epoch, self.train_args.epochs))
             self.save_acc.write('Epoch {} \r\n'.format(epoch))
             self.epoch = epoch
