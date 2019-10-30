@@ -411,7 +411,6 @@ class Server(Logger):
             self.train_args.start_epoch = int(input("start epoch : "))
             save_path = self.train_args.save_path + "server/" + str(self.train_args.start_epoch) + "epochs_model.pkl"
             self.model = torch.load(save_path)
-            self.is_first_training = False
 
         self._build()
         self._conn_to_agents()
