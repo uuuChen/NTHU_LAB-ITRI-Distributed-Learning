@@ -90,10 +90,12 @@ class Agent(Logger):
 
     def _send_model_to_next_agent(self):
         # send model to next agent
+        print('sending model to next agent...')
         self.to_agent_sock.accept()
         self.to_agent_sock.send(self.model.state_dict(), 'model_state_dict')
         self.to_agent_sock.send(self.optim.state_dict(), 'optim_state_dict')
         self.to_agent_sock.close()
+        print('done!')
 
     def _iter(self, is_training):
 
@@ -192,8 +194,11 @@ class Agent(Logger):
             return True
         else:
             self._send_model_to_next_agent()
-            if self.cur_epoch % 5 == 0:
-                torch.save(self.model, self.train_args.save_path + 'agent/' + str(self.cur_epoch) + 'epochs_model.pkl')
+            # if self.cur_epoch % 5 == 0:
+            #     print('saving model.pkl...')
+                # torch.save(self.model, self.train_args.save_path + 'agent/' + str(self.cur_epoch) + 'epochs_model.pkl')
+                # self.agent_server_sock.awake()
+                # print('done!')
             return False
 
     def start_training(self):
