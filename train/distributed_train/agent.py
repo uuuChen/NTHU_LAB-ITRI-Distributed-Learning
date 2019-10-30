@@ -28,16 +28,19 @@ class Agent(Logger):
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
 
+        self.switch = Switch(data_name=self.train_args.dataSet)
+        self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
+
         # save
         if not os.path.exists(self.train_args.save_path + 'agent/'):
             self.model = self.switch.get_model(is_agent=True)
             os.makedirs(self.train_args.save_path + 'agent/')
+            print(self.train_args.save_path)
         else:
             save_path = self.train_args.save_path + "agent/" + str(self.train_args.start_epoch) + "epochs_model.pkl"
+            print(save_path)
             self.model = torch.load(save_path)
 
-        self.switch = Switch(data_name=self.train_args.dataSet)
-        self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
 
         if self.is_simulate:  # have to wait for "id_list" receiving from server
             self.train_data_nums = None
