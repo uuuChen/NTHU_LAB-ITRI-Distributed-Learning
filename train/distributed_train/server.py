@@ -186,6 +186,8 @@ class Server(Logger):
     def _whether_is_training_done(self, cur_agent_idx):
 
         self.server_socks[cur_agent_idx].send(self.epoch, 'cur_epoch')
+        if self.epoch % 5 == 0:
+            self.server_socks[cur_agent_idx].sleep()
 
     def _train_log(self):
         print('\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
@@ -401,8 +403,8 @@ class Server(Logger):
 
     def start_training(self):
         # if used previous model
-        # model_exist = input("Start with exist model? (y/n) : ")
-        model_exist = 'n'
+        model_exist = input("Start with exist model? (y/n) : ")
+        # model_exist = 'n'
         if model_exist == 'y':
             date = input("model path : ")
             self.train_args.save_path = "record/" + self.data_name + "/" + date + "/"

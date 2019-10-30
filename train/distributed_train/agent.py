@@ -210,6 +210,7 @@ class Agent(Logger):
             done = self._iter(is_training=False)
             if self.cur_epoch % 5 == 0:
                 torch.save(self.model, self.train_args.save_path + 'agent/' + str(self.cur_epoch) + 'epochs_model.pkl')
+                self.agent_server_sock.awake()
             if done:
                 break
 
