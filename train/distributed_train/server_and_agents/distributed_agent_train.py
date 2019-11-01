@@ -16,11 +16,11 @@ dataSet_num = 4
 
 if __name__ == '__main__':
 
-    # for i in range(1, dataSet_num + 1):
-    agent = Agent(server_host_port, cur_agent_name)
-    agent.start_training()
-        # if i != dataSet_num:
-        #     time.sleep(100)
+    for i in range(1, dataSet_num + 1):
+        agent = Agent(server_host_port, cur_agent_name)
+        agent.start_training()
+        if i != dataSet_num:
+            time.sleep(300)
 
 
 

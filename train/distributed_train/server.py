@@ -186,8 +186,8 @@ class Server(Logger):
     def _whether_is_training_done(self, cur_agent_idx):
 
         self.server_socks[cur_agent_idx].send(self.epoch, 'cur_epoch')
-        if self.epoch % 5 == 0:
-            self.server_socks[cur_agent_idx].sleep()
+        # if self.epoch % 5 == 0:
+        #     self.server_socks[cur_agent_idx].sleep()
 
     def _train_log(self):
         print('\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
@@ -435,10 +435,12 @@ class Server(Logger):
             self.epoch = epoch
             self._iter_one_epoch(is_training=True)
             self._iter_one_epoch(is_training=False)
-            if self.epoch % 5 == 0:
-                self.record_model()
+            # if self.epoch % 5 == 0:
+            #
+        self.record_time('結束時間: ')
+        self.save_acc.close()
         self.plot_acc_loss()
-
+        self.record_model()
 
 
 
