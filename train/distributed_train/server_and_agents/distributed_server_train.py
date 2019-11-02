@@ -17,6 +17,7 @@ if __name__ == '__main__':
         for data_name in data_names:
             server = Server(data_name=data_name, agent_nums=agent_nums, use_localhost=use_localhost)
             server.start_training()
+        agent_nums -= 1
 
 
 
