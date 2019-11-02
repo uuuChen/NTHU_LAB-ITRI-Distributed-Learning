@@ -17,7 +17,7 @@ dataSet_num = 4
 
 if __name__ == '__main__':
 
-    for i in range(1, magic_number + 1):
+    for i in range(1, int(magic_number) + 1):
         agent = Agent(server_host_port, cur_agent_name)
         agent.start_training()
         if i != dataSet_num:
