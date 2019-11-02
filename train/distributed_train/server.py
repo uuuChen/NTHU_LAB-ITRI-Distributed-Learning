@@ -403,8 +403,8 @@ class Server(Logger):
 
     def start_training(self):
         # if used previous model
-        model_exist = input("Start with exist model? (y/n) : ")
-        # model_exist = 'n'
+        # model_exist = input("Start with exist model? (y/n) : ")
+        model_exist = 'n'
         if model_exist == 'y':
             date = input("model path : ")
             self.train_args.save_path = "record/" + self.data_name + "/" + date + "/"
