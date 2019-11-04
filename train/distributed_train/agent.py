@@ -15,6 +15,7 @@ class Agent(Logger):
         Logger.__init__(self)
         self.server_host_port = server_host_port
         self.cur_name = cur_name
+        self.cur_epoch = 1
 
     def _conn_to_server(self):
         self.agent_server_sock = Socket(self.server_host_port, False)
@@ -32,12 +33,12 @@ class Agent(Logger):
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
 
         # save
-        if not os.path.exists(self.train_args.save_path + 'agent/'):
+        if not os.path.exists(self.train_args.save_path + self.cur_name + '/'):
             self.model = self.switch.get_model(is_agent=True)
-            os.makedirs(self.train_args.save_path + 'agent/')
+            os.makedirs(self.train_args.save_path + self.cur_name + '/')
             print(self.train_args.save_path)
         else:
-            save_path = self.train_args.save_path + "agent/" + str(self.train_args.start_epoch) + "epochs_model.pkl"
+            save_path = self.train_args.save_path + self.cur_name + '/' + str(self.train_args.start_epoch) + "epochs_model.pkl"
             print(save_path)
             self.model = torch.load(save_path)
 
@@ -194,11 +195,10 @@ class Agent(Logger):
             return True
         else:
             self._send_model_to_next_agent()
-            # if self.cur_epoch % 5 == 0:
-            #     print('saving model.pkl...')
-                # torch.save(self.model, self.train_args.save_path + 'agent/' + str(self.cur_epoch) + 'epochs_model.pkl')
-                # self.agent_server_sock.awake()
-                # print('done!')
+            if self.cur_epoch % 5 == 0:
+                print('saving model.pkl...')
+                torch.save(self.model, self.train_args.save_path + self.cur_name +'/' + str(self.cur_epoch) + 'epochs_model.pkl')
+                print('done!')
             return False
 
     def start_training(self):

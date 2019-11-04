@@ -8,6 +8,9 @@
 1. <新增> | 新增尚不存在的功能、註解、檔案...等
 2. <更動> | 已有某功能且正常運作，更動其寫法、功能、註解...等
 3. <除錯> | 已有某功能但出錯，將其更正
+#### "Edward1997 11/04 18:20"
+1. <除錯> | "distributed_train" 中 func plot_contusion_matrix
+    * label error
 
 #### "uuuChen 10/30 00:20"
 1. <更動> | distibuted_server_train.py, distibuted_agent_train.py
@@ -54,22 +57,23 @@
 
 #### "Edward1997 10/18 14:50"
 1. <新增> | server.py
-    效能紀錄完善
+    * 效能紀錄完善
 2. <除錯> | server.py
-    解決 confusion matrix 超界問題
+    * 解決 confusion matrix 超界問題
 
 
 #### "Edward1997 10/17 18:20"
 1. <除錯> | import 問題
     * 若在 cmd 運行，需增加
-    # set import path
+    ```
     import sys
     import os
     sys.path.insert(0, os.getcwd())
-    並註解掉 os.chdir('../../')
+    ```
+    並註解掉 `os.chdir('../../')`
     * 若在 pycharm 運行，則反之
-    增加 os.chdir('../../')
-    註解掉 sys.path.insert(0, os.getcwd())
+    增加 `os.chdir('../../')`
+    註解掉 `sys.path.insert(0, os.getcwd())`
 
 #### "uuuChen 10/15 13:30"
 
