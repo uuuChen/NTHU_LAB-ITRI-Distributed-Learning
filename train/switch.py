@@ -66,7 +66,7 @@ class Switch:
             server_model = Server_VGG('VGG16', train_data_args['label_class_nums'])
             agent_model = Agent_VGG('VGG16', train_data_args['label_class_nums'])
 
-        elif data_name == 'MC':
+        elif data_name == 'MC' or data_name == 'MC_2':
 
             dataSet = MC_DataSet
             train_data_args = MC_TRAIN_ARGS
@@ -75,9 +75,12 @@ class Switch:
             train_args = MC_TRAINING_ARGS
 
             central_model = AlexNet()
-            server_model = Server_AlexNet(flatten_nodes=9216,
-                                          num_classes=MC_COMMON_ARGS['label_class_nums'])
-            agent_model = Agent_AlexNet()
+            if data_name == 'MC':
+                server_model = Server_AlexNet(num_classes=MC_COMMON_ARGS['label_class_nums'])
+                agent_model = Agent_AlexNet()
+            else:
+                server_model = Server_AlexNet_2(num_classes=MC_COMMON_ARGS['label_class_nums'])
+                agent_model = Agent_AlexNet_2()
 
         else:
             raise Exception('DataSet ( %s ) Not Exist !' % data_name)

@@ -12,6 +12,13 @@
 1. <除錯> | "distributed_train" 中 func plot_contusion_matrix
     * label error
 
+#### "uuuChen 11/05 14:20"
+1. <新增> | model/AlexNet.py
+    1. Server_AlexNet_2, Agent_AlexNet_2:  新增不同切割層的 AlexNet
+
+2. <更動，新增> | distributed_train/switch.py
+    1. 加入一組新的 data_name "MC_2" ，他會使用 "Server_AlexNet_2", "Agent_AlexNet_2" 而非 "Server_AlexNet", "Agent_AlexNet"
+
 #### "uuuChen 10/30 00:20"
 1. <更動> | distibuted_server_train.py, distibuted_agent_train.py
     1. 實作改為 for 迴圈，另外將 agent sleep 時間從 50 更動為 100
