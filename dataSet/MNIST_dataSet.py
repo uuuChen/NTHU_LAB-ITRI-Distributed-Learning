@@ -5,17 +5,11 @@ from dataSet.data_proc.data_processor import *
 DEBUG = False
 
 
-
 class MNIST_DataSet(Data_Processor):
 
     def __init__(self, data_args):
-
-        self.__logger = self.get_logger(unique_name=__name__,
-                                        debug=DEBUG)
-
+        self.__logger = self.get_logger(__name__, DEBUG)
         Data_Processor.__init__(self, data_args=data_args)
-
-
 
     def _get_data_and_labels_from_local(self):
 
@@ -28,7 +22,6 @@ class MNIST_DataSet(Data_Processor):
         data_test = datasets.MNIST(root="./data/",
                                    transform=transforms.ToTensor(),
                                    train=False)
-
 
         if self.train:
             images = data_train.data.tolist()
@@ -46,7 +39,7 @@ class MNIST_DataSet(Data_Processor):
 
     def get_data_and_labels(self, batch_size, image_size=(28, 28), data_preprocess=True, toTensor=True, one_hot=False):
 
-        data, labels = self._get_data_and_labels_from_database(batch_size=batch_size)
+        data, labels = self._get_data_and_labels_from_database(batch_size)
 
         if data_preprocess:
             datas = []
@@ -56,12 +49,10 @@ class MNIST_DataSet(Data_Processor):
             data = np.array(datas)
 
         if one_hot:
-            labels = self._trans_labels_to_one_hot(labels=labels,
-                                                   class_nums=self.label_class_nums)
+            labels = self._trans_labels_to_one_hot(labels, self.label_class_nums)
 
         if toTensor:
-            data, labels = self._trans_data_and_labels_to_tensor(data=data,
-                                                                 labels=labels)
+            data, labels = self._trans_data_and_labels_to_tensor(data, labels)
 
         return data, labels
 

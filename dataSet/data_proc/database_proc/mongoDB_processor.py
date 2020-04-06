@@ -19,18 +19,14 @@ DEBUG = False  # when Debug is True, logger will print debug messages.
 class MongoDB_Processor(Logger):
 
     def __init__(self, data_args):
-
         Logger.__init__(self)
-
         self.db_name = data_args['data_name']  # the name of the database to link to, and it equals to the data name
-
         self.client = pymongo.MongoClient(data_args['client_url'])  # connect to client
-
         self.db = self.client[self.db_name]  # connect to database
 
         # get a unique logger for debug, so the get_logger() needs to pass in a unique name
         unique_name = data_args['data_type'] + '_' + self.db_name + '_' + __name__
-        self.__logger = self.get_logger(unique_name=unique_name, debug=DEBUG)
+        self.__logger = self.get_logger(unique_name, DEBUG)
 
     def coll_insert(self, coll_name, data, labels):
 
@@ -49,12 +45,9 @@ class MongoDB_Processor(Logger):
         """
 
         coll = self.db[coll_name]
-
         data_labels_dicts = []
-
         self.__logger.debug('Insert %s Rows To Database ( %s ) Collection ( %s )...' % (len(data), self.db_name,
                                                                                         coll_name))
-
         for i in range(len(data)):
 
             if (i + 1) % 1000 == 0:
@@ -65,11 +58,9 @@ class MongoDB_Processor(Logger):
                 'data': data[i],
                 'label': labels[i],
             }
-
             data_labels_dicts.append(data_label_dict)
 
         coll.insert_many(data_labels_dicts)
-
         self.__logger.debug('Done')
 
     def coll_find_all(self, coll_name):
@@ -87,9 +78,7 @@ class MongoDB_Processor(Logger):
         """
 
         coll = self.db[coll_name]
-
         cursor = coll.find(no_cursor_timeout=True)
-
         return cursor
 
     def coll_find_query(self, coll_name, query):
@@ -108,9 +97,7 @@ class MongoDB_Processor(Logger):
         """
 
         coll = self.db[coll_name]
-
         cursor = coll.find(query, no_cursor_timeout=True)
-
         return cursor
 
     def coll_delete_all(self, coll_name):
@@ -128,13 +115,9 @@ class MongoDB_Processor(Logger):
         """
 
         coll = self.db[coll_name]
-
         delete_count = coll.count()
-
         self.__logger.debug('Delete %s Rows From Database ( %s ) ...' % (delete_count, self.db_name))
-
         coll.delete_many({})
-
         self.__logger.debug('Done !')
 
     def coll_read_all_labels(self, coll_name):
@@ -165,7 +148,6 @@ class MongoDB_Processor(Logger):
         labels = []
 
         data_labels = self.coll_find_all(coll_name=coll_name)
-
         self.__logger.debug('Get %s Rows From Database ( %s ) ...' % (data_labels.count(), self.db_name))
 
         for i, data_label in list(enumerate(data_labels, start=1)):
@@ -206,7 +188,6 @@ class MongoDB_Processor(Logger):
                                                  query=find_query)
 
         self.__logger.debug('id list %s ' % str(id_list))
-
         self.__logger.debug('Get %s Rows From Database ( %s ) ...' % (batch_data_labels.count(), self.db_name))
 
         for i, data_label in list(enumerate(batch_data_labels, start=1)):
@@ -237,9 +218,7 @@ class MongoDB_Processor(Logger):
         """
 
         self.__logger.debug('Delete Database ( %s ) ...' % self.db_name)
-
         self.client.drop_database(self.db_name)
-
         self.__logger.debug('Done !')
 
     def gridFS_coll_insert(self, coll_name, data_file_paths, labels):
@@ -263,9 +242,7 @@ class MongoDB_Processor(Logger):
 
         self.__logger.debug('Insert %s Rows From Local To Database ( %s ) Collection ( %s ) ...' %
                             (len(data_file_paths), self.db_name, coll_name))
-
         error_data_nums = 0
-
         fs = GridFS(self.db, collection=coll_name)
 
         for i in range(len(data_file_paths)):
@@ -285,13 +262,11 @@ class MongoDB_Processor(Logger):
 
             # else:  # the data is complete, so we upload data file and corresponding label to database
             label = labels[i]
-
             dic = {
                 "label": label,
                 "file_name": re.split(r"[/\\]", data_file_path)[-1],
                 "ID": i + 1
             }
-
             fs.put(open(data_file_path, 'rb'), **dic)
 
         self.__logger.debug('Done !')
@@ -369,11 +344,8 @@ class MongoDB_Processor(Logger):
         """
 
         fs = GridFS(self.db, coll_name)
-
         find_query = {'ID': {"$in": id_list}}
-
         batch_grid_outs = fs.find(find_query)
-
         batch_grid_outs_count = batch_grid_outs.count()
 
         self.__logger.debug('Read %s Rows From Database ( %s ) ...' % (batch_grid_outs_count, self.db_name))
@@ -413,15 +385,12 @@ class MongoDB_Processor(Logger):
         """
 
         fs = GridFS(self.db, coll_name)
-
         delete_count = fs.find(no_cursor_timeout=True).count()
 
         self.__logger.debug('Delete %s Rows From Database ( %s ) ...' % (delete_count, self.db_name))
 
         for grid_out in fs.find(no_cursor_timeout=True):
-
             id = grid_out._id
-
             fs.delete(id)
 
         self.__logger.debug('Done !')
@@ -441,9 +410,7 @@ class MongoDB_Processor(Logger):
         """
 
         fs = GridFS(self.db, coll_name)
-
         cursor = fs.find(no_cursor_timeout=True)
-
         return cursor
 
 

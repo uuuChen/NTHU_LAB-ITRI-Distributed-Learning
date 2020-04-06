@@ -4,7 +4,6 @@ from torch.autograd import Variable
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from sklearn.utils.multiclass import unique_labels
 import time
 
 # Socket Imports
@@ -64,13 +63,11 @@ class Server(Logger):
         self.optim = optim.Adam(self.model.parameters(),  lr=self.train_args.lr)
 
     def _build(self):
-
-        if not os.path.exists(self.train_args.save_path+'server/'):
-            os.makedirs(self.train_args.save_path+'server/')
+        if not os.path.exists(self.train_args.save_path + 'server/'):
+            os.makedirs(self.train_args.save_path + 'server/')
         self.save_acc = open(self.train_args.save_path + self.data_name + "_distributed_record.txt", "a")
 
     def _conn_to_agents(self):
-
         for i in range(self.train_args.agent_nums):
             if self.use_localhost:
                 host_name = 'localhost'
@@ -89,12 +86,10 @@ class Server(Logger):
             self.agents_attrs.append(agents_attr)
 
     def _send_train_args_to_agents(self):
-
         for i in range(self.train_args.agent_nums):
             self.server_socks[i].send(self.train_args, 'train_args')
 
     def _send_agents_attrs_to_agents(self):
-
         for i in range(self.train_args.agent_nums):
             # send agent IP and distributed port
             self.server_socks[i].send(self.agents_attrs[i]['host_port'], 'cur_host_port')
@@ -104,7 +99,6 @@ class Server(Logger):
             self.server_socks[i].send((prev_agent_attrs, next_agent_attrs), 'prev_next_agent_attrs')
 
     def _get_prev_next_agents_attrs(self, agent_idx):
-
         prev_agent_idx = agent_idx - 1
         next_agent_idx = agent_idx + 1
 
@@ -119,7 +113,6 @@ class Server(Logger):
         return prev_agent_attrs, next_agent_attrs
 
     def _recv_total_data_nums_from_first_agent(self):
-
         for i in range(self.train_args.agent_nums):
             if i == 0:
                 self.server_socks[i].send(True, 'is_first_agent')
@@ -129,7 +122,6 @@ class Server(Logger):
                 self.server_socks[i].send(False, 'is_first_agent')
 
     def _send_id_lists_to_agents(self):
-
         all_train_id_list = list(range(1, self.all_train_data_nums + 1))
         all_test_id_list = list(range(1, self.all_test_data_nums + 1))
 
@@ -164,7 +156,6 @@ class Server(Logger):
             self.server_socks[i].send([agent_train_id_list, agent_test_id_list], 'train_test_id_list')
 
     def _recv_data_nums_from_agents(self):
-
         for i in range(self.train_args.agent_nums):
             self.train_data_nums[i] = self.server_socks[i].recv('train_data_nums')
             self.all_train_data_nums += self.train_data_nums[i]
@@ -173,18 +164,14 @@ class Server(Logger):
             self.all_test_data_nums += self.test_data_nums[i]
 
     def _whether_waiting_for_agent(self, cur_agent_idx):
-
         self.server_socks[cur_agent_idx].send(self.is_first_training, 'is_first_training')
-
         if not self.is_first_training:
             self.record_time(self.agents_attrs[cur_agent_idx]['name'] + ' 開始 snapshot : ')
             self.server_socks[cur_agent_idx].sleep()
             self.record_time(self.agents_attrs[cur_agent_idx]['name'] + ' 結束 snapshot : ')
-
         self.is_first_training = False
 
     def _whether_is_training_done(self, cur_agent_idx):
-
         self.server_socks[cur_agent_idx].send(self.epoch, 'cur_epoch')
 
     def _train_log(self):
@@ -202,7 +189,6 @@ class Server(Logger):
             100 * float(self.correct) / self.all_test_data_nums))
 
     def _iter_through_agent_database(self, is_training, cur_agent_idx):
-
         iter_type = 'training' if is_training else 'testing'
         print('start %s with %s' % (iter_type, str(self.agents_attrs[cur_agent_idx])))
 
@@ -214,9 +200,7 @@ class Server(Logger):
             batch_size = self.train_args.test_batch_size
 
         batches = (data_nums - 1) // batch_size + 1
-
         for batch_idx in range(1, batches + 1):
-
             # get agent_output and target from agent
             agent_output = self.server_socks[cur_agent_idx].recv('agent_output')
             target = self.server_socks[cur_agent_idx].recv('target')
@@ -235,7 +219,6 @@ class Server(Logger):
             if int(self.epoch) == int(self.train_args.epochs):
                 self.targets.extend(target.data.cpu())
                 self.preds.extend(pred.data.cpu())
-
 
             self.loss += loss.item()
             pred = server_output.data.max(1)[1]
@@ -260,7 +243,6 @@ class Server(Logger):
                         self.correct, self.trained_data_num, 100 * float(self.correct) / self.trained_data_num))
 
     def _iter_one_epoch(self, is_training):
-
         self.loss = 0
         self.correct = 0
         self.batches = 0
@@ -274,11 +256,8 @@ class Server(Logger):
             self.model.eval()
 
         for agent_idx in range(self.train_args.agent_nums):
-
             self._whether_waiting_for_agent(agent_idx)
-
             self._iter_through_agent_database(is_training, agent_idx)
-
             if not is_training:
                 self._whether_is_training_done(agent_idx)
 
@@ -358,6 +337,7 @@ class Server(Logger):
             plt.savefig(self.train_args.save_path + self.data_name + "_distributed_confusion_matrix(normalize).png", dpi=300, format="png")
         else:
             plt.savefig(self.train_args.save_path + self.data_name + "_distributed_confusion_matrix.png", dpi=300, format="png")
+
     def read_acc_loss(self):
         self.save_acc = open(self.train_args.save_path + self.data_name + "_distributed_record.txt", "r")
         self.train_loss = []
@@ -411,15 +391,12 @@ class Server(Logger):
 
         self._build()
         self._conn_to_agents()
-
         self._send_train_args_to_agents()
-
         self._send_agents_attrs_to_agents()
 
         if self.is_simulate:  # for simulated accuracy test
             self._recv_total_data_nums_from_first_agent()
             self._send_id_lists_to_agents()
-
         else:  # for real hospitals usage
             self._recv_data_nums_from_agents()
 

@@ -11,10 +11,7 @@ DEBUG = False
 class File_Processor(Logger):
 
     def __init__(self):
-
-        self.__logger = self.get_logger(unique_name=__name__,
-                                        debug=DEBUG)
-
+        self.__logger = self.get_logger(__name__, DEBUG)
         Logger.__init__(self)
 
     def _read_images_directory(self, images_dir_path, images_dir_idx_ptr_path, sort_key=None, get_images=False,
@@ -32,7 +29,6 @@ class File_Processor(Logger):
             old_dir_idx_ptr = 0
             batch_size = image_file_nums  # actual usage
             # batch_size = 500  # testing usage
-
         else:
             old_dir_idx_ptr = self.read_nums_from_file(file_path=images_dir_idx_ptr_path)
 
@@ -65,17 +61,14 @@ class File_Processor(Logger):
                 batch_images.append(image)
 
             self.__logger.debug(image_file_path)
-
             self.__logger.debug('Read %s Images' % int(i + 1))
 
         self.__logger.debug('Done !')
 
         if get_images and get_image_paths:
             return batch_images, batch_image_file_paths
-
         elif get_images:
             return batch_images
-
         else:
             return batch_image_file_paths
 
@@ -99,10 +92,8 @@ class File_Processor(Logger):
         try:
             with open(file_path, "r") as file:
                 nums = int(file.readline())
-
         except:
             nums = 0
-
         return nums
 
     @staticmethod
@@ -115,10 +106,8 @@ class File_Processor(Logger):
         try:
             with open(file_path, 'rb') as fp:
                 itemlist = pickle.load(fp)
-
         except:
             itemlist = None
-
         return itemlist
 
 

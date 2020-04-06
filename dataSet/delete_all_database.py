@@ -4,6 +4,7 @@ sys.path.insert(0, os.getcwd())
 
 from train.switch import Switch
 
+
 def delete_dataSet_in_database(data_name, train=False):
     source = '"train_data_labels"' if train else '"test_data_labels"'
     print("deleting {} from {}...".format(source, data_name))
@@ -20,3 +21,6 @@ if __name__ == '__main__':
     for data_name in data_names:
         delete_dataSet_in_database(data_name, train=True)
         delete_dataSet_in_database(data_name, train=False)
+
+
+

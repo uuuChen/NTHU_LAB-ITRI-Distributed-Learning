@@ -1,79 +1,57 @@
 
 from socket import *
-import pickle
-
 from logger import *
 
-DEBUG = False
+import pickle
 
-logger = Logger.get_logger(unique_name=__name__,
-                           debug=DEBUG)
+
+DEBUG = False
+logger = Logger.get_logger(__name__, DEBUG)
+
 
 class Socket(Logger):
 
     def __init__(self, server_host_port, is_server, back_log=5, buffer_size=2048):
-
         Logger.__init__(self)
-
         self.__logger = logger
-
         if is_server:
             type_ = 'server'
         else:
             type_ = 'agent'
         self.type = type_
-
         self.is_server = is_server
-
         self.server_host_port = server_host_port
-
         self.back_log = back_log
-
         self.buffer_size = buffer_size
-
         self.socket = self._get_socket()
 
     def _get_socket(self):
-
         if self.is_server:
             socket = self._get_server_socket()
-
         else:
             socket = self._get_client_socket()
-
         return socket
 
     def _get_server_socket(self):
-
         server = socket(AF_INET, SOCK_STREAM)
-
         server.bind(self.server_host_port)
-
         server.listen(self.back_log)
-
         self.__logger.debug('Server Starts Running...')
-
         return server
 
     def _get_client_socket(self):
-
         client = socket(AF_INET, SOCK_STREAM)
-
         return client
 
     def _send(self, data, data_name):
-        #print('send: %s' %data_name)
-        #print(data)
         data = pickle.dumps(data)
-
         try:
             if self.is_server:
-                self.conn.sendall(data)  # sendall() is a package of send(). It can automatically call send() when the
-                                         # data has not been delivered completely.
-
+                # sendall() is a package of send(). It can automatically call send() when the
+                # data has not been delivered completely.
+                self.conn.sendall(data)
             else:
                 self.socket.sendall(data)
-
         except Exception:
             self.__logger.error('"%s" Send "%s" Error !' % (self.type, data_name))
             raise
@@ -109,28 +87,22 @@ class Socket(Logger):
             'data_bytes': len(pickle.dumps(data))
         }
         self._send(header, data_name + '_header')
-
         self.__logger.debug('send data_bytes: %s' % header['data_bytes'])
 
         self.sleep()
 
         self._send(data, data_name)
-
         self.__logger.debug('"%s" Send "%s" Successfully !' % (self.type, data_name))
 
     def _recv(self, data_name, data_bytes, is_header=False):
-        #print('recv %s' %data_name)
         data = []
-
         left_data_bytes = data_bytes
         while True:
-
             # VERY IMPORTANT! Adjust "buf_size" to get just the right size of the data
             if left_data_bytes >= self.buffer_size:
                 buf_size = self.buffer_size
             else:
                 buf_size = left_data_bytes
-
             try:
                 if self.is_server:
                     buf_data = self.conn.recv(buf_size)
@@ -140,16 +112,11 @@ class Socket(Logger):
                 if is_header:
                     data = [buf_data]
                     break
-
                 data.append(buf_data)
-
                 left_data_bytes -= len(buf_data)
-
                 if left_data_bytes == 0:
                     break
-
             except timeout:
-
                 self.__logger.error('TIMEOUT !!! "%s" Receive "%s" Error !' % (self.type, data_name))
                 raise
 
@@ -159,9 +126,6 @@ class Socket(Logger):
             self.__logger.debug('receive data bytes: ' + str(len(b"".join(data))))
 
         data = pickle.loads(b"".join(data))
-
-        # self.__logger.debug('| receive data: %s |' % str(data))
-
         return data
 
     def recv(self, data_name):
@@ -196,23 +160,17 @@ class Socket(Logger):
                 header = self._recv(header_name, data_bytes=self.buffer_size, is_header=True)
             except timeout:
                 raise
-
             self.__logger.debug('header: ' + str(header))
-
             # whether get the correct packet
             if data_name == header['data_name']:  # correct, break the while loop
                 self.__logger.debug('matching header name')
                 break
-
             else:  # incorrect, keep waiting
                 self.__logger.error('"%s" Receive Wrong data. Expect to receive "%s" instead of "%s" !'
                                     % (self.type, data_name, header['data_name']))
         self.awake()
-
         data = self._recv(data_name, data_bytes=header['data_bytes'])
-
         self.__logger.debug('"%s" Receive "%s" Successfully !' % (self.type, data_name))
-
         return data
 
     def is_right_conn(self, client_name):
@@ -238,12 +196,10 @@ class Socket(Logger):
         else:
             self.sleep()
             self.send(client_name, 'client_name')
-
             try:
                 conn = self.recv('is_conn_or_not')
             except timeout:
                 conn = False
-
             if conn:
                 self.__logger.debug(
                     '"%s" connect to "%s" Successfully!' % (client_name, self.server_host_port))

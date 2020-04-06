@@ -4,6 +4,7 @@ sys.path.insert(0, os.getcwd())
 
 from train.switch import Switch
 
+
 def load_dataSet(data_name, from_database=False):
     source = '"database"' if from_database else '"local"'
     print("Loading {} training data from {}...".format(data_name, source))

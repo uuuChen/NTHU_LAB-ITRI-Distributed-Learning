@@ -1,7 +1,8 @@
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from sklearn.utils.multiclass import unique_labels
+from train.switch import *
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch.optim as optim
 import time
@@ -9,10 +10,8 @@ import time
 # set import path
 import sys
 import os
-sys.path.insert(0, os.getcwd())
-# os.chdir('../../')
 
-from train.switch import *
+sys.path.insert(0, os.getcwd())
 
 
 class Central_Train:
@@ -29,26 +28,20 @@ class Central_Train:
 
     def _build(self):
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True)
-
-
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
-
         torch.manual_seed(self.train_args.seed)  # seeding the CPU for generating random numbers so that the results are
                                                  # deterministic
-
         if self.train_args.cuda:
             torch.cuda.manual_seed(self.train_args.seed)  # set a random seed for the current GPU
             self.model.cuda()  # move all model parameters to the GPU
 
         self.optim = optim.Adam(self.model.parameters(), lr=self.train_args.lr)
 
-
         if not os.path.exists(self.save_path + 'model/'):
             os.makedirs(self.save_path + 'model/')
         self.save_acc = open(self.save_path + self.data_name + "_central_record.txt", "a")
 
     def _iter_epoch(self, is_training):
-
         if is_training:
             self.model.train()
             dataSet = self.train_dataSet
@@ -68,21 +61,19 @@ class Central_Train:
         batches = (data_nums - 1) // batch_size + 1
         for batch_idx in range(1, batches + 1):
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
-
             data, target = Variable(data).float(), Variable(target).long()
-
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
 
             if is_training:
                 self.optim.zero_grad()
-
             output = self.model(data)
             loss = F.cross_entropy(output, target)
 
             if is_training:
                 loss.backward()
                 self.optim.step()
+
             pred = output.data.max(1)[1]
             correct += pred.eq(target.data).cpu().sum()
             total_loss += loss.item()
@@ -99,6 +90,7 @@ class Central_Train:
                         trained_data_num, 100 * float(correct) / trained_data_num))
 
         total_loss /= batches
+
         if is_training:
             self.save_acc.write('Epoch {} \r\nTrain set: Average loss:{:.4f}, Accuracy: {}/{} ({:.2f}%)\r\n'.format(
                 self.epoch, total_loss, correct, data_nums, 100 * float(correct) / data_nums))
@@ -128,10 +120,7 @@ class Central_Train:
         self.save_acc = open(self.save_path + data_name + "_central_record.txt", "a")
         torch.save(self.model, self.save_path + 'model/' + str(self.epoch) + 'epochs_model.pkl')
 
-    def plot_confusion_matrix(self, target, pred, classes, data_name,
-                              normalize=False,
-                              title=None,
-                              cmap=plt.cm.Blues):
+    def plot_confusion_matrix(self, target, pred, classes, data_name, normalize=False, title=None, cmap=plt.cm.Blues):
         """
         This function prints and plots the confusion matrix.
         Normalization can be applied by setting `normalize=True`.
@@ -271,12 +260,9 @@ class Central_Train:
 
 
 if __name__ == '__main__':
-
     data_name = sys.argv[1]
     # data_name = 'ECG'
-
     lc_train = Central_Train(data_name)
-
     lc_train.start_training()
 
 

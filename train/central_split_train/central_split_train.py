@@ -3,27 +3,20 @@ from train.switch import *
 from torch.autograd import Variable
 import torch.optim as optim
 
+
 class Local_Split_Train:
 
     def __init__(self):
         pass
 
     def _build(self, data_name):
-
         self.data_name = data_name
-
-        self.switch = Switch(data_name=data_name)
-
+        self.switch = Switch(data_name)
         self.train_args = self.switch.get_train_args()
-
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True)
-
         self.server_model = self.switch.get_model(is_server=True)
-
         self.agent_model = self.switch.get_model(is_agent=True)
-
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
-
         torch.manual_seed(self.train_args.seed)  # seeding the CPU for generating random numbers so that the results are
                                                  # deterministic
 
@@ -34,7 +27,6 @@ class Local_Split_Train:
 
         self.server_optim = optim.SGD(self.server_model.parameters(), lr=self.train_args.lr,
                                       momentum=self.train_args.momentum)
-
         self.agent_optim = optim.SGD(self.agent_model.parameters(), lr=self.train_args.lr,
                                      momentum=self.train_args.momentum)
 
@@ -106,9 +98,7 @@ class Local_Split_Train:
                 test_loss, correct, data_nums, 100. * correct / data_nums))
 
     def start_training(self, data_name):
-
         self._build(data_name=data_name)
-
         for epoch in range(1,  self.train_args.epochs + 1):
             self.epoch = epoch
             self._iter_epoch(is_training=True)

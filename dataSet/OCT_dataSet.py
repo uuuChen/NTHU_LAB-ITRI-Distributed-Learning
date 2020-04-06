@@ -11,27 +11,18 @@ class_id = {
     'DRUSEN': 3
 }
 
+
 class OCT_DataSet(Data_Processor):
 
     def __init__(self, data_args, shuffle=False):
-
         data_args['shuffle'] = shuffle
-
-        self.__logger = self.get_logger(unique_name=__name__,
-                                        debug=DEBUG)
-
+        self.__logger = self.get_logger(__name__, DEBUG)
         self.images_dir_path = data_args['images_dir_path']
-
         self.images_dir_idx_ptr_path = data_args['images_dir_idx_ptr_path']
-
         self.label_class_nums = data_args['label_class_nums']
-
         Data_Processor.__init__(self, data_args=data_args)
 
-
-
     def _get_data_and_labels_from_local(self):
-
         self.__logger.debug('[Get OCT Data And Labels]')
 
         from_path = self.images_dir_path
@@ -59,12 +50,10 @@ class OCT_DataSet(Data_Processor):
 
         if data_preprocess:
             preproc_data = []
-
             for data_ in data:
                 data_ = np.array(Image.fromarray(data_).resize(image_size)) / 255
                 data_ = data_.reshape(1, image_size[0], image_size[1])
                 preproc_data.append(data_)
-
             data = np.array(preproc_data)
 
         if one_hot:

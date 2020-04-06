@@ -25,11 +25,9 @@ class Agent(Logger):
         self.train_args = self.agent_server_sock.recv('train_args')
 
     def _training_setting(self):
-
         self.train_args.cuda = not self.train_args.no_cuda and torch.cuda.is_available()
         self.is_simulate = self.train_args.is_simulate
-
-        self.switch = Switch(data_name=self.train_args.dataSet)
+        self.switch = Switch(self.train_args.dataSet)
         self.train_dataSet, self.test_dataSet = self.switch.get_dataSet(shuffle=True, is_simulate=self.is_simulate)
 
         # save
@@ -41,7 +39,6 @@ class Agent(Logger):
             save_path = self.train_args.save_path + self.cur_name + '/' + str(self.train_args.start_epoch) + "epochs_model.pkl"
             print(save_path)
             self.model = torch.load(save_path)
-
 
         if self.is_simulate:  # have to wait for "id_list" receiving from server
             self.train_data_nums = None
@@ -90,7 +87,6 @@ class Agent(Logger):
         self.agent_server_sock.send(test_data_nums, 'test_data_nums')
 
     def _send_model_to_next_agent(self):
-        # send model to next agent
         print('sending model to next agent...')
         self.to_agent_sock.accept()
         self.to_agent_sock.send(self.model.state_dict(), 'model_state_dict')
@@ -99,22 +95,16 @@ class Agent(Logger):
         print('done!')
 
     def _iter(self, is_training):
-
         self._whether_to_recv_model_from_prev_agent()
-
         self._iter_through_database_once(is_training=is_training)
-
         if is_training:
             self._send_model_to_next_agent()
-
         else:
             return self._whether_is_training_done()
 
     def _whether_to_recv_model_from_prev_agent(self):
-
-        print('\nwait for previous agent {} sending model snapshot...'.format(self.prev_agent_attrs['host_port']))
-
         if not self.agent_server_sock.recv('is_first_training'):
+            print('\nwait for previous agent {} sending model snapshot...'.format(self.prev_agent_attrs['host_port']))
 
             from_agent_sock = Socket(self.prev_agent_attrs['host_port'], False)
             from_agent_sock.connect()
@@ -130,10 +120,9 @@ class Agent(Logger):
             # VERY IMPORTANT !!! awake server after current agent receiving model snapshot from previous agent
             self.agent_server_sock.awake()
 
-        print('done ! \n')
+            print('done ! \n')
 
     def _iter_through_database_once(self, is_training):
-
         iter_type = 'Training' if is_training else 'Testing'
         print('{} starts {}....'.format(self.cur_name, iter_type ))
 
@@ -152,9 +141,7 @@ class Agent(Logger):
         batches = (data_nums - 1) // batch_size + 1
 
         for batch_idx in range(1, batches + 1):
-
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
-
             data, target = Variable(data).float(), Variable(target).long()
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
@@ -185,7 +172,6 @@ class Agent(Logger):
         print('{} done {} \n'.format(self.cur_name, train_str))
 
     def _whether_is_training_done(self):
-
         self.cur_epoch = self.agent_server_sock.recv('cur_epoch')
         if self.train_args.epochs == self.cur_epoch:
             is_last_agent = (int(self.cur_name.split("_")[1]) == self.train_args.agent_nums)
@@ -202,19 +188,14 @@ class Agent(Logger):
             return False
 
     def start_training(self):
-
         self._conn_to_server()
-
         self._recv_train_args_from_server()
-
         self._training_setting()  # train setting after receiving train args
-
         self._recv_agents_attrs_from_server()
 
         if self.is_simulate:
             self._send_total_data_nums_to_server()
             self._recv_id_list_from_server()
-
         else:
             self._send_data_nums_to_server()
 
