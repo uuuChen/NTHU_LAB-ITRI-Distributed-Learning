@@ -31,7 +31,6 @@ class Local_Split_Train:
                                      momentum=self.train_args.momentum)
 
     def _iter_epoch(self, is_training):
-
         if is_training:
             self.server_model.train()
             self.agent_model.train()
@@ -50,9 +49,7 @@ class Local_Split_Train:
         correct = 0
         batches = (data_nums - 1) // batch_size + 1
         for batch_idx in range(1, batches + 1):
-
             data, target = dataSet.get_data_and_labels(batch_size=batch_size)
-
             data, target = Variable(data).float(), Variable(target).long()
             if self.train_args.cuda:
                 data, target = data.cuda(), target.cuda()
@@ -80,7 +77,6 @@ class Local_Split_Train:
                 # agent backward
                 agent_output.backward(gradient=server_input.grad.data)
                 self.agent_optim.step()
-
             else:
                 pred = output.data.max(1)[1]
                 correct += pred.eq(target.data).cpu().sum()
@@ -106,10 +102,8 @@ class Local_Split_Train:
 
 
 if __name__ == '__main__':
-
     os.chdir('../../')
     data_name = 'MNIST'
-
     lc_train = Local_Split_Train()
     lc_train.start_training(data_name)
 

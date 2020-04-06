@@ -21,7 +21,6 @@ from train.train_args import *
 class Switch:
 
     def __init__(self, data_name):
-
         self._build(data_name)
 
     def _build(self, data_name):

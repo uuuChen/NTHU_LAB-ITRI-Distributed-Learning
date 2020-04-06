@@ -21,7 +21,6 @@ class Central_Train:
         self.switch = Switch(data_name=self.data_name)
         self.train_args = self.switch.get_train_args()
         self.model = self.switch.get_model(is_central=True)
-
         date = time.strftime("%m-%d_%H-%M-%S", time.localtime())
         self.save_path = "record/"+self.data_name+"/"+date+"/"
         self.start_epoch = 1

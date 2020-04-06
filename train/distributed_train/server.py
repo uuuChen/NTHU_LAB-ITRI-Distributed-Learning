@@ -16,9 +16,7 @@ from logger import Logger
 class Server(Logger):
 
     def __init__(self, data_name, agent_nums, use_localhost=True):
-
         Logger.__init__(self)
-
         # get model and train args by "data_name"
         self.switch = Switch(data_name=data_name)
         self.model = self.switch.get_model(is_server=True)
@@ -158,9 +156,9 @@ class Server(Logger):
     def _recv_data_nums_from_agents(self):
         for i in range(self.train_args.agent_nums):
             self.train_data_nums[i] = self.server_socks[i].recv('train_data_nums')
-            self.all_train_data_nums += self.train_data_nums[i]
-
             self.test_data_nums[i] = self.server_socks[i].recv('test_data_nums')
+
+            self.all_train_data_nums += self.train_data_nums[i]
             self.all_test_data_nums += self.test_data_nums[i]
 
     def _whether_waiting_for_agent(self, cur_agent_idx):
