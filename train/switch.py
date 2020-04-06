@@ -25,9 +25,7 @@ class Switch:
         self._build(data_name)
 
     def _build(self, data_name):
-
         if data_name == 'MNIST':
-
             dataSet = MNIST_DataSet
             train_data_args = MNIST_TRAIN_ARGS
             test_data_args = MNIST_TEST_ARGS
@@ -40,22 +38,17 @@ class Switch:
             agent_model = Agent_LeNet()
 
         elif data_name == 'ECG':
-
             dataSet = ECG_DataSet
             train_data_args = ECG_TRAIN_ARGS
             test_data_args = ECG_TEST_ARGS
 
             train_args = ECG_TRAINING_ARGS
 
-            central_model = MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
-                                label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
-            server_model = Server_MLP(conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'],
-                                      label_class_nums=ECG_COMMON_ARGS['label_class_nums'])
-            agent_model = Agent_MLP(input_node_nums=ECG_COMMON_ARGS['data_length'],
-                                    conn_node_nums=ECG_COMMON_ARGS['MLP_conn_node_nums'])
+            central_model = MLP(ECG_COMMON_ARGS['data_length'], ECG_COMMON_ARGS['label_class_nums'])
+            server_model = Server_MLP(ECG_COMMON_ARGS['MLP_conn_node_nums'], ECG_COMMON_ARGS['label_class_nums'])
+            agent_model = Agent_MLP(ECG_COMMON_ARGS['data_length'], ECG_COMMON_ARGS['MLP_conn_node_nums'])
 
         elif data_name == 'OCT':
-
             dataSet = OCT_DataSet
             train_data_args = OCT_TRAIN_ARGS
             test_data_args = OCT_TEST_ARGS
@@ -67,7 +60,6 @@ class Switch:
             agent_model = Agent_VGG('VGG16', train_data_args['label_class_nums'])
 
         elif data_name == 'MC' or data_name == 'MC_2':
-
             dataSet = MC_DataSet
             train_data_args = MC_TRAIN_ARGS
             test_data_args = MC_TEST_ARGS
@@ -76,10 +68,10 @@ class Switch:
 
             central_model = AlexNet()
             if data_name == 'MC':
-                server_model = Server_AlexNet(num_classes=MC_COMMON_ARGS['label_class_nums'])
+                server_model = Server_AlexNet(MC_COMMON_ARGS['label_class_nums'])
                 agent_model = Agent_AlexNet()
             else:
-                server_model = Server_AlexNet_2(num_classes=MC_COMMON_ARGS['label_class_nums'])
+                server_model = Server_AlexNet_2(MC_COMMON_ARGS['label_class_nums'])
                 agent_model = Agent_AlexNet_2()
 
         else:
@@ -94,7 +86,6 @@ class Switch:
         self.data_args = [train_data_args, test_data_args]
 
     def get_dataSet(self, **kwargs):
-
         training_args = {}
         if kwargs is not None:
             for key, value in kwargs.items():
