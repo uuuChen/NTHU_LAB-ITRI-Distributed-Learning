@@ -2,14 +2,17 @@
 * [Distributed learning of deep neural network over multiple agents](https://www.sciencedirect.com/science/article/pii/S1084804518301590)
 
 ## Distributed Learning Architecture
-* ![](https://i.imgur.com/7JS5mHh.jpg)
-* ![](https://i.imgur.com/hXDnbQo.png)
+<img src="https://i.imgur.com/7JS5mHh.jpg" width = "70%" height = "70%" align=center />
+<img src="https://i.imgur.com/hXDnbQo.png" width = "70%" height = "70%" align=center />
 
 ### Distributed Architecture with Docker
-* ![](https://i.imgur.com/ytAX8ev.png)
+<img src="https://i.imgur.com/ytAX8ev.png" width = "70%" height = "70%" align=center />
 
 ### Algorithm Flow
 #### Central
-![](https://i.imgur.com/9JnuboK.png)
+<img src="https://i.imgur.com/9JnuboK.png" width = "50%" height = "50%" align=center />
+
 #### Distribute
-![](https://i.imgur.com/fmF6Wi8.png)
+<img src="https://i.imgur.com/fmF6Wi8.png" width = "70%" height = "70%" align=center />
+
+
